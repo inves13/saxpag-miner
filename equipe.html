@@ -1,3 +1,4 @@
+<!-- SALVE COMO equipe.html -->
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -169,14 +170,13 @@
         </div>
         <button class="btn-detalhes" onclick="detalhesNivel(1)">Detalhes</button>
       </div>
-      <!-- Níveis 2 a 6 podem ser implementados semelhante ao nível 1 -->
     </div>
   </main>
 
   <footer>
     <div onclick="abrirPagina('tela-principal.html')">🏠<br>Lar</div>
     <div onclick="abrirPagina('vip.html')">👑<br>VIP</div>
-    <div onclick="abrirPagina('mineracao.html')">⛏️<br>Piscina de Mineração</div>
+    <div onclick="abrirPagina('mineracao.html')">⛏️<br>Mineração</div>
     <div class="active">👥<br>Equipe</div>
     <div onclick="abrirPagina('meu.html')">📱<br>Meu</div>
   </footer>
@@ -195,25 +195,18 @@
       projectId: "saxpag-miner",
       storageBucket: "saxpag-miner.appspot.com",
       messagingSenderId: "154250189626",
-      appId: "1:154250189626:web:83c232a5c539e3f9fe0e03",
-      measurementId: "G-LEV5TL9P7H"
+      appId: "1:154250189626:web:83c232a5c539e3f9fe0e03"
     };
     firebase.initializeApp(firebaseConfig);
   </script>
 
   <script>
-    // Copiar texto para área de transferência
     function copiarTexto(id) {
-      const texto = document.getElementById(id).innerText;
+      const el = document.getElementById(id);
+      const texto = el.innerText || el.textContent;
       navigator.clipboard.writeText(texto).then(() => {
-        alert('Copiado para a área de transferência!');
-      }).catch(() => {
-        alert('Falha ao copiar.');
+        alert('Copiado com sucesso!');
       });
-    }
-
-    function detalhesNivel(nivel) {
-      alert('Você clicou em detalhes do nível ' + nivel + '.\nFuncionalidade ainda não implementada.');
     }
 
     function abrirPagina(pagina) {
@@ -224,77 +217,64 @@
       return `https://inves13.github.io/saxpag-miner/#/reg?ref=${codigo}`;
     }
 
-    // Função para calcular totais - placeholder (adicione seu cálculo real)
     function calcularTotais(indicados) {
-      // Exemplo simples:
       return {
         totalEquipe: indicados.length,
-        comissaoTotal: indicados.length * 10, // Exemplo R$10 por indicado
+        comissaoTotal: indicados.length * 10,
         recargaTotal: indicados.length * 50,
         retiradaTotal: indicados.length * 20
       };
     }
 
-    // Função para buscar indicados diretos (LEV 1)
     function buscarIndicadosDiretos(codigoUsuario) {
       return firebase.database().ref('usuarios').orderByChild('indicacao').equalTo(codigoUsuario).once('value')
         .then(snapshot => {
           let indicados = [];
           snapshot.forEach(child => {
-            const data = child.val();
-            indicados.push(data);
+            indicados.push(child.val());
           });
           return indicados;
         });
     }
 
-    // Lógica principal após autenticação
+    function detalhesNivel(n) {
+      alert('Detalhes do nível ' + n + ' ainda serão implementados.');
+    }
+
     firebase.auth().onAuthStateChanged(async (user) => {
-      if (user) {
-        const userId = user.uid;
-        const userRef = firebase.database().ref('usuarios/' + userId);
-
-        try {
-          const snapshot = await userRef.once('value');
-          const dados = snapshot.val();
-
-          if (!dados) {
-            alert("Dados do usuário não encontrados.");
-            firebase.auth().signOut();
-            window.location.href = "index.html";
-            return;
-          }
-
-          // Seu código de convite (se existir, senão usa UID parcial)
-          const codigoUsuario = dados.codigoConvite || userId.substring(0,6);
-          document.getElementById('codigoConvite').innerText = codigoUsuario;
-          document.getElementById('linkConvite').innerText = gerarLinkIndicacao(codigoUsuario);
-
-          // Buscar indicados diretos (LEV 1)
-          const indicados = await buscarIndicadosDiretos(codigoUsuario);
-
-          // Mostrar número de indicados diretos
-          document.getElementById('lev1Num').innerText = indicados.length;
-
-          // Exemplo para "Válido" pode ser quantos indicados têm saldo > 0 (ou outra regra)
-          const validos = indicados.filter(i => i.saldo && i.saldo > 0);
-          document.getElementById('lev1Valido').innerText = validos.length;
-
-          // Atualizar totais na tela
-          const totais = calcularTotais(indicados);
-          document.getElementById('totalEquipe').innerText = totais.totalEquipe;
-          document.getElementById('comissaoTotal').innerText = totais.comissaoTotal.toFixed(2);
-          document.getElementById('recargaTotal').innerText = totais.recargaTotal.toFixed(2);
-          document.getElementById('retiradaTotal').innerText = totais.retiradaTotal.toFixed(2);
-
-        } catch (erro) {
-          alert("Erro ao carregar dados: " + erro.message);
-        }
-
-      } else {
-        alert("Usuário não está logado. Redirecionando para login.");
-        window.location.href = "index.html";
+      if (!user) {
+        alert("Você precisa estar logado.");
+        location.href = "index.html";
+        return;
       }
+
+      const uid = user.uid;
+      const userRef = firebase.database().ref("usuarios/" + uid);
+      const snapshot = await userRef.once("value");
+      const dados = snapshot.val();
+
+      if (!dados) {
+        alert("Usuário não encontrado.");
+        firebase.auth().signOut();
+        location.href = "index.html";
+        return;
+      }
+
+      const codigoUsuario = dados.codigoConvite || uid.substring(0, 6);
+      document.getElementById("codigoConvite").innerText = codigoUsuario;
+      document.getElementById("linkConvite").innerText = gerarLinkIndicacao(codigoUsuario);
+
+      const indicados = await buscarIndicadosDiretos(codigoUsuario);
+      document.getElementById("lev1Num").innerText = indicados.length;
+
+      const validos = indicados.filter(i => i.saldo && i.saldo > 0);
+      document.getElementById("lev1Valido").innerText = validos.length;
+
+      const totais = calcularTotais(indicados);
+      document.getElementById("totalEquipe").innerText = totais.totalEquipe;
+      document.getElementById("comissaoTotal").innerText = totais.comissaoTotal.toFixed(2);
+      document.getElementById("recargaTotal").innerText = totais.recargaTotal.toFixed(2);
+      document.getElementById("retiradaTotal").innerText = totais.retiradaTotal.toFixed(2);
     });
   </script>
 </body>
