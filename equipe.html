@@ -36,6 +36,7 @@
       background: #0e1e2a;
       margin: 10px 20px;
       border-radius: 15px;
+      overflow-y: auto;
     }
     h2 {
       margin-top: 0;
@@ -142,12 +143,12 @@
     <h2>Detalhes da Comissão</h2>
 
     <div class="comissao-box">
-      <p><strong>Código de convite：</strong><span id="codigoConvite">wsgb1j</span>
+      <p><strong>Código de convite：</strong><span id="codigoConvite">...</span>
         <button class="btn-copiar" onclick="copiarTexto('codigoConvite')">Cópia</button>
       </p>
       <p><strong>Compartilhe seu link e comece a ganhar dinheiro</strong></p>
       <div class="link-convite" id="linkConvite">
-        https://saxpag-miner.vip/#/reg?ref=wsgb1j
+        ...
         <button class="btn-copiar" onclick="copiarTexto('linkConvite')">Cópia</button>
       </div>
     </div>
@@ -168,46 +169,7 @@
         </div>
         <button class="btn-detalhes" onclick="detalhesNivel(1)">Detalhes</button>
       </div>
-      <div class="nivel">
-        <div class="nivel-info">
-          <div><strong>LEV 2</strong></div>
-          <div>Número de pessoas: <span id="lev2Num">0</span></div>
-          <div>Válido: <span id="lev2Valido">0</span></div>
-        </div>
-        <button class="btn-detalhes" onclick="detalhesNivel(2)">Detalhes</button>
-      </div>
-      <div class="nivel">
-        <div class="nivel-info">
-          <div><strong>LEV 3</strong></div>
-          <div>Número de pessoas: <span id="lev3Num">0</span></div>
-          <div>Válido: <span id="lev3Valido">0</span></div>
-        </div>
-        <button class="btn-detalhes" onclick="detalhesNivel(3)">Detalhes</button>
-      </div>
-      <div class="nivel">
-        <div class="nivel-info">
-          <div><strong>LEV 4</strong></div>
-          <div>Número de pessoas: <span id="lev4Num">0</span></div>
-          <div>Válido: <span id="lev4Valido">0</span></div>
-        </div>
-        <button class="btn-detalhes" onclick="detalhesNivel(4)">Detalhes</button>
-      </div>
-      <div class="nivel">
-        <div class="nivel-info">
-          <div><strong>LEV 5</strong></div>
-          <div>Número de pessoas: <span id="lev5Num">0</span></div>
-          <div>Válido: <span id="lev5Valido">0</span></div>
-        </div>
-        <button class="btn-detalhes" onclick="detalhesNivel(5)">Detalhes</button>
-      </div>
-      <div class="nivel">
-        <div class="nivel-info">
-          <div><strong>LEV 6</strong></div>
-          <div>Número de pessoas: <span id="lev6Num">0</span></div>
-          <div>Válido: <span id="lev6Valido">0</span></div>
-        </div>
-        <button class="btn-detalhes" onclick="detalhesNivel(6)">Detalhes</button>
-      </div>
+      <!-- Níveis 2 a 6 podem ser implementados semelhante ao nível 1 -->
     </div>
   </main>
 
@@ -219,7 +181,28 @@
     <div onclick="abrirPagina('meu.html')">📱<br>Meu</div>
   </footer>
 
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+
+  <!-- Firebase Config -->
   <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyDzOgL6cvc0b4AO0vAEay1CeSAv_-WqaWQ",
+      authDomain: "saxpag-miner.firebaseapp.com",
+      databaseURL: "https://saxpag-miner-default-rtdb.firebaseio.com",
+      projectId: "saxpag-miner",
+      storageBucket: "saxpag-miner.appspot.com",
+      messagingSenderId: "154250189626",
+      appId: "1:154250189626:web:83c232a5c539e3f9fe0e03",
+      measurementId: "G-LEV5TL9P7H"
+    };
+    firebase.initializeApp(firebaseConfig);
+  </script>
+
+  <script>
+    // Copiar texto para área de transferência
     function copiarTexto(id) {
       const texto = document.getElementById(id).innerText;
       navigator.clipboard.writeText(texto).then(() => {
@@ -236,6 +219,83 @@
     function abrirPagina(pagina) {
       window.location.href = pagina;
     }
+
+    function gerarLinkIndicacao(codigo) {
+      return `https://inves13.github.io/saxpag-miner/#/reg?ref=${codigo}`;
+    }
+
+    // Função para calcular totais - placeholder (adicione seu cálculo real)
+    function calcularTotais(indicados) {
+      // Exemplo simples:
+      return {
+        totalEquipe: indicados.length,
+        comissaoTotal: indicados.length * 10, // Exemplo R$10 por indicado
+        recargaTotal: indicados.length * 50,
+        retiradaTotal: indicados.length * 20
+      };
+    }
+
+    // Função para buscar indicados diretos (LEV 1)
+    function buscarIndicadosDiretos(codigoUsuario) {
+      return firebase.database().ref('usuarios').orderByChild('indicacao').equalTo(codigoUsuario).once('value')
+        .then(snapshot => {
+          let indicados = [];
+          snapshot.forEach(child => {
+            const data = child.val();
+            indicados.push(data);
+          });
+          return indicados;
+        });
+    }
+
+    // Lógica principal após autenticação
+    firebase.auth().onAuthStateChanged(async (user) => {
+      if (user) {
+        const userId = user.uid;
+        const userRef = firebase.database().ref('usuarios/' + userId);
+
+        try {
+          const snapshot = await userRef.once('value');
+          const dados = snapshot.val();
+
+          if (!dados) {
+            alert("Dados do usuário não encontrados.");
+            firebase.auth().signOut();
+            window.location.href = "index.html";
+            return;
+          }
+
+          // Seu código de convite (se existir, senão usa UID parcial)
+          const codigoUsuario = dados.codigoConvite || userId.substring(0,6);
+          document.getElementById('codigoConvite').innerText = codigoUsuario;
+          document.getElementById('linkConvite').innerText = gerarLinkIndicacao(codigoUsuario);
+
+          // Buscar indicados diretos (LEV 1)
+          const indicados = await buscarIndicadosDiretos(codigoUsuario);
+
+          // Mostrar número de indicados diretos
+          document.getElementById('lev1Num').innerText = indicados.length;
+
+          // Exemplo para "Válido" pode ser quantos indicados têm saldo > 0 (ou outra regra)
+          const validos = indicados.filter(i => i.saldo && i.saldo > 0);
+          document.getElementById('lev1Valido').innerText = validos.length;
+
+          // Atualizar totais na tela
+          const totais = calcularTotais(indicados);
+          document.getElementById('totalEquipe').innerText = totais.totalEquipe;
+          document.getElementById('comissaoTotal').innerText = totais.comissaoTotal.toFixed(2);
+          document.getElementById('recargaTotal').innerText = totais.recargaTotal.toFixed(2);
+          document.getElementById('retiradaTotal').innerText = totais.retiradaTotal.toFixed(2);
+
+        } catch (erro) {
+          alert("Erro ao carregar dados: " + erro.message);
+        }
+
+      } else {
+        alert("Usuário não está logado. Redirecionando para login.");
+        window.location.href = "index.html";
+      }
+    });
   </script>
 </body>
 </html>
