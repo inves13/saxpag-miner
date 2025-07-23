@@ -81,29 +81,29 @@
       <button id="btnLogin" onclick="mostrarLogin()">Login</button>
     </div>
 
-    <!-- Área de Cadastro -->
-    <div id="cadastroArea" class="form">
-      <input type="email" id="email" placeholder="E-mail" autocomplete="username" />
+    <!-- Cadastro -->
+    <div id="cadastroArea">
+      <input type="email" id="email" placeholder="E‑mail" autocomplete="username" />
       <input type="password" id="senha" placeholder="Senha" autocomplete="new-password" />
       <input type="text" id="indicacao" placeholder="Código de Indicação (opcional)" />
-      <button class="btn" type="button" onclick="registrar()">REGISTRAR</button>
+      <button class="btn" onclick="registrar()">REGISTRAR</button>
     </div>
 
-    <!-- Área de Login -->
-    <div id="loginArea" class="form hidden">
-      <input type="email" id="emailLogin" placeholder="E-mail" autocomplete="username" />
+    <!-- Login -->
+    <div id="loginArea" class="hidden">
+      <input type="email" id="emailLogin" placeholder="E‑mail" autocomplete="username" />
       <input type="password" id="senhaLogin" placeholder="Senha" autocomplete="current-password" />
-      <button class="btn" type="button" onclick="login()">ENTRAR</button>
+      <button class="btn" onclick="login()">ENTRAR</button>
     </div>
   </div>
 
-  <!-- Firebase SDK -->
+  <!-- Firebase -->
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
-  <!-- Firebase Config -->
   <script>
+    // Configurações Firebase
     const firebaseConfig = {
       apiKey: "AIzaSyDzOgL6cvc0b4AO0vAEay1CeSAv_-WqaWQ",
       authDomain: "saxpag-miner.firebaseapp.com",
@@ -115,10 +115,7 @@
       measurementId: "G-LEV5TL9P7H"
     };
     firebase.initializeApp(firebaseConfig);
-  </script>
 
-  <!-- Script principal -->
-  <script>
     function mostrarLogin() {
       document.getElementById("cadastroArea").classList.add("hidden");
       document.getElementById("loginArea").classList.remove("hidden");
@@ -139,27 +136,25 @@
       const indicacao = document.getElementById("indicacao").value.trim();
 
       if (!email || !senha) {
-        alert("Preencha o e-mail e a senha.");
+        alert("Preencha e‑mail e senha.");
         return;
       }
 
-      firebase.auth().createUserWithEmailAndPassword(email, senha)
-        .then((userCredential) => {
-          const userId = userCredential.user.uid;
-          firebase.database().ref("usuarios/" + userId).set({
-            email: email,
+      firebase.auth()
+        .createUserWithEmailAndPassword(email, senha)
+        .then(cred => {
+          const uid = cred.user.uid;
+          return firebase.database().ref("usuarios/" + uid).set({
+            email,
             indicacao: indicacao || "",
             saldo: 0
-          }).then(() => {
-            alert("Cadastro realizado com sucesso!");
-            mostrarLogin();
-          }).catch(error => {
-            alert("Erro ao salvar dados: " + error.message);
           });
         })
-        .catch((error) => {
-          alert("Erro no cadastro: " + error.message);
-        });
+        .then(() => {
+          alert("Cadastro realizado!");
+          mostrarLogin();
+        })
+        .catch(err => alert("Erro: " + err.message));
     }
 
     function login() {
@@ -167,29 +162,26 @@
       const senha = document.getElementById("senhaLogin").value;
 
       if (!email || !senha) {
-        alert("Preencha o e-mail e a senha.");
+        alert("Preencha e‑mail e senha.");
         return;
       }
 
-      firebase.auth().signInWithEmailAndPassword(email, senha)
+      firebase.auth()
+        .signInWithEmailAndPassword(email, senha)
         .then(() => {
           window.location.href = "tela-principal.html";
         })
-        .catch((error) => {
-          alert("Erro no login: " + error.message);
-        });
+        .catch(err => alert("Erro: " + err.message));
     }
 
-    // Ao carregar a página
     window.addEventListener("DOMContentLoaded", () => {
       mostrarCadastro();
 
-      // Capturar o ref da URL mesmo vindo após "#/"
+      // Puxa o "ref" da hash: #/reg?ref=CODIGO
       const hash = window.location.hash;
-      const refMatch = hash.match(/ref=([^&]+)/i);
-      if (refMatch && refMatch[1]) {
-        document.getElementById("indicacao").value = refMatch[1];
-      }
+      const params = new URLSearchParams(hash.split("?")[1]);
+      const code = params.get("ref");
+      if (code) document.getElementById("indicacao").value = code;
     });
   </script>
 </body>
