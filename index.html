@@ -3,44 +3,194 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Max Mineração - Entrar</title>
+  <title>Max Mineração - Login</title>
   <link rel="stylesheet" href="style.css" />
+  <style>
+    .hidden { display: none; }
+    .active { font-weight: bold; }
+    body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(to bottom, #000028, #001640);
+      color: white;
+      min-height: 100vh;
+      margin: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    .container {
+      background: #0e1e2a;
+      padding: 30px;
+      border-radius: 10px;
+      width: 320px;
+      box-shadow: 0 0 15px #00bfff88;
+    }
+    input {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+      border-radius: 6px;
+      border: none;
+      font-size: 14px;
+    }
+    button.btn {
+      background-color: #00bfff;
+      border: none;
+      color: white;
+      padding: 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: bold;
+      font-size: 16px;
+      width: 100%;
+      margin-top: 10px;
+      transition: background-color 0.3s ease;
+    }
+    button.btn:hover {
+      background-color: #0091cc;
+    }
+    .form-toggle {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 15px;
+    }
+    .form-toggle button {
+      flex: 1;
+      background: transparent;
+      border: none;
+      color: #aaa;
+      font-weight: normal;
+      font-size: 16px;
+      padding: 8px;
+      cursor: pointer;
+      transition: color 0.3s ease;
+    }
+    .form-toggle button.active {
+      color: #00bfff;
+      font-weight: bold;
+      border-bottom: 2px solid #00bfff;
+    }
+  </style>
 </head>
 <body>
   <div class="container">
-    <img src="1000331657.jpg" alt="Logo" class="logo" />
-    <h1>Max Mineração</h1>
+    <img src="logo.png" class="logo" alt="Logo" style="display:block; margin: 0 auto 20px auto; max-width: 150px;" />
 
     <div class="form-toggle">
-      <button id="btnLogin" class="active">E-mail</button>
-      <button id="btnRegister">Registrar</button>
+      <button id="btnCadastro" class="active" onclick="mostrarCadastro()">Cadastro</button>
+      <button id="btnLogin" onclick="mostrarLogin()">Login</button>
     </div>
 
-    <!-- Formulário de Login -->
-    <form id="loginForm" class="form">
-      <input type="email" id="loginEmail" placeholder="E-mail" required />
-      <input type="password" id="loginSenha" placeholder="Senha de login" required />
-      <div class="check-remember">
-        <input type="checkbox" id="lembrar" />
-        <label for="lembrar">lembre de mim</label>
-      </div>
-      <button type="submit" class="btn">CONECTE-SE</button>
-      <p>Não tem conta? <span id="toRegister">Registrar</span></p>
-    </form>
+    <!-- Área de Cadastro -->
+    <div id="cadastroArea" class="form">
+      <input type="email" id="email" placeholder="E-mail" autocomplete="username" />
+      <input type="password" id="senha" placeholder="Senha" autocomplete="new-password" />
+      <input type="text" id="indicacao" placeholder="Código de Indicação (opcional)" />
+      <button class="btn" type="button" onclick="registrar()">REGISTRAR</button>
+    </div>
 
-    <!-- Formulário de Registro -->
-    <form id="registerForm" class="form hidden">
-      <input type="email" id="registerEmail" placeholder="E-mail" required />
-      <input type="password" id="registerSenha" placeholder="Senha de login" required />
-      <input type="text" id="codigo" placeholder="Código de convite (opcional)" />
-      <button type="submit" class="btn">REGISTRAR</button>
-      <p>Já tem uma conta? <span id="toLogin">Conecte-se</span></p>
-    </form>
+    <!-- Área de Login -->
+    <div id="loginArea" class="form hidden">
+      <input type="email" id="emailLogin" placeholder="E-mail" autocomplete="username" />
+      <input type="password" id="senhaLogin" placeholder="Senha" autocomplete="current-password" />
+      <button class="btn" type="button" onclick="login()">ENTRAR</button>
+    </div>
   </div>
 
+  <!-- Firebase SDK -->
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
-  <script src="firebase-config.js"></script>
-  <script src="script.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+
+  <!-- Firebase Config -->
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyDzOgL6cvc0b4AO0vAEay1CeSAv_-WqaWQ",
+      authDomain: "saxpag-miner.firebaseapp.com",
+      databaseURL: "https://saxpag-miner-default-rtdb.firebaseio.com",
+      projectId: "saxpag-miner",
+      storageBucket: "saxpag-miner.appspot.com",
+      messagingSenderId: "154250189626",
+      appId: "1:154250189626:web:83c232a5c539e3f9fe0e03",
+      measurementId: "G-LEV5TL9P7H"
+    };
+    firebase.initializeApp(firebaseConfig);
+  </script>
+
+  <!-- Script principal -->
+  <script>
+    function mostrarLogin() {
+      document.getElementById("cadastroArea").classList.add("hidden");
+      document.getElementById("loginArea").classList.remove("hidden");
+      document.getElementById("btnCadastro").classList.remove("active");
+      document.getElementById("btnLogin").classList.add("active");
+    }
+
+    function mostrarCadastro() {
+      document.getElementById("loginArea").classList.add("hidden");
+      document.getElementById("cadastroArea").classList.remove("hidden");
+      document.getElementById("btnLogin").classList.remove("active");
+      document.getElementById("btnCadastro").classList.add("active");
+    }
+
+    function registrar() {
+      const email = document.getElementById("email").value.trim();
+      const senha = document.getElementById("senha").value;
+      const indicacao = document.getElementById("indicacao").value.trim();
+
+      if (!email || !senha) {
+        alert("Preencha o e-mail e a senha.");
+        return;
+      }
+
+      firebase.auth().createUserWithEmailAndPassword(email, senha)
+        .then((userCredential) => {
+          const userId = userCredential.user.uid;
+          firebase.database().ref("usuarios/" + userId).set({
+            email: email,
+            indicacao: indicacao || "",
+            saldo: 0
+          }).then(() => {
+            alert("Cadastro realizado com sucesso!");
+            mostrarLogin();
+          }).catch(error => {
+            alert("Erro ao salvar dados: " + error.message);
+          });
+        })
+        .catch((error) => {
+          alert("Erro no cadastro: " + error.message);
+        });
+    }
+
+    function login() {
+      const email = document.getElementById("emailLogin").value.trim();
+      const senha = document.getElementById("senhaLogin").value;
+
+      if (!email || !senha) {
+        alert("Preencha o e-mail e a senha.");
+        return;
+      }
+
+      firebase.auth().signInWithEmailAndPassword(email, senha)
+        .then(() => {
+          window.location.href = "tela-principal.html";
+        })
+        .catch((error) => {
+          alert("Erro no login: " + error.message);
+        });
+    }
+
+    // Ao carregar a página
+    window.addEventListener("DOMContentLoaded", () => {
+      mostrarCadastro();
+
+      // Capturar o ref da URL mesmo vindo após "#/"
+      const hash = window.location.hash;
+      const refMatch = hash.match(/ref=([^&]+)/i);
+      if (refMatch && refMatch[1]) {
+        document.getElementById("indicacao").value = refMatch[1];
+      }
+    });
+  </script>
 </body>
 </html>
