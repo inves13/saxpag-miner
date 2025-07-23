@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>saxpag-miner</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background-color: #030b1c;
+      color: white;
+    }
+    header {
+      text-align: center;
+      padding: 20px 10px;
+    }
+    header h1 {
+      margin: 0;
+      font-size: 22px;
+    }
+    .vip-status {
+      text-align: center;
+      font-size: 14px;
+      margin-bottom: 5px;
+    }
+    .info-box {
+      text-align: center;
+      margin-bottom: 10px;
+    }
+    .info-box h2 {
+      font-size: 14px;
+      margin: 5px 0;
+    }
+    .info-box .value {
+      font-size: 20px;
+      color: #00FFCC;
+    }
+    .mining-image {
+      display: flex;
+      justify-content: center;
+      margin: 10px 0;
+    }
+    .progress-container {
+      background: #1A3A6D;
+      margin: 10px;
+      height: 20px;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    .progress-bar {
+      height: 100%;
+      background: #FF69B4;
+      width: 0%;
+      transition: width 1s linear;
+    }
+    .btn-collect {
+      display: block;
+      margin: 15px auto;
+      padding: 12px 20px;
+      background: #FF69B4;
+      border: none;
+      border-radius: 20px;
+      color: white;
+      font-weight: bold;
+      font-size: 14px;
+      cursor: pointer;
+    }
+    .records-title {
+      text-align: center;
+      margin: 10px 0 5px;
+    }
+    .record-buttons {
+      display: flex;
+      justify-content: space-around;
+      margin: 10px;
+    }
+    .record-buttons button {
+      flex: 1;
+      margin: 0 5px;
+      padding: 10px;
+      border-radius: 10px;
+      background: #1A3A6D;
+      color: white;
+      border: none;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1> saxpag-miner</h1>
+  </header>
+
+  <div class="vip-status">Nível <strong id="vipLevel">VIP0</strong></div>
+
+  <div class="info-box">
+    <h2>Poder de Mineração</h2>
+    <div class="value" id="miningPower">10.0000 GH/s</div>
+  </div>
+
+  <div class="info-box">
+    <h2>Renda diária</h2>
+    <div class="value" id="dailyIncome">0.00 USDT</div>
+  </div>
+
+  <div class="mining-image">
+    <img src="https://cdn-icons-png.flaticon.com/512/4248/4248443.png" alt="mineracao" width="100">
+  </div>
+
+  <div style="text-align:center; font-size: 20px;">
+    <span id="miningBalance">0.000000</span><span> USDT</span>
+  </div>
+
+  <div class="progress-container">
+    <div class="progress-bar" id="progressBar"></div>
+  </div>
+
+  <button class="btn-collect" id="btnUpgrade" onclick="location.href='recarregar.html'">MELHORANDO O PODER DA COMPUTAÇÃO</button>
+
+  <div class="records-title">Registros de Mineração</div>
+  <div class="record-buttons">
+    <button id="btnToCollect" onclick="verParaColetar()">Para ser coletado: <span id="toCollect">0.000000</span></button>
+    <button id="btnReceived">Recebido: <span id="received">0.000000</span></button>
+    <button id="btnExpired">Expirado: <span id="expired">0.000000</span></button>
+  </div>
+
+  <script>
+    const segundosTotais = 86400; // 24 horas em segundos
+
+    // Recuperar dados do localStorage ou valores iniciais padrão
+    let progresso = parseFloat(localStorage.getItem('progresso')) || 0;
+    let saldoMinerado = parseFloat(localStorage.getItem('saldoMinerado')) || 0;
+    let recebido = parseFloat(localStorage.getItem('recebido')) || 0;
+    let paraColetar = parseFloat(localStorage.getItem('paraColetar')) || 0;
+    let expirado = parseFloat(localStorage.getItem('expirado')) || 0;
+    let minerando = localStorage.getItem('minerando') === 'false' ? false : true;
+
+    // Atualiza elementos da página com valores carregados
+    document.getElementById("progressBar").style.width = progresso + "%";
+    document.getElementById("miningBalance").innerText = saldoMinerado.toFixed(6);
+    document.getElementById("received").innerText = recebido.toFixed(6);
+    document.getElementById("toCollect").innerText = paraColetar.toFixed(6);
+    document.getElementById("expired").innerText = expirado.toFixed(6);
+
+    function salvarEstado() {
+      localStorage.setItem('progresso', progresso);
+      localStorage.setItem('saldoMinerado', saldoMinerado);
+      localStorage.setItem('recebido', recebido);
+      localStorage.setItem('paraColetar', paraColetar);
+      localStorage.setItem('expirado', expirado);
+      localStorage.setItem('minerando', minerando);
+    }
+
+    function atualizarBarra() {
+      if (minerando && progresso < 100) {
+        progresso += (100 / segundosTotais);
+        saldoMinerado += (0.26 / segundosTotais);
+
+        if (progresso >= 100) {
+          progresso = 100;
+          minerando = false;
+          // Aqui poderia mudar texto do botão ou sinalizar que terminou,
+          // mas como botão redireciona direto, deixei fixo.
+        }
+
+        document.getElementById("progressBar").style.width = progresso + "%";
+        document.getElementById("miningBalance").innerText = saldoMinerado.toFixed(6);
+        salvarEstado();
+      }
+    }
+
+    function coletar() {
+      if (saldoMinerado > 0) {
+        paraColetar += saldoMinerado;
+        saldoMinerado = 0;
+        progresso = 0;
+        minerando = true;
+
+        document.getElementById("miningBalance").innerText = "0.000000";
+        document.getElementById("toCollect").innerText = paraColetar.toFixed(6);
+        salvarEstado();
+        alert("Rendimento transferido para 'Para ser coletado'. A mineração reiniciou.");
+      } else {
+        alert("Nenhum saldo disponível para coletar.");
+      }
+    }
+
+    function verParaColetar() {
+      if (paraColetar > 0) {
+        alert(`Você coletou ${paraColetar.toFixed(6)} USDT`);
+        paraColetar = 0;
+        document.getElementById("toCollect").innerText = "0.000000";
+        salvarEstado();
+      } else {
+        alert("Nada para coletar agora.");
+      }
+    }
+
+    // No seu código, o botão principal redireciona direto, mas você pode adicionar coletar() se quiser que o saldo zere antes.
+    // Por enquanto mantive o botão só redirecionando.
+
+    setInterval(atualizarBarra, 1000);
+  </script>
+</body>
+</html>

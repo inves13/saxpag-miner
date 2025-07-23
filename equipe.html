@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>SaxPag Miner - Equipe</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: linear-gradient(to bottom, #000028, #001640);
+      color: white;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+    header {
+      background: linear-gradient(to right, #1a2c3b, #0a2f2f);
+      padding: 10px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .logo {
+      font-weight: bold;
+      font-size: 20px;
+      color: #00bfff;
+    }
+    .idioma {
+      font-size: 14px;
+      color: #ccc;
+    }
+    main {
+      flex: 1;
+      padding: 15px 20px;
+      background: #0e1e2a;
+      margin: 10px 20px;
+      border-radius: 15px;
+    }
+    h2 {
+      margin-top: 0;
+      color: #00bfff;
+      text-align: center;
+    }
+    .comissao-box, .total-box {
+      background: #142c43;
+      border-radius: 10px;
+      padding: 12px 15px;
+      margin-bottom: 15px;
+    }
+    .comissao-box p, .total-box p {
+      margin: 6px 0;
+      font-size: 14px;
+    }
+    .codigo-convite, .link-convite {
+      display: flex;
+      align-items: center;
+      margin: 10px 0;
+      background: #1a2f4a;
+      border-radius: 8px;
+      padding: 8px 10px;
+      font-size: 16px;
+      user-select: all;
+      justify-content: space-between;
+    }
+    .btn-copiar {
+      margin-left: 10px;
+      background: #00bfff;
+      border: none;
+      color: white;
+      padding: 6px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: background 0.3s ease;
+    }
+    .btn-copiar:hover {
+      background: #0091cc;
+    }
+    .niveles {
+      margin-top: 20px;
+    }
+    .nivel {
+      background: #142c43;
+      border-radius: 10px;
+      margin-bottom: 12px;
+      padding: 10px 15px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 14px;
+    }
+    .nivel-info {
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    .nivel-info > div {
+      min-width: 90px;
+    }
+    .btn-detalhes {
+      background: #00bfff;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 8px;
+      color: white;
+      cursor: pointer;
+      transition: background 0.3s ease;
+      font-size: 13px;
+    }
+    .btn-detalhes:hover {
+      background: #0091cc;
+    }
+    footer {
+      background: #1b2a38;
+      display: flex;
+      justify-content: space-around;
+      padding: 10px 0;
+      border-top: 1px solid #333;
+      position: sticky;
+      bottom: 0;
+    }
+    footer div {
+      color: white;
+      font-size: 12px;
+      text-align: center;
+      cursor: pointer;
+    }
+    footer div.active {
+      color: #ff69b4;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="logo">SaxPag Miner</div>
+    <div class="idioma">Português</div>
+  </header>
+
+  <main>
+    <h2>Detalhes da Comissão</h2>
+
+    <div class="comissao-box">
+      <p><strong>Código de convite：</strong><span id="codigoConvite">wsgb1j</span>
+        <button class="btn-copiar" onclick="copiarTexto('codigoConvite')">Cópia</button>
+      </p>
+      <p><strong>Compartilhe seu link e comece a ganhar dinheiro</strong></p>
+      <div class="link-convite" id="linkConvite">
+        https://saxpag-miner.vip/#/reg?ref=wsgb1j
+        <button class="btn-copiar" onclick="copiarTexto('linkConvite')">Cópia</button>
+      </div>
+    </div>
+
+    <div class="total-box">
+      <p><strong>Número total de equipes:</strong> <span id="totalEquipe">0</span></p>
+      <p><strong>Comissão total de promoção:</strong> $<span id="comissaoTotal">0.00</span></p>
+      <p><strong>Recarga total da equipe:</strong> $<span id="recargaTotal">0.00</span></p>
+      <p><strong>Total de retiradas da equipe:</strong> $<span id="retiradaTotal">0.00</span></p>
+    </div>
+
+    <div class="niveles">
+      <div class="nivel">
+        <div class="nivel-info">
+          <div><strong>LEV 1</strong></div>
+          <div>Número de pessoas: <span id="lev1Num">0</span></div>
+          <div>Válido: <span id="lev1Valido">0</span></div>
+        </div>
+        <button class="btn-detalhes" onclick="detalhesNivel(1)">Detalhes</button>
+      </div>
+      <div class="nivel">
+        <div class="nivel-info">
+          <div><strong>LEV 2</strong></div>
+          <div>Número de pessoas: <span id="lev2Num">0</span></div>
+          <div>Válido: <span id="lev2Valido">0</span></div>
+        </div>
+        <button class="btn-detalhes" onclick="detalhesNivel(2)">Detalhes</button>
+      </div>
+      <div class="nivel">
+        <div class="nivel-info">
+          <div><strong>LEV 3</strong></div>
+          <div>Número de pessoas: <span id="lev3Num">0</span></div>
+          <div>Válido: <span id="lev3Valido">0</span></div>
+        </div>
+        <button class="btn-detalhes" onclick="detalhesNivel(3)">Detalhes</button>
+      </div>
+      <div class="nivel">
+        <div class="nivel-info">
+          <div><strong>LEV 4</strong></div>
+          <div>Número de pessoas: <span id="lev4Num">0</span></div>
+          <div>Válido: <span id="lev4Valido">0</span></div>
+        </div>
+        <button class="btn-detalhes" onclick="detalhesNivel(4)">Detalhes</button>
+      </div>
+      <div class="nivel">
+        <div class="nivel-info">
+          <div><strong>LEV 5</strong></div>
+          <div>Número de pessoas: <span id="lev5Num">0</span></div>
+          <div>Válido: <span id="lev5Valido">0</span></div>
+        </div>
+        <button class="btn-detalhes" onclick="detalhesNivel(5)">Detalhes</button>
+      </div>
+      <div class="nivel">
+        <div class="nivel-info">
+          <div><strong>LEV 6</strong></div>
+          <div>Número de pessoas: <span id="lev6Num">0</span></div>
+          <div>Válido: <span id="lev6Valido">0</span></div>
+        </div>
+        <button class="btn-detalhes" onclick="detalhesNivel(6)">Detalhes</button>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <div onclick="abrirPagina('tela-principal.html')">🏠<br>Lar</div>
+    <div onclick="abrirPagina('vip.html')">👑<br>VIP</div>
+    <div onclick="abrirPagina('mineracao.html')">⛏️<br>Piscina de Mineração</div>
+    <div class="active">👥<br>Equipe</div>
+    <div onclick="abrirPagina('meu.html')">📱<br>Meu</div>
+  </footer>
+
+  <script>
+    function copiarTexto(id) {
+      const texto = document.getElementById(id).innerText;
+      navigator.clipboard.writeText(texto).then(() => {
+        alert('Copiado para a área de transferência!');
+      }).catch(() => {
+        alert('Falha ao copiar.');
+      });
+    }
+
+    function detalhesNivel(nivel) {
+      alert('Você clicou em detalhes do nível ' + nivel + '.\nFuncionalidade ainda não implementada.');
+    }
+
+    function abrirPagina(pagina) {
+      window.location.href = pagina;
+    }
+  </script>
+</body>
+</html>

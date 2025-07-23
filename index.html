@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Max Mineração - Entrar</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="container">
+    <img src="1000331657.jpg" alt="Logo" class="logo" />
+    <h1>Max Mineração</h1>
+
+    <div class="form-toggle">
+      <button id="btnLogin" class="active">E-mail</button>
+      <button id="btnRegister">Registrar</button>
+    </div>
+
+    <!-- Formulário de Login -->
+    <form id="loginForm" class="form">
+      <input type="email" id="loginEmail" placeholder="E-mail" required />
+      <input type="password" id="loginSenha" placeholder="Senha de login" required />
+      <div class="check-remember">
+        <input type="checkbox" id="lembrar" />
+        <label for="lembrar">lembre de mim</label>
+      </div>
+      <button type="submit" class="btn">CONECTE-SE</button>
+      <p>Não tem conta? <span id="toRegister">Registrar</span></p>
+    </form>
+
+    <!-- Formulário de Registro -->
+    <form id="registerForm" class="form hidden">
+      <input type="email" id="registerEmail" placeholder="E-mail" required />
+      <input type="password" id="registerSenha" placeholder="Senha de login" required />
+      <input type="text" id="codigo" placeholder="Código de convite (opcional)" />
+      <button type="submit" class="btn">REGISTRAR</button>
+      <p>Já tem uma conta? <span id="toLogin">Conecte-se</span></p>
+    </form>
+  </div>
+
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+  <script src="firebase-config.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>

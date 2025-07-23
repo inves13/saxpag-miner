@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Carteira - Retirar</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #000014;
+      color: #fff;
+      padding: 20px;
+      max-width: 480px;
+      margin: auto;
+    }
+    h2 {
+      text-align: center;
+      color: #00ffcc;
+    }
+    label, p {
+      margin-top: 10px;
+      font-size: 14px;
+      display: block;
+    }
+    input, select, button {
+      width: 100%;
+      padding: 10px;
+      margin-top: 8px;
+      border-radius: 5px;
+      border: none;
+      font-size: 14px;
+      box-sizing: border-box;
+    }
+    input {
+      background-color: #fff;
+      color: #000;
+    }
+    button {
+      background-color: #00ffcc;
+      color: #000;
+      font-weight: bold;
+      cursor: pointer;
+      margin-top: 15px;
+    }
+    .info {
+      font-size: 12px;
+      color: #ccc;
+      margin-top: 5px;
+    }
+    .resumo {
+      margin-top: 20px;
+      font-size: 14px;
+    }
+    .resumo p {
+      margin: 4px 0;
+    }
+    .lembrete {
+      background: #111;
+      padding: 15px;
+      margin-top: 25px;
+      border-radius: 8px;
+      font-size: 13px;
+      line-height: 1.5;
+      color: #ccc;
+    }
+    .method-section {
+      margin-top: 15px;
+      padding: 15px;
+      background: #111;
+      border-radius: 10px;
+    }
+  </style>
+</head>
+<body onload="mostrarSaldo()">
+
+  <h2>Retirar</h2>
+
+  <p><strong>Ativos disponíveis atualmente</strong></p>
+  <p id="saldo">0.000000 USDT</p>
+
+  <label for="metodoRetirada">Método de retirada</label>
+  <select id="metodoRetirada" onchange="alternarMetodo()">
+    <option value="usdt">USDT</option>
+    <option value="pix">PIX</option>
+  </select>
+
+  <div id="usdtSection" class="method-section">
+    <label for="mainnet">Selecione Mainnet</label>
+    <select id="mainnet">
+      <option>BEP20-USDT</option>
+      <option>BNB</option>
+      <option>BEP20-USDC</option>
+      <option>TRC20-TRX</option>
+    </select>
+
+    <label for="endereco">Endereço de retirada</label>
+    <input type="text" id="endereco" placeholder="Cole o endereço de retirada" />
+    
+    <label for="valorUsdt">Valor de retirada (USDT)</label>
+    <input type="number" id="valorUsdt" placeholder="Insira o valor da transferência" min="10" max="1000000" step="0.000001" />
+    <button type="button" onclick="preencherTudoUsdt()">Todos</button>
+  </div>
+
+  <div id="pixSection" class="method-section" style="display:none;">
+    <label for="nomeCompleto">Nome completo</label>
+    <input type="text" id="nomeCompleto" placeholder="Digite seu nome completo" />
+
+    <label for="tipoChave">Tipo de chave PIX</label>
+    <select id="tipoChave">
+      <option value="cpf">CPF</option>
+      <option value="telefone">Telefone</option>
+      <option value="email">Email</option>
+    </select>
+
+    <label for="chavePix">Chave PIX</label>
+    <input type="text" id="chavePix" placeholder="Digite a chave PIX" />
+
+    <label for="valorPix">Valor de retirada (R$)</label>
+    <input type="number" id="valorPix" placeholder="Insira o valor da transferência" min="30" max="5000" step="0.01" />
+    <button type="button" onclick="preencherTudoPix()">Todos</button>
+  </div>
+
+  <label for="senha">Senha de segurança</label>
+  <input type="password" id="senha" placeholder="Senha de segurança" />
+
+  <div class="resumo" id="resumoTaxas">
+    <p>Taxa: <span id="taxa">0 USDT</span></p>
+    <p>Impostos: <span id="impostos">0 USDT</span></p>
+    <p>Chegada real: <span id="chegada">0 USDT</span></p>
+  </div>
+
+  <button onclick="confirmarSaque()">Confirmar</button>
+
+  <div class="lembrete">
+    <p><strong>💰 Regras de retirada da taxa</strong><br>
+    2% Taxa de manuseio para cada retirada em USDT, chegada rápida!</p>
+    <p><strong>📌 Retirada USDT</strong><br>
+    Retirada mínima: 10 USDT<br>
+    Retirada máxima: 1.000.000 USDT<br>
+    Data da chegada: 1-5 minutos (pode haver atraso em horários de pico)</p>
+    <p><strong>📌 Retirada PIX</strong><br>
+    Retirada mínima: R$ 30,00<br>
+    Retirada máxima: R$ 5.000,00<br>
+    Data da chegada: até 1 dia útil</p>
+    <p><strong>🔥 Vantagens de retirada</strong><br>
+    ✅ Baixa taxa de manuseio - 2% somente para USDT!</p>
+  </div>
+
+  <script>
+    // Taxa fixa de conversão USDT para Real (ajuste conforme necessário)
+    const taxaConversao = 5.20;
+
+    function mostrarSaldo() {
+      // Simulando saldo USDT guardado no localStorage
+      let saldoUsdt = parseFloat(localStorage.getItem('saldo') || '100.000000');
+      const metodo = document.getElementById('metodoRetirada').value;
+
+      if (metodo === 'pix') {
+        const saldoReal = saldoUsdt * taxaConversao;
+        document.getElementById('saldo').innerText = saldoReal.toFixed(2) + ' R$ (convertido)';
+      } else {
+        document.getElementById('saldo').innerText = saldoUsdt.toFixed(6) + ' USDT';
+      }
+
+      calcularTaxas();
+    }
+
+    document.getElementById('valorUsdt').addEventListener('input', calcularTaxas);
+    document.getElementById('valorPix').addEventListener('input', calcularTaxas);
+
+    function alternarMetodo() {
+      const metodo = document.getElementById('metodoRetirada').value;
+      if (metodo === 'usdt') {
+        document.getElementById('usdtSection').style.display = 'block';
+        document.getElementById('pixSection').style.display = 'none';
+        document.getElementById('resumoTaxas').style.display = 'block';
+      } else {
+        document.getElementById('usdtSection').style.display = 'none';
+        document.getElementById('pixSection').style.display = 'block';
+        document.getElementById('resumoTaxas').style.display = 'none';
+      }
+      mostrarSaldo();
+    }
+
+    function preencherTudoUsdt() {
+      let saldo = parseFloat(localStorage.getItem('saldo') || '0');
+      document.getElementById('valorUsdt').value = saldo.toFixed(6);
+      calcularTaxas();
+    }
+
+    function preencherTudoPix() {
+      let saldoUsdt = parseFloat(localStorage.getItem('saldo') || '0');
+      let saldoReal = saldoUsdt * taxaConversao;
+      // Limitar ao máximo de R$5000
+      let valorMaxPix = saldoReal > 5000 ? 5000 : saldoReal;
+      document.getElementById('valorPix').value = valorMaxPix.toFixed(2);
+      calcularTaxas();
+    }
+
+    function calcularTaxas() {
+      const metodo = document.getElementById('metodoRetirada').value;
+
+      if (metodo === 'usdt') {
+        const valor = parseFloat(document.getElementById('valorUsdt').value || '0');
+        if (valor > 0) {
+          const taxa = valor * 0.02;
+          const chegada = valor - taxa;
+          document.getElementById('taxa').innerText = taxa.toFixed(6) + ' USDT';
+          document.getElementById('impostos').innerText = '0 USDT';
+          document.getElementById('chegada').innerText = chegada.toFixed(6) + ' USDT';
+        } else {
+          document.getElementById('taxa').innerText = '0 USDT';
+          document.getElementById('impostos').innerText = '0 USDT';
+          document.getElementById('chegada').innerText = '0 USDT';
+        }
+      } else {
+        // PIX não mostra taxas
+        const valorPix = parseFloat(document.getElementById('valorPix').value || '0');
+        if (valorPix > 0) {
+          document.getElementById('taxa').innerText = '0';
+          document.getElementById('impostos').innerText = '0';
+          document.getElementById('chegada').innerText = 'R$ ' + valorPix.toFixed(2);
+        } else {
+          document.getElementById('taxa').innerText = '0';
+          document.getElementById('impostos').innerText = '0';
+          document.getElementById('chegada').innerText = '0';
+        }
+      }
+    }
+
+    function confirmarSaque() {
+      const metodo = document.getElementById('metodoRetirada').value;
+      const senha = document.getElementById('senha').value.trim();
+      let saldoUsdt = parseFloat(localStorage.getItem('saldo') || '0');
+
+      if (!senha) {
+        alert('Por favor, insira sua senha de segurança.');
+        return;
+      }
+
+      if (metodo === 'usdt') {
+        const valor = parseFloat(document.getElementById('valorUsdt').value || '0');
+        const endereco = document.getElementById('endereco').value.trim();
+
+        if (valor < 10 || valor > 1000000) {
+          alert('Valor inválido para retirada USDT (mínimo 10, máximo 1.000.000).');
+          return;
+        }
+        if (valor > saldoUsdt) {
+          alert('Saldo insuficiente para essa retirada.');
+          return;
+        }
+        if (!endereco) {
+          alert('Por favor, insira o endereço de retirada.');
+          return;
+        }
+
+        const taxa = valor * 0.02;
+        saldoUsdt -= valor;
+        localStorage.setItem('saldo', saldoUsdt.toFixed(6));
+
+        alert(`Saque USDT solicitado com sucesso!\nValor: ${valor.toFixed(6)} USDT\nTaxa: ${taxa.toFixed(6)} USDT\nEndereço: ${endereco}`);
+        window.location.href = 'index.html';
+
+      } else if (metodo === 'pix') {
+        const nome = document.getElementById('nomeCompleto').value.trim();
+        const tipoChave = document.getElementById('tipoChave').value;
+        const chavePix = document.getElementById('chavePix').value.trim();
+        const valorPix = parseFloat(document.getElementById('valorPix').value || '0');
+
+        if (!nome) {
+          alert('Por favor, insira seu nome completo para retirada PIX.');
+          return;
+        }
+        if (!chavePix) {
+          alert('Por favor, insira a chave PIX.');
+          return;
+        }
+        if (valorPix < 30 || valorPix > 5000) {
+          alert('Valor inválido para retirada PIX (mínimo R$30, máximo R$5.000).');
+          return;
+        }
+
+        // Converter valor PIX em R$ para USDT para descontar saldo
+        const valorUsdtEquivalent = valorPix / taxaConversao;
+        if (valorUsdtEquivalent > saldoUsdt) {
+          alert('Saldo insuficiente para essa retirada PIX.');
+          return;
+        }
+
+        saldoUsdt -= valorUsdtEquivalent;
+        localStorage.setItem('saldo', saldoUsdt.toFixed(6));
+
+        alert(`Saque PIX solicitado com sucesso!\nNome: ${nome}\nTipo da chave: ${tipoChave}\nChave PIX: ${chavePix}\nValor: R$ ${valorPix.toFixed(2)}`);
+        window.location.href = 'index.html';
+
+      } else {
+        alert('Método de retirada inválido.');
+      }
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BEP20-USDT</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: linear-gradient(to bottom, #0b0f3b, #041830);
+      color: white;
+      text-align: center;
+      padding: 20px;
+    }
+
+    h2 {
+      margin-top: 20px;
+    }
+
+    .address-box {
+      background: #1f2f45;
+      padding: 15px;
+      margin: 20px 0;
+      border-radius: 10px;
+      word-break: break-all;
+      font-size: 16px;
+    }
+
+    button {
+      background: linear-gradient(to right, #7a5fff, #01d0ff);
+      border: none;
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-size: 16px;
+      color: white;
+      cursor: pointer;
+    }
+
+    button:active {
+      transform: scale(0.98);
+    }
+  </style>
+</head>
+<body>
+
+  <h2>Endereço para Recarregar</h2>
+  <p>Envie somente <strong>BEP20-USDT</strong> para o endereço abaixo:</p>
+
+  <div class="address-box" id="endereco">
+    0xAbCdEf1234567890aBCdefABc1234567890abcdE
+  </div>
+
+  <button onclick="copiarEndereco()">📋 Copiar Endereço</button>
+
+  <script>
+    function copiarEndereco() {
+      const endereco = document.getElementById("endereco").innerText;
+      navigator.clipboard.writeText(endereco).then(() => {
+        alert("Endereço copiado com sucesso!");
+      });
+    }
+  </script>
+
+</body>
+</html>

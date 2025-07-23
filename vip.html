@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sax Mining - VIP</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: linear-gradient(to bottom, #000028, #001640);
+      color: white;
+    }
+
+    header {
+      background: linear-gradient(to right, #1a2c3b, #0a2f2f);
+      padding: 10px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+    }
+
+    .logo span {
+      font-size: 20px;
+      font-weight: bold;
+      margin-left: 10px;
+      color: #fff;
+    }
+
+    .card-topo {
+      background: #0e1e2a;
+      margin: 20px;
+      padding: 15px;
+      border-radius: 15px;
+    }
+
+    .card-topo p {
+      margin: 5px 0;
+    }
+
+    .btn-recarregar {
+      background: linear-gradient(to right, #7a5fff, #01d0ff);
+      border: none;
+      width: 100%;
+      padding: 12px;
+      border-radius: 10px;
+      font-size: 16px;
+      font-weight: bold;
+      color: white;
+      cursor: pointer;
+      margin: 15px 0;
+    }
+
+    .tab-container {
+      display: flex;
+      justify-content: space-around;
+      margin-bottom: 10px;
+    }
+
+    .tab {
+      flex: 1;
+      padding: 10px;
+      text-align: center;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    .tab.active {
+      background: linear-gradient(to right, #7a5fff, #01d0ff);
+      color: white;
+    }
+
+    .vip-box {
+      background: #162d45;
+      margin: 10px 20px;
+      padding: 15px;
+      border-radius: 12px;
+    }
+
+    .vip-box h3 {
+      margin-top: 0;
+      color: #7ad3ff;
+    }
+
+    .vip-box p {
+      margin: 4px 0;
+      font-size: 14px;
+    }
+
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      width: 100%;
+      background: #1b2a38;
+      display: flex;
+      justify-content: space-around;
+      padding: 10px 0;
+      border-top: 1px solid #333;
+    }
+
+    .bottom-nav div {
+      color: white;
+      text-align: center;
+      font-size: 12px;
+      cursor: pointer;
+    }
+
+    .bottom-nav .active {
+      color: #ff69b4;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="logo">
+      <span>Sax Mining</span>
+    </div>
+    <div style="color: white; font-size: 14px;">🌐 Português</div>
+  </header>
+
+  <div class="card-topo">
+    <p><strong>Nível</strong>: <span style="color: #00ff66;">VIP0</span></p>
+    <p><strong>Valor da recarga</strong>: $0</p>
+    <button class="btn-recarregar" onclick="abrir('recarregar.html')">RECARREGAR</button>
+  </div>
+
+  <div class="tab-container">
+    <div class="tab active">Investir Carteira</div>
+    <div class="tab">Descontos</div>
+  </div>
+
+  <!-- Blocos VIP -->
+  <div class="vip-box">
+    <h3>VIP0</h3>
+    <p>Valor da recarga: 0.00 ~ 70.00</p>
+    <p>Renda de Mineração: 0.5000%</p>
+    <p>Tempo efetivo de mineração: Para sempre</p>
+  </div>
+
+  <div class="vip-box">
+    <h3>VIP1</h3>
+    <p>Valor da recarga: 70.00 ~ 200.00</p>
+    <p>Renda de Mineração: 3.00%</p>
+    <p>Tempo efetivo de mineração: 365 Dias</p>
+  </div>
+
+  <div class="vip-box">
+    <h3>VIP2</h3>
+    <p>Valor da recarga: 200.00 ~ 1,000.00</p>
+    <p>Renda de Mineração: 5.00%</p>
+    <p>Tempo efetivo de mineração: 365 Dias</p>
+  </div>
+
+  <div class="vip-box">
+    <h3>VIP3</h3>
+    <p>Valor da recarga: 1,000.00 ~ 3,000.00</p>
+    <p>Renda de Mineração: 6.00%</p>
+    <p>Tempo efetivo de mineração: 365 Dias</p>
+  </div>
+
+  <div class="vip-box">
+    <h3>VIP4</h3>
+    <p>Valor da recarga: 3,000.00 ~ 8,000.00</p>
+    <p>Renda de Mineração: 7.00%</p>
+    <p>Tempo efetivo de mineração: 365 Dias</p>
+  </div>
+
+  <div class="vip-box">
+    <h3>VIP5</h3>
+    <p>Valor da recarga: 8,000.00 ~ 30,000.00</p>
+    <p>Renda de Mineração: 8.00%</p>
+    <p>Tempo efetivo de mineração: 365 Dias</p>
+  </div>
+
+  <div class="vip-box">
+    <h3>VIP6</h3>
+    <p>Valor da recarga: 30,000.00 ~ 100,000.00</p>
+    <p>Renda de Mineração: 9.00%</p>
+    <p>Tempo efetivo de mineração: 365 Dias</p>
+  </div>
+
+  <!-- Menu fixo -->
+  <div class="bottom-nav">
+    <div onclick="abrir('tela-principal.html')">🏠<br>Lar</div>
+    <div class="active">👑<br>VIP</div>
+    <div onclick="abrir('mineracao.html')">⛏️<br>Piscina de Mineração</div>
+    <div onclick="abrir('equipe.html')">👥<br>Equipe</div>
+    <div onclick="abrir('meu.html')">📱<br>Meu</div>
+  </div>
+
+  <script>
+    function abrir(pagina) {
+      window.location.href = pagina;
+    }
+  </script>
+
+</body>
+</html>
