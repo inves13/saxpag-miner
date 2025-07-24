@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>BEP20-USDT</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Recarregar - BEP20 USDT</title>
   <style>
     body {
       margin: 0;
@@ -14,51 +14,163 @@
       padding: 20px;
     }
 
-    h2 {
-      margin-top: 20px;
-    }
-
-    .address-box {
-      background: #1f2f45;
+    header {
+      background-color: #001F4A;
       padding: 15px;
-      margin: 20px 0;
-      border-radius: 10px;
-      word-break: break-all;
-      font-size: 16px;
+      font-size: 18px;
+      font-weight: bold;
     }
 
-    button {
-      background: linear-gradient(to right, #7a5fff, #01d0ff);
-      border: none;
-      padding: 12px 24px;
+    .qr-code {
+      margin: 20px auto;
+      width: 200px;
+      height: 200px;
+      background-color: #fff;
+    }
+
+    .info {
+      background-color: #101f3a;
+      padding: 20px;
+      border-radius: 10px;
+      margin-top: 15px;
+    }
+
+    .address {
+      background-color: #1c2d4a;
+      padding: 10px;
+      margin: 10px auto;
       border-radius: 8px;
-      font-size: 16px;
-      color: white;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      word-break: break-all;
+    }
+
+    button.copy-btn {
+      background: #0ad4a4;
+      border: none;
+      color: #000;
+      font-weight: bold;
+      padding: 6px 10px;
+      border-radius: 5px;
       cursor: pointer;
     }
 
-    button:active {
-      transform: scale(0.98);
+    button.confirm-btn {
+      margin-top: 20px;
+      padding: 12px 20px;
+      font-size: 16px;
+      background: linear-gradient(to right, #6441a5, #2a0845);
+      border: none;
+      color: white;
+      border-radius: 10px;
+      cursor: pointer;
+    }
+
+    .alerta {
+      text-align: left;
+      font-size: 14px;
+      margin-top: 20px;
+    }
+
+    .sucesso {
+      margin-top: 20px;
+      color: #00ff8c;
+      font-weight: bold;
+      display: none;
     }
   </style>
 </head>
 <body>
 
-  <h2>Endereço para Recarregar</h2>
-  <p>Envie somente <strong>BEP20-USDT</strong> para o endereço abaixo:</p>
+  <header>🔙 Recarregar - BEP20-USDT</header>
 
-  <div class="address-box" id="endereco">
-    0xAbCdEf1234567890aBCdefABc1234567890abcdE
+  <div class="qr-code">
+    <img src="https://chart.googleapis.com/chart?chs=200x200&cht=qr&chl=0xe724896a45384aa8eff6c15339" alt="QR Code" width="200" height="200">
   </div>
 
-  <button onclick="copiarEndereco()">📋 Copiar Endereço</button>
+  <div class="info">
+    <p><strong>BEP20-USDT</strong></p>
+    <p>Endereço de depósito:</p>
+    <div class="address">
+      <span id="wallet">0xe724896a45384aa8eff6c15339</span>
+      <button class="copy-btn" onclick="copiarEndereco()">Copiar</button>
+    </div>
+
+    <button class="confirm-btn" onclick="confirmarRecarga()">✅ RECARGA CONCLUÍDA</button>
+    <div class="sucesso" id="sucesso">✅ Sua recarga foi registrada com sucesso!</div>
+  </div>
+
+  <div class="alerta">
+    <p><strong>⚠️ Lembrete:</strong></p>
+    <p>1. Copie o endereço acima ou digitalize o QR Code e selecione a rede <strong>BNB Smart Chain (BEP20)</strong> para USDT.</p>
+    <p>2. O valor mínimo de recarga é <strong>10 USDT</strong>. Valores menores não serão creditados.</p>
+    <p>3. Não envie moedas de outras redes para este endereço.</p>
+    <p>4. Após o envio, os fundos levam de 1 a 3 minutos para aparecer.</p>
+    <p>5. Se demorar mais, atualize a página ou contate o suporte.</p>
+  </div>
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
 
   <script>
+    // Configuração correta do Firebase
+    const firebaseConfig = {
+      apiKey: "AIzaSyDzOgL6cvc0b4AO0vAEay1CeSAv_-WqaWQ",
+      authDomain: "saxpag-miner.firebaseapp.com",
+      databaseURL: "https://saxpag-miner-default-rtdb.firebaseio.com",
+      projectId: "saxpag-miner",
+      storageBucket: "saxpag-miner.firebasestorage.app",
+      messagingSenderId: "154250189626",
+      appId: "1:154250189626:web:83c232a5c539e3f9fe0e03",
+      measurementId: "G-LEV5TL9P7H"
+    };
+
+    // Inicializar Firebase
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
     function copiarEndereco() {
-      const endereco = document.getElementById("endereco").innerText;
+      const endereco = document.getElementById("wallet").innerText;
       navigator.clipboard.writeText(endereco).then(() => {
         alert("Endereço copiado com sucesso!");
+      }).catch(() => {
+        alert("Não foi possível copiar o endereço.");
       });
+    }
+
+    function confirmarRecarga() {
+      let userId = localStorage.getItem("userId");
+      if (!userId) {
+        userId = 'user_' + Math.random().toString(36).substr(2, 9);
+        localStorage.setItem("userId", userId);
+      }
+
+      const recargaData = {
+        valor: 10, // Agora o valor fixo é 10 USDT
+        data: new Date().toISOString()
+      };
+
+      // Registra a recarga
+      db.ref('recargas/' + userId).push(recargaData)
+        .then(() => {
+          // Atualiza o VIP após confirmação da recarga
+          db.ref('usuarios/' + userId).once('value', (snapshot) => {
+            const usuario = snapshot.val();
+            if (usuario && usuario.saldo >= 10) {
+              db.ref('usuarios/' + userId).update({
+                vip: 1,  // Usuário vira VIP 1 após a recarga
+                saldo: usuario.saldo + 10  // Adiciona o valor de recarga à carteira
+              });
+            }
+          });
+
+          document.getElementById("sucesso").style.display = "block";
+        })
+        .catch((error) => {
+          alert("Erro ao registrar recarga: " + error.message);
+        });
     }
   </script>
 
