@@ -38,7 +38,6 @@
       user-select: none;
       white-space: nowrap;
     }
-    /* restante do seu CSS original */
     .card {
       background: #0e1e2a;
       margin: 20px;
@@ -119,7 +118,7 @@
     }
   </style>
 </head>
-<body onload="loadData()">
+<body onload="checkLogin()">
 
   <header>
     <div class="logo">
@@ -164,47 +163,82 @@
     <div onclick="abrir('meu.html')">📱<br>Meu</div>
   </div>
 
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+
   <script>
+    // Configuração do Firebase
+    const firebaseConfig = {
+      apiKey: "AIzaSyDzOgL6cvc0b4AO0vAEay1CeSAv_-WqaWQ",
+      authDomain: "saxpag-miner.firebaseapp.com",
+      databaseURL: "https://saxpag-miner-default-rtdb.firebaseio.com",
+      projectId: "saxpag-miner",
+      storageBucket: "saxpag-miner.firebasestorage.app",
+      messagingSenderId: "154250189626",
+      appId: "1:154250189626:web:83c232a5c539e3f9fe0e03",
+      measurementId: "G-LEV5TL9P7H"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+    const auth = firebase.auth();
+
+    // Verifica se o usuário está logado
+    function checkLogin() {
+      auth.onAuthStateChanged(user => {
+        if (!user) {
+          window.location.href = 'login.html'; // Redireciona para a página de login
+        } else {
+          loadData(user.uid);  // Carrega os dados do usuário
+        }
+      });
+    }
+
+    function loadData(userId) {
+      db.ref("usuarios/" + userId).once("value", (snapshot) => {
+        const data = snapshot.val() || {};
+        let saldo = data.saldo || 10;  // O saldo padrão de $10
+        let vip = data.vip || 0;
+
+        // Se o saldo for maior ou igual a 10, o usuário pode ser promovido ao VIP 1
+        if (saldo >= 10 && vip === 0) {
+          vip = 1;
+          db.ref("usuarios/" + userId).update({ vip: vip });
+        }
+
+        document.getElementById("saldoCarteira").innerText = `$${saldo.toFixed(2)}`;
+        document.getElementById("investido").innerText = `$${saldo.toFixed(2)}`;
+        document.getElementById("carteiraCorretagem").innerText = `$0.00`;
+        document.getElementById("vipLevel").innerText = `VIP ${vip}`;
+      });
+    }
+
     function abrir(pagina) {
       window.location.href = pagina;
     }
 
-    function loadData() {
-      const saldo = parseFloat(localStorage.getItem('saldo') || '10.00');
-      const corretagem = parseFloat(localStorage.getItem('carteiraCorretagem') || '0.00');
-      const vip = localStorage.getItem('vipLevel') || '0';
-
-      document.getElementById('saldoCarteira').innerText = `$${saldo.toFixed(2)}`;
-      document.getElementById('investido').innerText = `$${saldo.toFixed(2)}`;
-      document.getElementById('carteiraCorretagem').innerText = `$${corretagem.toFixed(2)}`;
-      document.getElementById('vipLevel').innerText = `VIP ${vip}`;
-    }
-
     function fazerCheckin() {
-      const ultimaColeta = localStorage.getItem('ultimoCheckin');
+      const userId = auth.currentUser.uid;
+      const checkinKey = "ultimoCheckin_" + userId;
+      const ultimaColeta = localStorage.getItem(checkinKey);
       const agora = new Date().getTime();
       const umDia = 24 * 60 * 60 * 1000;
 
       if (ultimaColeta && agora - ultimaColeta < umDia) {
-        alert('Você já coletou hoje. Tente novamente amanhã.');
+        alert("Você já coletou hoje. Tente novamente amanhã.");
         return;
       }
 
-      let saldo = parseFloat(localStorage.getItem('saldo') || '10.00');
-      saldo += 0.08;
-      localStorage.setItem('saldo', saldo.toFixed(2));
-      localStorage.setItem('ultimoCheckin', agora);
+      const saldoRef = db.ref("usuarios/" + userId + "/saldo");
+      saldoRef.once("value").then(snapshot => {
+        let saldoAtual = snapshot.val() || 10;  // Mantém $10 até a recarga
+        saldoAtual += 0.08;  // Coleta diária de 0.08 USDT
+        db.ref("usuarios/" + userId).update({ saldo: saldoAtual });
+        localStorage.setItem(checkinKey, agora);
 
-      // Exemplo de VIP automático - se saldo >= 20 VIP sobe para 1
-      let vip = parseInt(localStorage.getItem('vipLevel') || '0');
-      if (saldo >= 20 && vip < 1) {
-        vip = 1;
-        localStorage.setItem('vipLevel', vip);
-        alert('Parabéns! Seu VIP subiu para VIP 1!');
-      }
-
-      loadData();
-      alert('Check-in realizado com sucesso! +0.08 USDT');
+        alert("Check-in realizado com sucesso! +0.08 USDT");
+        loadData(userId);
+      });
     }
   </script>
 </body>
