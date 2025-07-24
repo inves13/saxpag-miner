@@ -115,6 +115,7 @@
     <div class="progress-bar" id="progressBar"></div>
   </div>
 
+  <button class="btn-collect" onclick="coletar()">COLETAR RENDIMENTO</button>
   <button class="btn-collect" id="btnUpgrade" onclick="location.href='recarregar.html'">MELHORANDO O PODER DA COMPUTAÇÃO</button>
 
   <div class="records-title">Registros de Mineração</div>
@@ -124,62 +125,100 @@
     <button id="btnExpired">Expirado: <span id="expired">0.000000</span></button>
   </div>
 
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
   <script>
-    const segundosTotais = 86400; // 24 horas em segundos
+    const firebaseConfig = {
+      apiKey: "AIzaSyDzOgL6cvc0b4AO0vAEay1CeSAv_-WqaWQ",
+      authDomain: "saxpag-miner.firebaseapp.com",
+      databaseURL: "https://saxpag-miner-default-rtdb.firebaseio.com",
+      projectId: "saxpag-miner",
+      storageBucket: "saxpag-miner.firebasestorage.app",
+      messagingSenderId: "154250189626",
+      appId: "1:154250189626:web:83c232a5c539e3f9fe0e03",
+      measurementId: "G-LEV5TL9P7H"
+    };
+    firebase.initializeApp(firebaseConfig);
 
-    // Recuperar dados do localStorage ou valores iniciais padrão
-    let progresso = parseFloat(localStorage.getItem('progresso')) || 0;
-    let saldoMinerado = parseFloat(localStorage.getItem('saldoMinerado')) || 0;
-    let recebido = parseFloat(localStorage.getItem('recebido')) || 0;
-    let paraColetar = parseFloat(localStorage.getItem('paraColetar')) || 0;
-    let expirado = parseFloat(localStorage.getItem('expirado')) || 0;
-    let minerando = localStorage.getItem('minerando') === 'false' ? false : true;
+    const userId = localStorage.getItem("userId") || 'vip_user_' + Math.random().toString(36).substr(2, 9);
+    localStorage.setItem("userId", userId);
 
-    // Atualiza elementos da página com valores carregados
-    document.getElementById("progressBar").style.width = progresso + "%";
-    document.getElementById("miningBalance").innerText = saldoMinerado.toFixed(6);
-    document.getElementById("received").innerText = recebido.toFixed(6);
-    document.getElementById("toCollect").innerText = paraColetar.toFixed(6);
-    document.getElementById("expired").innerText = expirado.toFixed(6);
+    const db = firebase.database();
 
-    function salvarEstado() {
-      localStorage.setItem('progresso', progresso);
-      localStorage.setItem('saldoMinerado', saldoMinerado);
-      localStorage.setItem('recebido', recebido);
-      localStorage.setItem('paraColetar', paraColetar);
-      localStorage.setItem('expirado', expirado);
-      localStorage.setItem('minerando', minerando);
+    const segundosTotais = 86400;
+    let progresso = 0;
+    let saldoMinerado = 0;
+    let paraColetar = 0;
+    let recebido = 0;
+    let expirado = 0;
+    let minerando = true;
+    let rendaDiaria = 0;
+    let vip = 0;
+    let poder = 10;
+
+    function salvarFirebase() {
+      db.ref('usuarios/' + userId).set({
+        progresso, saldoMinerado, paraColetar, recebido, expirado,
+        minerando, rendaDiaria, vip, poder
+      });
+    }
+
+    function carregarFirebase() {
+      db.ref('usuarios/' + userId).once('value').then(snapshot => {
+        if (snapshot.exists()) {
+          const data = snapshot.val();
+          progresso = data.progresso || 0;
+          saldoMinerado = data.saldoMinerado || 0;
+          paraColetar = data.paraColetar || 0;
+          recebido = data.recebido || 0;
+          expirado = data.expirado || 0;
+          rendaDiaria = data.rendaDiaria || 0;
+          minerando = data.minerando !== false;
+          vip = data.vip || 0;
+          poder = data.poder || 10;
+          atualizarInterface();
+        } else {
+          salvarFirebase();
+        }
+      });
+    }
+
+    function atualizarInterface() {
+      document.getElementById("progressBar").style.width = progresso + "%";
+      document.getElementById("miningBalance").innerText = saldoMinerado.toFixed(6);
+      document.getElementById("toCollect").innerText = paraColetar.toFixed(6);
+      document.getElementById("received").innerText = recebido.toFixed(6);
+      document.getElementById("expired").innerText = expirado.toFixed(6);
+      document.getElementById("dailyIncome").innerText = rendaDiaria.toFixed(6) + " USDT";
+      document.getElementById("vipLevel").innerText = "VIP" + vip;
+      document.getElementById("miningPower").innerText = (poder * 1).toFixed(4) + " GH/s";
     }
 
     function atualizarBarra() {
       if (minerando && progresso < 100) {
         progresso += (100 / segundosTotais);
-        saldoMinerado += (0.26 / segundosTotais);
+        saldoMinerado += ((poder * 0.02622) / segundosTotais);
 
         if (progresso >= 100) {
           progresso = 100;
           minerando = false;
-          // Aqui poderia mudar texto do botão ou sinalizar que terminou,
-          // mas como botão redireciona direto, deixei fixo.
         }
-
-        document.getElementById("progressBar").style.width = progresso + "%";
-        document.getElementById("miningBalance").innerText = saldoMinerado.toFixed(6);
-        salvarEstado();
+        atualizarInterface();
+        salvarFirebase();
       }
     }
 
     function coletar() {
       if (saldoMinerado > 0) {
         paraColetar += saldoMinerado;
+        rendaDiaria += saldoMinerado;
         saldoMinerado = 0;
         progresso = 0;
         minerando = true;
-
-        document.getElementById("miningBalance").innerText = "0.000000";
-        document.getElementById("toCollect").innerText = paraColetar.toFixed(6);
-        salvarEstado();
-        alert("Rendimento transferido para 'Para ser coletado'. A mineração reiniciou.");
+        atualizarInterface();
+        salvarFirebase();
+        alert("Rendimento transferido para Renda Diária. A mineração reiniciou.");
       } else {
         alert("Nenhum saldo disponível para coletar.");
       }
@@ -188,17 +227,33 @@
     function verParaColetar() {
       if (paraColetar > 0) {
         alert(`Você coletou ${paraColetar.toFixed(6)} USDT`);
+        recebido += paraColetar;
         paraColetar = 0;
-        document.getElementById("toCollect").innerText = "0.000000";
-        salvarEstado();
+        atualizarInterface();
+        salvarFirebase();
       } else {
         alert("Nada para coletar agora.");
       }
     }
 
-    // No seu código, o botão principal redireciona direto, mas você pode adicionar coletar() se quiser que o saldo zere antes.
-    // Por enquanto mantive o botão só redirecionando.
+    // Checar recarga e atualizar VIP
+    db.ref('recargas/' + userId).once('value').then(snapshot => {
+      let totalRecarga = 0;
+      snapshot.forEach(child => {
+        const val = child.val();
+        if (val.valor >= 10) {
+          totalRecarga += val.valor;
+        }
+      });
+      if (totalRecarga >= 10) {
+        vip = Math.floor(totalRecarga / 10);
+        poder = 10 + (vip * 10);
+        salvarFirebase();
+        atualizarInterface();
+      }
+    });
 
+    carregarFirebase();
     setInterval(atualizarBarra, 1000);
   </script>
 </body>
