@@ -116,7 +116,7 @@
     }
   </style>
 </head>
-<body>
+<body onload="checkLogin()">
 
   <header>
     <div class="logo">
@@ -126,8 +126,8 @@
   </header>
 
   <div class="card-topo">
-    <p><strong>Nível</strong>: <span style="color: #00ff66;">VIP0</span></p>
-    <p><strong>Valor da recarga</strong>: $0</p>
+    <p><strong>Nível</strong>: <span id="vipLevel" style="color: #00ff66;">VIP0</span></p>
+    <p><strong>Valor da recarga</strong>: <span id="recargaValor">$0</span></p>
     <button class="btn-recarregar" onclick="abrir('recarregar.html')">RECARREGAR</button>
   </div>
 
@@ -195,7 +195,54 @@
     <div onclick="abrir('meu.html')">📱<br>Meu</div>
   </div>
 
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+
   <script>
+    // Configuração do Firebase
+    const firebaseConfig = {
+      apiKey: "AIzaSyDzOgL6cvc0b4AO0vAEay1CeSAv_-WqaWQ",
+      authDomain: "saxpag-miner.firebaseapp.com",
+      databaseURL: "https://saxpag-miner-default-rtdb.firebaseio.com",
+      projectId: "saxpag-miner",
+      storageBucket: "saxpag-miner.firebasestorage.app",
+      messagingSenderId: "154250189626",
+      appId: "1:154250189626:web:83c232a5c539e3f9fe0e03",
+      measurementId: "G-LEV5TL9P7H"
+    };
+
+    // Inicializa o Firebase
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+    const auth = firebase.auth();
+
+    // Verifica se o usuário está logado
+    function checkLogin() {
+      auth.onAuthStateChanged(user => {
+        if (!user) {
+          window.location.href = 'login.html'; // Redireciona para a página de login
+        } else {
+          loadData(user.uid);  // Carrega os dados do usuário
+        }
+      });
+    }
+
+    // Carrega dados do usuário
+    function loadData(userId) {
+      db.ref("usuarios/" + userId).once("value", (snapshot) => {
+        const data = snapshot.val() || {};
+        let saldo = data.saldo || 0;  // O saldo padrão é 0
+        let vip = data.vip || 0;
+        let recargaValor = data.recargaValor || 0;  // Valor da recarga
+
+        // Atualiza o nível VIP e o valor da recarga
+        document.getElementById("vipLevel").innerText = `VIP${vip}`;
+        document.getElementById("recargaValor").innerText = `$${recargaValor.toFixed(2)}`;
+      });
+    }
+
+    // Função para redirecionar para a página
     function abrir(pagina) {
       window.location.href = pagina;
     }
