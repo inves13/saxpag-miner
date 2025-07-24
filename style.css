@@ -38,13 +38,13 @@ h1 {
   flex: 1;
   padding: 10px;
   border: none;
-  background: #1d275e; /* Azul escuro da imagem */
+  background: #333;
   color: white;
   cursor: pointer;
 }
 
 .form-toggle .active {
-  background: linear-gradient(90deg, #1b2c7c, #3e60ff); /* Azul igual ao da imagem */
+  background: linear-gradient(90deg, #6a00ff, #ae4cff);
   font-weight: bold;
 }
 
@@ -61,7 +61,7 @@ input[type="email"], input[type="password"], input[type="text"] {
 }
 
 .btn {
-  background: linear-gradient(90deg, #1b2c7c, #3e60ff); /* Cor azul extraída da imagem */
+  background: linear-gradient(90deg, #6a00ff, #ae4cff);
   border: none;
   color: white;
   padding: 12px;
