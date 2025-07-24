@@ -114,29 +114,11 @@
     .btn-detalhes:hover {
       background: #0091cc;
     }
-    footer {
-      background: #1b2a38;
-      display: flex;
-      justify-content: space-around;
-      padding: 10px 0;
-      border-top: 1px solid #333;
-      position: sticky;
-      bottom: 0;
-    }
-    footer div {
-      color: white;
-      font-size: 12px;
-      text-align: center;
-      cursor: pointer;
-    }
-    footer div.active {
-      color: #ff69b4;
-    }
   </style>
 </head>
 <body>
   <header>
-    <div class="logo">SaxPag Miner</div>
+    <div class="logo">Sax Mining</div>
     <div class="idioma">Português</div>
   </header>
 
@@ -161,25 +143,10 @@
       <p><strong>Total de retiradas da equipe:</strong> $<span id="retiradaTotal">0.00</span></p>
     </div>
 
-    <div class="niveles">
-      <div class="nivel">
-        <div class="nivel-info">
-          <div><strong>LEV 1</strong></div>
-          <div>Número de pessoas: <span id="lev1Num">0</span></div>
-          <div>Válido: <span id="lev1Valido">0</span></div>
-        </div>
-        <button class="btn-detalhes" onclick="detalhesNivel(1)">Detalhes</button>
-      </div>
+    <div class="niveles" id="listaNiveis">
+      <!-- Níveis serão inseridos via JavaScript -->
     </div>
   </main>
-
-  <footer>
-    <div onclick="abrirPagina('tela-principal.html')">🏠<br>Lar</div>
-    <div onclick="abrirPagina('vip.html')">👑<br>VIP</div>
-    <div onclick="abrirPagina('mineracao.html')">⛏️<br>Mineração</div>
-    <div class="active">👥<br>Equipe</div>
-    <div onclick="abrirPagina('meu.html')">📱<br>Meu</div>
-  </footer>
 
   <!-- Firebase SDK -->
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
@@ -209,36 +176,51 @@
       });
     }
 
-    function abrirPagina(pagina) {
-      window.location.href = pagina;
-    }
-
     function gerarLinkIndicacao(codigo) {
       return `https://inves13.github.io/saxpag-miner/#/reg?ref=${codigo}`;
     }
 
-    function calcularTotais(indicados) {
-      return {
-        totalEquipe: indicados.length,
-        comissaoTotal: indicados.length * 10,
-        recargaTotal: indicados.length * 50,
-        retiradaTotal: indicados.length * 20
-      };
+    function buscarIndicadosNivel(codigo, nivel = 1) {
+      if (nivel > 6) return Promise.resolve([]);
+      return firebase.database().ref("usuarios").orderByChild("indicacao").equalTo(codigo).once("value").then(snapshot => {
+        const diretos = [];
+        snapshot.forEach(child => diretos.push({ ...child.val(), uid: child.key }));
+        const validos = diretos.filter(i => i.saldo && i.saldo > 0);
+        if (nivel === 1) return { [`lev${nivel}`]: { total: diretos.length, validos: validos.length }, diretos };
+        return buscarIndicadosNivelSequencial(diretos, nivel, 1).then(result => ({
+          [`lev${nivel}`]: { total: result.length, validos: result.filter(i => i.saldo && i.saldo > 0).length }
+        }));
+      });
     }
 
-    function buscarIndicadosDiretos(codigoUsuario) {
-      return firebase.database().ref('usuarios').orderByChild('indicacao').equalTo(codigoUsuario).once('value')
-        .then(snapshot => {
-          let indicados = [];
-          snapshot.forEach(child => {
-            indicados.push(child.val());
-          });
-          return indicados;
-        });
+    function buscarIndicadosNivelSequencial(lista, nivelAlvo, nivelAtual) {
+      if (nivelAtual >= nivelAlvo) return Promise.resolve(lista);
+      const proximos = [];
+      const promises = lista.map(user => firebase.database().ref("usuarios").orderByChild("indicacao").equalTo(user.codigoConvite || user.uid.substring(0, 6)).once("value").then(snapshot => {
+        snapshot.forEach(child => proximos.push(child.val()));
+      }));
+      return Promise.all(promises).then(() => buscarIndicadosNivelSequencial(proximos, nivelAlvo, nivelAtual + 1));
     }
 
     function detalhesNivel(n) {
       alert('Detalhes do nível ' + n + ' ainda serão implementados.');
+    }
+
+    function renderNiveis(dados) {
+      const container = document.getElementById('listaNiveis');
+      for (let i = 1; i <= 6; i++) {
+        const nivel = dados[`lev${i}`] || { total: 0, validos: 0 };
+        container.innerHTML += `
+          <div class="nivel">
+            <div class="nivel-info">
+              <div><strong>LEV ${i}</strong></div>
+              <div>Número de pessoas: ${nivel.total}</div>
+              <div>Válido: ${nivel.validos}</div>
+            </div>
+            <button class="btn-detalhes" onclick="detalhesNivel(${i})">Detalhes</button>
+          </div>
+        `;
+      }
     }
 
     firebase.auth().onAuthStateChanged(async (user) => {
@@ -264,17 +246,18 @@
       document.getElementById("codigoConvite").innerText = codigoUsuario;
       document.getElementById("linkConvite").innerText = gerarLinkIndicacao(codigoUsuario);
 
-      const indicados = await buscarIndicadosDiretos(codigoUsuario);
-      document.getElementById("lev1Num").innerText = indicados.length;
+      // Total fixado em 0.00
+      document.getElementById("totalEquipe").innerText = "0";
+      document.getElementById("comissaoTotal").innerText = "0.00";
+      document.getElementById("recargaTotal").innerText = "0.00";
+      document.getElementById("retiradaTotal").innerText = "0.00";
 
-      const validos = indicados.filter(i => i.saldo && i.saldo > 0);
-      document.getElementById("lev1Valido").innerText = validos.length;
-
-      const totais = calcularTotais(indicados);
-      document.getElementById("totalEquipe").innerText = totais.totalEquipe;
-      document.getElementById("comissaoTotal").innerText = totais.comissaoTotal.toFixed(2);
-      document.getElementById("recargaTotal").innerText = totais.recargaTotal.toFixed(2);
-      document.getElementById("retiradaTotal").innerText = totais.retiradaTotal.toFixed(2);
+      const todosNiveis = {};
+      for (let n = 1; n <= 6; n++) {
+        const info = await buscarIndicadosNivel(codigoUsuario, n);
+        Object.assign(todosNiveis, info);
+      }
+      renderNiveis(todosNiveis);
     });
   </script>
 </body>
