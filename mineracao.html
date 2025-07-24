@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>saxpag-miner</title>
+  <title>SaxPag Miner</title>
   <style>
     body {
       margin: 0;
@@ -88,7 +88,7 @@
 </head>
 <body>
   <header>
-    <h1> saxpag-miner</h1>
+    <h1> SaxPag Miner</h1>
   </header>
 
   <div class="vip-status">Nível <strong id="vipLevel">VIP0</strong></div>
@@ -100,7 +100,7 @@
 
   <div class="info-box">
     <h2>Renda diária</h2>
-    <div class="value" id="dailyIncome">0.00 USDT</div>
+    <div class="value" id="dailyIncome">0.000000 USDT</div>
   </div>
 
   <div class="mining-image">
@@ -128,7 +128,10 @@
   <!-- Firebase SDK -->
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+  
   <script>
+    // Configuração do Firebase
     const firebaseConfig = {
       apiKey: "AIzaSyDzOgL6cvc0b4AO0vAEay1CeSAv_-WqaWQ",
       authDomain: "saxpag-miner.firebaseapp.com",
@@ -139,122 +142,91 @@
       appId: "1:154250189626:web:83c232a5c539e3f9fe0e03",
       measurementId: "G-LEV5TL9P7H"
     };
+
+    // Inicializar o Firebase
     firebase.initializeApp(firebaseConfig);
-
-    const userId = localStorage.getItem("userId") || 'vip_user_' + Math.random().toString(36).substr(2, 9);
-    localStorage.setItem("userId", userId);
-
     const db = firebase.database();
+    const auth = firebase.auth();
 
-    const segundosTotais = 86400;
     let progresso = 0;
     let saldoMinerado = 0;
     let paraColetar = 0;
     let recebido = 0;
-    let expirado = 0;
-    let minerando = true;
     let rendaDiaria = 0;
     let vip = 0;
     let poder = 10;
 
-    function salvarFirebase() {
-      db.ref('usuarios/' + userId).set({
-        progresso, saldoMinerado, paraColetar, recebido, expirado,
-        minerando, rendaDiaria, vip, poder
+    // Função para verificar se o usuário está logado
+    function checkLogin() {
+      auth.onAuthStateChanged(user => {
+        if (!user) {
+          window.location.href = 'login.html'; // Redireciona para a página de login se não estiver logado
+        } else {
+          loadData(user.uid); // Carrega os dados do usuário se logado
+        }
       });
     }
 
-    function carregarFirebase() {
+    // Função para carregar dados do Firebase
+    function loadData(userId) {
       db.ref('usuarios/' + userId).once('value').then(snapshot => {
         if (snapshot.exists()) {
           const data = snapshot.val();
-          progresso = data.progresso || 0;
-          saldoMinerado = data.saldoMinerado || 0;
-          paraColetar = data.paraColetar || 0;
-          recebido = data.recebido || 0;
-          expirado = data.expirado || 0;
-          rendaDiaria = data.rendaDiaria || 0;
-          minerando = data.minerando !== false;
-          vip = data.vip || 0;
-          poder = data.poder || 10;
-          atualizarInterface();
+          const vip = data.vip || 0;
+          const poder = data.poder || 10;
+          const saldoMinerado = data.saldoMinerado || 0;
+          const paraColetar = data.paraColetar || 0;
+          const recebido = data.recebido || 0;
+          const progresso = data.progresso || 0;
+          const rendaDiaria = data.rendaDiaria || 0;
+
+          document.getElementById("vipLevel").innerText = "VIP" + vip;
+          document.getElementById("miningPower").innerText = (poder * 1).toFixed(4) + " GH/s";
+          document.getElementById("miningBalance").innerText = saldoMinerado.toFixed(6);
+          document.getElementById("toCollect").innerText = paraColetar.toFixed(6);
+          document.getElementById("received").innerText = recebido.toFixed(6);
+          document.getElementById("dailyIncome").innerText = rendaDiaria.toFixed(6) + " USDT";
+          document.getElementById("progressBar").style.width = progresso + "%";
         } else {
-          salvarFirebase();
+          alert("Dados não encontrados para o usuário.");
         }
       });
     }
 
-    function atualizarInterface() {
-      document.getElementById("progressBar").style.width = progresso + "%";
-      document.getElementById("miningBalance").innerText = saldoMinerado.toFixed(6);
-      document.getElementById("toCollect").innerText = paraColetar.toFixed(6);
-      document.getElementById("received").innerText = recebido.toFixed(6);
-      document.getElementById("expired").innerText = expirado.toFixed(6);
-      document.getElementById("dailyIncome").innerText = rendaDiaria.toFixed(6) + " USDT";
-      document.getElementById("vipLevel").innerText = "VIP" + vip;
-      document.getElementById("miningPower").innerText = (poder * 1).toFixed(4) + " GH/s";
-    }
-
-    function atualizarBarra() {
-      if (minerando && progresso < 100) {
-        progresso += (100 / segundosTotais);
-        saldoMinerado += ((poder * 0.02622) / segundosTotais);
-
-        if (progresso >= 100) {
-          progresso = 100;
-          minerando = false;
-        }
-        atualizarInterface();
-        salvarFirebase();
-      }
-    }
-
+    // Função para coletar rendimento
     function coletar() {
       if (saldoMinerado > 0) {
         paraColetar += saldoMinerado;
-        rendaDiaria += saldoMinerado;
         saldoMinerado = 0;
         progresso = 0;
-        minerando = true;
-        atualizarInterface();
         salvarFirebase();
-        alert("Rendimento transferido para Renda Diária. A mineração reiniciou.");
+        alert("Rendimento transferido para a coleta.");
       } else {
         alert("Nenhum saldo disponível para coletar.");
       }
     }
 
-    function verParaColetar() {
-      if (paraColetar > 0) {
-        alert(`Você coletou ${paraColetar.toFixed(6)} USDT`);
-        recebido += paraColetar;
-        paraColetar = 0;
-        atualizarInterface();
-        salvarFirebase();
-      } else {
-        alert("Nada para coletar agora.");
-      }
+    // Função para salvar dados no Firebase
+    function salvarFirebase() {
+      const userId = auth.currentUser ? auth.currentUser.uid : 'anonimo';
+      db.ref('usuarios/' + userId).update({
+        progresso, saldoMinerado, paraColetar, recebido, rendaDiaria, poder
+      });
     }
 
-    // Checar recarga e atualizar VIP
-    db.ref('recargas/' + userId).once('value').then(snapshot => {
-      let totalRecarga = 0;
-      snapshot.forEach(child => {
-        const val = child.val();
-        if (val.valor >= 10) {
-          totalRecarga += val.valor;
-        }
-      });
-      if (totalRecarga >= 10) {
-        vip = Math.floor(totalRecarga / 10);
-        poder = 10 + (vip * 10);
+    // Atualização contínua do progresso
+    setInterval(() => {
+      if (progresso < 100) {
+        progresso += 0.1;
+        saldoMinerado += 0.0001;
+        document.getElementById("progressBar").style.width = progresso + "%";
+        document.getElementById("miningBalance").innerText = saldoMinerado.toFixed(6);
         salvarFirebase();
-        atualizarInterface();
       }
-    });
+    }, 1000);
 
-    carregarFirebase();
-    setInterval(atualizarBarra, 1000);
+    // Chama a função checkLogin quando o documento é carregado
+    checkLogin();
   </script>
 </body>
 </html>
