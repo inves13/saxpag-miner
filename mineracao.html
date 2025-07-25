@@ -130,111 +130,134 @@
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
-  <script>
-    const firebaseConfig = {
-      apiKey: "AIzaSyDzOgL6cvc0b4AO0vAEay1CeSAv_-WqaWQ",
-      authDomain: "saxpag-miner.firebaseapp.com",
-      databaseURL: "https://saxpag-miner-default-rtdb.firebaseio.com",
-      projectId: "saxpag-miner",
-      storageBucket: "saxpag-miner.appspot.com",
-      messagingSenderId: "154250189626",
-      appId: "1:154250189626:web:83c232a5c539e3f9fe0e03",
-      measurementId: "G-LEV5TL9P7H"
-    };
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyDzOgL6cvc0b4AO0vAEay1CeSAv_-WqaWQ",
+    authDomain: "saxpag-miner.firebaseapp.com",
+    databaseURL: "https://saxpag-miner-default-rtdb.firebaseio.com",
+    projectId: "saxpag-miner",
+    storageBucket: "saxpag-miner.appspot.com",
+    messagingSenderId: "154250189626",
+    appId: "1:154250189626:web:83c232a5c539e3f9fe0e03",
+    measurementId: "G-LEV5TL9P7H"
+  };
 
-    firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth();
-    const db = firebase.database();
+  firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+  const db = firebase.database();
 
-    let progresso = 0;
-    let saldoMinerado = 0.000001;
-    let paraColetar = 0;
-    let recebido = 0;
-    let rendaDiaria = 0;
-    let poder = 10;
-    let vip = 0;
-    let userId = null;
+  let progresso = 0;
+  let saldoMinerado = 0.000001;
+  let paraColetar = 0;
+  let recebido = 0;
+  let rendaDiaria = 0;
+  let poder = 10;
+  let vip = 0;
+  let userId = null;
+  let ultimaMineracao = Date.now();
+  let intervaloMineracao = null;
 
-    function checkLogin() {
-      auth.onAuthStateChanged(user => {
-        if (!user) {
-          window.location.href = 'login.html';
-        } else {
-          userId = user.uid;
-          startRealtimeListener(userId);
-        }
-      });
-    }
-
-    function startRealtimeListener(uid) {
-      const ref = db.ref('usuarios/' + uid);
-      ref.on('value', snapshot => {
-        const data = snapshot.val();
-        if (data) {
-          progresso = data.progresso || 0;
-          saldoMinerado = data.saldoMinerado || 0.000001;
-          paraColetar = data.paraColetar || 0;
-          recebido = data.recebido || 0;
-          rendaDiaria = data.rendaDiaria || 0;
-          poder = data.poder || 10;
-          vip = data.vip || 0;
-
-          atualizarUI();
-        }
-      });
-    }
-
-    function atualizarUI() {
-      document.getElementById("vipLevel").innerText = "VIP" + vip;
-      document.getElementById("miningPower").innerText = poder.toFixed(4) + " GH/s";
-      document.getElementById("dailyIncome").innerText = rendaDiaria.toFixed(6) + " USDT";
-      document.getElementById("progressBar").style.width = progresso + "%";
-      document.getElementById("miningBalance").innerText = saldoMinerado.toFixed(6);
-      document.getElementById("toCollect").innerText = paraColetar.toFixed(6);
-      document.getElementById("received").innerText = recebido.toFixed(6);
-    }
-
-    function coletar() {
-      if (saldoMinerado > 0) {
-        paraColetar += saldoMinerado;
-        rendaDiaria += saldoMinerado;
-        saldoMinerado = 0.000001;
-        progresso = 0;
-        salvarFirebase();
-        alert("Rendimento coletado com sucesso!");
+  function checkLogin() {
+    auth.onAuthStateChanged(user => {
+      if (!user) {
+        window.location.href = 'login.html';
       } else {
-        alert("Nenhum saldo disponível para coletar.");
+        userId = user.uid;
+        startRealtimeListener(userId);
       }
-    }
+    });
+  }
 
-    function salvarFirebase() {
-      if (!userId) return;
-      db.ref('usuarios/' + userId).update({
-        progresso,
-        saldoMinerado,
-        paraColetar,
-        recebido,
-        rendaDiaria,
-        poder,
-        vip
-      });
-    }
+  function startRealtimeListener(uid) {
+    const ref = db.ref('usuarios/' + uid);
+    ref.once('value').then(snapshot => {
+      const data = snapshot.val();
+      if (data) {
+        progresso = data.progresso || 0;
+        saldoMinerado = data.saldoMinerado || 0.000001;
+        paraColetar = data.paraColetar || 0;
+        recebido = data.recebido || 0;
+        rendaDiaria = data.rendaDiaria || 0;
+        poder = data.poder || 10;
+        vip = data.vip || 0;
+        ultimaMineracao = data.ultimaMineracao || Date.now();
 
-    function verParaColetar() {
-      alert("Você tem " + paraColetar.toFixed(6) + " USDT para coletar.");
-    }
-
-    setInterval(() => {
-      if (userId) {
-        progresso += 0.1;
-        if (progresso > 100) progresso = 100;
-        saldoMinerado += 0.000001;
-        atualizarUI();
-        salvarFirebase();
+        aplicarMineracaoOffline();
       }
+
+      atualizarUI();
+      iniciarMineracao();
+    });
+  }
+
+  function aplicarMineracaoOffline() {
+    const agora = Date.now();
+    const segundosPassados = Math.floor((agora - ultimaMineracao) / 1000);
+    if (segundosPassados > 0) {
+      const minerado = segundosPassados * 0.000001;
+      saldoMinerado += minerado;
+      progresso += segundosPassados * 0.1;
+      if (progresso > 100) progresso = 100;
+    }
+    ultimaMineracao = agora;
+    salvarFirebase();
+  }
+
+  function iniciarMineracao() {
+    if (intervaloMineracao) clearInterval(intervaloMineracao);
+
+    intervaloMineracao = setInterval(() => {
+      progresso += 0.1;
+      if (progresso > 100) progresso = 100;
+      saldoMinerado += 0.000001;
+      ultimaMineracao = Date.now();
+      atualizarUI();
+      salvarFirebase();
     }, 1000);
+  }
 
-    checkLogin();
-  </script>
+  function atualizarUI() {
+    document.getElementById("vipLevel").innerText = "VIP" + vip;
+    document.getElementById("miningPower").innerText = poder.toFixed(4) + " GH/s";
+    document.getElementById("dailyIncome").innerText = rendaDiaria.toFixed(6) + " USDT";
+    document.getElementById("progressBar").style.width = progresso + "%";
+    document.getElementById("miningBalance").innerText = saldoMinerado.toFixed(6);
+    document.getElementById("toCollect").innerText = paraColetar.toFixed(6);
+    document.getElementById("received").innerText = recebido.toFixed(6);
+  }
+
+  function coletar() {
+    if (saldoMinerado > 0) {
+      paraColetar += saldoMinerado;
+      rendaDiaria += saldoMinerado;
+      saldoMinerado = 0.000001;
+      progresso = 0;
+      salvarFirebase();
+      alert("Rendimento coletado com sucesso!");
+    } else {
+      alert("Nenhum saldo disponível para coletar.");
+    }
+  }
+
+  function salvarFirebase() {
+    if (!userId) return;
+    db.ref('usuarios/' + userId).update({
+      progresso,
+      saldoMinerado,
+      paraColetar,
+      recebido,
+      rendaDiaria,
+      poder,
+      vip,
+      ultimaMineracao
+    });
+  }
+
+  function verParaColetar() {
+    alert("Você tem " + paraColetar.toFixed(6) + " USDT para coletar.");
+  }
+
+  checkLogin();
+</script>
 </body>
 </html>
