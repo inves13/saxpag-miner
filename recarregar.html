@@ -55,42 +55,23 @@
     <div class="crypto-item" onclick="selecionar('bnb.html')">
       <span class="crypto-label">BNB</span> <span class="arrow">➔</span>
     </div>
-    <div class="crypto-item" onclick="selecionar('bep20-usdt.html')">
+    <div class="crypto-item" onclick="selecionar('bep20-usdc.html')">
       <span class="crypto-label">BEP20-USDC</span> <span class="arrow">➔</span>
     </div>
     <div class="crypto-item" onclick="selecionar('trc20-trx.html')">
       <span class="crypto-label">TRC20-TRX</span> <span class="arrow">➔</span>
     </div>
-    <div class="crypto-item" onclick="selecionar('bep20-usdt.html')">
+    <div class="crypto-item" onclick="selecionar('trc20-usdt.html')">
       <span class="crypto-label">TRC20-USDT</span> <span class="arrow">➔</span>
-    </div>
-    <div class="crypto-item" onclick="selecionar('eth.html')">
-      <span class="crypto-label">ETH</span> <span class="arrow">➔</span>
-    </div>
-    <div class="crypto-item" onclick="selecionar('eth-usdt.html')">
-      <span class="crypto-label">ETH-USDT</span> <span class="arrow">➔</span>
-    </div>
-    <div class="crypto-item" onclick="selecionar('eth-usdc.html')">
-      <span class="crypto-label">ETH-USDC</span> <span class="arrow">➔</span>
-    </div>
-    <div class="crypto-item" onclick="selecionar('polygon.html')">
-      <span class="crypto-label">POLYGON</span> <span class="arrow">➔</span>
-    </div>
-    <div class="crypto-item" onclick="selecionar('polygon-usdt.html')">
-      <span class="crypto-label">POLYGON-USDT</span> <span class="arrow">➔</span>
-    </div>
-    <div class="crypto-item" onclick="selecionar('polygon-usdc.html')">
-      <span class="crypto-label">POLYGON-USDC</span> <span class="arrow">➔</span>
-    </div>
-    <div class="crypto-item" onclick="selecionar('eth-pyusd.html')">
-      <span class="crypto-label">ETH-PYUSD</span> <span class="arrow">➔</span>
     </div>
   </div>
 
+  <!-- Firebase SDK -->
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+
   <script>
-    // Configuração correta do Firebase
+    // Configuração do Firebase
     const firebaseConfig = {
       apiKey: "AIzaSyDzOgL6cvc0b4AO0vAEay1CeSAv_-WqaWQ",
       authDomain: "saxpag-miner.firebaseapp.com",
@@ -105,6 +86,7 @@
     // Inicializar Firebase
     firebase.initializeApp(firebaseConfig);
 
+    // Redirecionamento ao clicar
     function selecionar(pagina) {
       window.location.href = pagina;
     }
