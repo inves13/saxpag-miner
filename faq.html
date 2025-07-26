@@ -1,1 +1,114 @@
-faq.html
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Perguntas Frequentes - FAQ</title>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(to bottom, #000028, #001640);
+      color: white;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+    .container {
+      background: #0e1e2a;
+      padding: 30px;
+      border-radius: 10px;
+      width: 90%;
+      max-width: 700px;
+      box-shadow: 0 0 15px #00bfff88;
+    }
+    h1 {
+      text-align: center;
+      font-size: 32px;
+      margin-bottom: 20px;
+    }
+    .faq-item {
+      background-color: #2a3d56;
+      padding: 15px;
+      margin-bottom: 10px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    }
+    .faq-item h3 {
+      cursor: pointer;
+      margin: 0;
+      font-size: 20px;
+    }
+    .faq-item p {
+      display: none;
+      margin-top: 10px;
+      font-size: 16px;
+    }
+    .faq-item.active p {
+      display: block;
+    }
+    button {
+      width: 100%;
+      padding: 12px;
+      margin-top: 20px;
+      background-color: #00bfff;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+    button:hover {
+      background-color: #0091cc;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Perguntas Frequentes (FAQ)</h1>
+
+    <!-- FAQ 1 -->
+    <div class="faq-item">
+      <h3 onclick="toggleFAQ(this)">O que é a plataforma SaxPag Miner?</h3>
+      <p>A SaxPag Miner é uma plataforma de investimentos e mineração online, onde você pode ganhar rendimentos diários a partir de suas apostas e investimentos.</p>
+    </div>
+
+    <!-- FAQ 2 -->
+    <div class="faq-item">
+      <h3 onclick="toggleFAQ(this)">Como faço para criar uma conta?</h3>
+      <p>Para criar uma conta, basta preencher o formulário de cadastro com seu e-mail, senha e opcionalmente um código de indicação. Após isso, você poderá acessar a plataforma e começar a investir.</p>
+    </div>
+
+    <!-- FAQ 3 -->
+    <div class="faq-item">
+      <h3 onclick="toggleFAQ(this)">Como faço para fazer um saque?</h3>
+      <p>Você pode solicitar um saque acessando a sua carteira na plataforma e escolhendo o valor que deseja retirar. O saque será realizado via PIX.</p>
+    </div>
+
+    <!-- FAQ 4 -->
+    <div class="faq-item">
+      <h3 onclick="toggleFAQ(this)">Quais são as formas de pagamento aceitas?</h3>
+      <p>A plataforma aceita pagamentos via PIX e transferência bancária, além de permitir recargas usando QR Code ou links gerados.</p>
+    </div>
+
+    <!-- FAQ 5 -->
+    <div class="faq-item">
+      <h3 onclick="toggleFAQ(this)">Como funciona a comissão por indicação?</h3>
+      <p>Ao indicar novos usuários para a plataforma, você pode ganhar uma comissão sobre os investimentos feitos pelos indicados, de acordo com a política de comissões da plataforma.</p>
+    </div>
+
+    <button onclick="window.location.href='index.html'">Voltar para Login</button>
+  </div>
+
+  <script>
+    // Função para exibir e ocultar as respostas
+    function toggleFAQ(element) {
+      const parent = element.parentElement;
+      parent.classList.toggle('active');
+    }
+  </script>
+</body>
+</html>
