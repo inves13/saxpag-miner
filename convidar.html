@@ -1,1 +1,180 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Convidar - SaxPag Miner</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: linear-gradient(to bottom, #0b0f3b, #041830);
+      color: white;
+      padding: 20px;
+    }
 
+    header {
+      text-align: center;
+      font-size: 20px;
+      font-weight: bold;
+      margin-bottom: 20px;
+    }
+
+    .box {
+      background: #101c3a;
+      border-radius: 12px;
+      padding: 20px;
+    }
+
+    .label {
+      font-size: 14px;
+      margin-bottom: 5px;
+    }
+
+    .input-box {
+      background: #1b2a4d;
+      border-radius: 8px;
+      padding: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+    }
+
+    .input-box span {
+      font-size: 16px;
+    }
+
+    button.copy-btn {
+      background: #5b5fff;
+      border: none;
+      border-radius: 6px;
+      color: white;
+      padding: 5px 10px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    .qr-code {
+      text-align: center;
+      margin: 20px 0;
+    }
+
+    .share-icons {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .share-icons img {
+      width: 32px;
+      height: 32px;
+      cursor: pointer;
+    }
+
+    .instructions {
+      background: #1b2a4d;
+      border-radius: 8px;
+      padding: 15px;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+
+  <!-- Firebase Config -->
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyDzOgL6cvc0b4AO0vAEay1CeSAv_-WqaWQ",
+      authDomain: "saxpag-miner.firebaseapp.com",
+      databaseURL: "https://saxpag-miner-default-rtdb.firebaseio.com",
+      projectId: "saxpag-miner",
+      storageBucket: "saxpag-miner.appspot.com",
+      messagingSenderId: "154250189626",
+      appId: "1:154250189626:web:83c232a5c539e3f9fe0e03"
+    };
+    firebase.initializeApp(firebaseConfig);
+  </script>
+</head>
+<body>
+
+  <header>🔗 Convidar</header>
+
+  <div class="box">
+    <div class="label">Código de convite:</div>
+    <div class="input-box">
+      <span id="codigoConvite">Carregando...</span>
+      <button class="copy-btn" onclick="copiarTexto('codigoConvite')">Cópia</button>
+    </div>
+
+    <div class="label">Compartilhe seu link e comece a ganhar dinheiro</div>
+    <div class="input-box">
+      <span id="linkConvite">Carregando...</span>
+      <button class="copy-btn" onclick="copiarTexto('linkConvite')">Cópia</button>
+    </div>
+
+    <div class="qr-code">
+      <canvas id="qrcode"></canvas>
+    </div>
+
+    <div class="share-icons">
+      <img src="https://cdn-icons-png.flaticon.com/512/3670/3670151.png" alt="X" />
+      <img src="https://cdn-icons-png.flaticon.com/512/733/733547.png" alt="Facebook" />
+      <img src="https://cdn-icons-png.flaticon.com/512/2111/2111644.png" alt="Telegram" />
+      <img src="https://cdn-icons-png.flaticon.com/512/733/733585.png" alt="WhatsApp" />
+      <img src="https://cdn-icons-png.flaticon.com/512/2111/2111421.png" alt="Instagram" />
+      <img src="https://cdn-icons-png.flaticon.com/512/3046/3046122.png" alt="TikTok" />
+    </div>
+
+    <div class="instructions">
+      <strong>📢 Instruções para convite</strong><br>
+      Junte-se à SaxPag Miner e torne-se um agente global, e deixe que seus esforços gerem retornos irrestritos!<br>
+      Basta investir um pouco de tempo para promover e construir uma rede de subordinados, compartilhar as vantagens da plataforma e você poderá continuar recebendo descontos de agente sobre investimentos subordinados.<br><br>
+      <strong>📊 Estrutura de desconto do agente:</strong><br>
+      • Nível 1 (convidado diretamente por você): 10,00%<br>
+      • Nível 2 (convite do seu amigo): 4,00%<br>
+      • Nível 3 (convite do amigo do amigo): 2,00%
+    </div>
+  </div>
+
+  <script>
+    function copiarTexto(id) {
+      const texto = document.getElementById(id).innerText;
+      navigator.clipboard.writeText(texto).then(() => {
+        alert('Copiado com sucesso!');
+      });
+    }
+
+    firebase.auth().onAuthStateChanged(function(user) {
+      if (user) {
+        const uid = user.uid;
+        const link = `https://inves13.github.io/saxpag-miner/#/reg?ref=${uid}`;
+
+        document.getElementById("codigoConvite").innerText = uid;
+        document.getElementById("linkConvite").innerText = link;
+
+        QRCode.toCanvas(document.getElementById('qrcode'), link, {
+          color: { dark: "#ffffff", light: "#0000" },
+          width: 180
+        });
+
+        // Salvar no banco, se quiser:
+        firebase.database().ref("usuarios/" + uid).update({
+          codigoConvite: uid,
+          linkConvite: link
+        });
+
+      } else {
+        window.location.href = "login.html"; // redireciona se não logado
+      }
+    });
+  </script>
+
+</body>
+</html>
