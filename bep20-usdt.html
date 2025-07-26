@@ -148,25 +148,27 @@
       }
 
       const recargaData = {
-        valor: 10, // Agora o valor fixo é 10 USDT
+        valor: 10, // Valor fixo da recarga
         data: new Date().toISOString()
       };
 
-      // Registra a recarga
+      // Registra a recarga no banco
       db.ref('recargas/' + userId).push(recargaData)
         .then(() => {
-          // Atualiza o VIP após confirmação da recarga
-          db.ref('usuarios/' + userId).once('value', (snapshot) => {
-            const usuario = snapshot.val();
-            if (usuario && usuario.saldo >= 10) {
-              db.ref('usuarios/' + userId).update({
-                vip: 1,  // Usuário vira VIP 1 após a recarga
-                saldo: usuario.saldo + 10  // Adiciona o valor de recarga à carteira
-              });
-            }
-          });
+          // Atualiza saldo e VIP do usuário
+          db.ref('usuarios/' + userId).once('value').then(snapshot => {
+            const usuario = snapshot.val() || {};
+            const saldoAtual = usuario.saldo || 0;
+            const novoSaldo = saldoAtual + recargaData.valor;
+            const novoVip = novoSaldo >= 10 ? 1 : (usuario.vip || 0);
 
-          document.getElementById("sucesso").style.display = "block";
+            db.ref('usuarios/' + userId).update({
+              saldo: novoSaldo,
+              vip: novoVip
+            });
+
+            document.getElementById("sucesso").style.display = "block";
+          });
         })
         .catch((error) => {
           alert("Erro ao registrar recarga: " + error.message);
