@@ -1,3 +1,4 @@
+<!-- SALVAR COMO: mineradora.html -->
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -5,259 +6,152 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>SaxPag Miner</title>
   <style>
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background-color: #030b1c;
-      color: white;
-    }
-    header {
-      text-align: center;
-      padding: 20px 10px;
-    }
-    header h1 {
-      margin: 0;
-      font-size: 22px;
-    }
-    .vip-status {
-      text-align: center;
-      font-size: 14px;
-      margin-bottom: 5px;
-    }
-    .info-box {
-      text-align: center;
-      margin-bottom: 10px;
-    }
-    .info-box h2 {
-      font-size: 14px;
-      margin: 5px 0;
-    }
-    .info-box .value {
-      font-size: 20px;
-      color: #00FFCC;
-    }
-    .mining-image {
-      display: flex;
-      justify-content: center;
-      margin: 10px 0;
-    }
-    .progress-container {
-      background: #1A3A6D;
-      margin: 10px;
-      height: 20px;
-      border-radius: 10px;
-      overflow: hidden;
-    }
-    .progress-bar {
-      height: 100%;
-      background: #FF69B4;
-      width: 0%;
-      transition: width 0.5s linear;
-    }
-    .btn-collect {
-      display: block;
-      margin: 15px auto;
-      padding: 12px 20px;
-      background: #FF69B4;
-      border: none;
-      border-radius: 20px;
-      color: white;
-      font-weight: bold;
-      font-size: 14px;
-      cursor: pointer;
-    }
-    .records-title {
-      text-align: center;
-      margin: 10px 0 5px;
-    }
-    .record-buttons {
-      display: flex;
-      justify-content: space-around;
-      margin: 10px;
-    }
-    .record-buttons button {
-      flex: 1;
-      margin: 0 5px;
-      padding: 10px;
-      border-radius: 10px;
-      background: #1A3A6D;
-      color: white;
-      border: none;
-    }
+    body { margin: 0; font-family: Arial, sans-serif; background-color: #030b1c; color: white; }
+    header { text-align: center; padding: 20px 10px; }
+    header h1 { margin: 0; font-size: 22px; }
+    .vip-status, .info-box h2 { text-align: center; font-size: 14px; }
+    .info-box .value { font-size: 20px; color: #00FFCC; text-align: center; }
+    .mining-image { display: flex; justify-content: center; margin: 10px 0; }
+    .progress-container { background: #1A3A6D; margin: 10px; height: 20px; border-radius: 10px; overflow: hidden; }
+    .progress-bar { height: 100%; background: #FF69B4; width: 0%; transition: width 0.5s linear; }
+    .btn-collect { display: block; margin: 15px auto; padding: 12px 20px; background: #FF69B4; border: none; border-radius: 20px; color: white; font-weight: bold; font-size: 14px; cursor: pointer; }
+    .record-buttons { display: flex; justify-content: space-around; margin: 10px; }
+    .record-buttons button { flex: 1; margin: 0 5px; padding: 10px; border-radius: 10px; background: #1A3A6D; color: white; border: none; }
   </style>
 </head>
 <body>
-  <header>
-    <h1>SaxPag Miner</h1>
-  </header>
-
+  <header><h1>SaxPag Miner</h1></header>
   <div class="vip-status">Nível <strong id="vipLevel">VIP0</strong></div>
 
-  <div class="info-box">
-    <h2>Poder de Mineração</h2>
-    <div class="value" id="miningPower">10.0000 GH/s</div>
-  </div>
+  <div class="info-box"><h2>Poder de Mineração</h2><div class="value" id="miningPower">10.0000 GH/s</div></div>
+  <div class="info-box"><h2>Renda diária</h2><div class="value" id="dailyIncome">0.000000 USDT</div></div>
 
-  <div class="info-box">
-    <h2>Renda diária</h2>
-    <div class="value" id="dailyIncome">0.000000 USDT</div>
-  </div>
+  <div class="mining-image"><img src="https://cdn-icons-png.flaticon.com/512/4248/4248443.png" alt="mineracao" width="100" /></div>
+  <div style="text-align:center; font-size: 20px;"><span id="miningBalance">0.000000</span><span> USDT</span></div>
 
-  <div class="mining-image">
-    <img src="https://cdn-icons-png.flaticon.com/512/4248/4248443.png" alt="mineracao" width="100">
-  </div>
-
-  <div style="text-align:center; font-size: 20px;">
-    <span id="miningBalance">0.000000</span><span> USDT</span>
-  </div>
-
-  <div class="progress-container">
-    <div class="progress-bar" id="progressBar"></div>
-  </div>
+  <div class="progress-container"><div class="progress-bar" id="progressBar"></div></div>
 
   <button class="btn-collect" onclick="coletar()">COLETAR RENDIMENTO</button>
-  <button class="btn-collect" id="btnUpgrade" onclick="location.href='recarregar.html'">MELHORAR PODER DE COMPUTAÇÃO</button>
+  <button class="btn-collect" onclick="location.href='recarregar.html'">MELHORAR PODER DE COMPUTAÇÃO</button>
 
-  <div class="records-title">Registros de Mineração</div>
   <div class="record-buttons">
-    <button onclick="verParaColetar()">Para ser coletado: <span id="toCollect">0.000000</span></button>
+    <button>Para ser coletado: <span id="toCollect">0.000000</span></button>
     <button>Recebido: <span id="received">0.000000</span></button>
-    <button>Expirado: <span id="expired">0.000000</span></button>
   </div>
 
   <!-- Firebase SDK -->
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyDzOgL6cvc0b4AO0vAEay1CeSAv_-WqaWQ",
+      authDomain: "saxpag-miner.firebaseapp.com",
+      databaseURL: "https://saxpag-miner-default-rtdb.firebaseio.com",
+      projectId: "saxpag-miner",
+      storageBucket: "saxpag-miner.appspot.com",
+      messagingSenderId: "154250189626",
+      appId: "1:154250189626:web:83c232a5c539e3f9fe0e03"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.database();
+    const baseRate = 0.000001;
 
-<script>
-  const firebaseConfig = {
-    apiKey: "AIzaSyDzOgL6cvc0b4AO0vAEay1CeSAv_-WqaWQ",
-    authDomain: "saxpag-miner.firebaseapp.com",
-    databaseURL: "https://saxpag-miner-default-rtdb.firebaseio.com",
-    projectId: "saxpag-miner",
-    storageBucket: "saxpag-miner.appspot.com",
-    messagingSenderId: "154250189626",
-    appId: "1:154250189626:web:83c232a5c539e3f9fe0e03",
-    measurementId: "G-LEV5TL9P7H"
-  };
+    const mineracao = {
+      progresso: 0, saldoMinerado: 0.000001, paraColetar: 0, recebido: 0, rendaDiaria: 0,
+      poder: 10, vip: 0, ultimaMineracao: Date.now(), userId: null, intervalo: null,
+    };
 
-  firebase.initializeApp(firebaseConfig);
-  const auth = firebase.auth();
-  const db = firebase.database();
+    function getVipMultiplicador(n) {
+      return n === 1 ? 1.1 : n === 2 ? 1.2 : n === 3 ? 1.4 : n === 4 ? 1.6 : n === 5 ? 2.0 : 1.0;
+    }
 
-  let progresso = 0;
-  let saldoMinerado = 0.000001;
-  let paraColetar = 0;
-  let recebido = 0;
-  let rendaDiaria = 0;
-  let poder = 10;
-  let vip = 0;
-  let userId = null;
-  let ultimaMineracao = Date.now();
-  let intervaloMineracao = null;
+    function checkLogin() {
+      auth.onAuthStateChanged(user => {
+        if (!user) window.location.href = 'login.html';
+        else {
+          mineracao.userId = user.uid;
+          carregarDados();
+        }
+      });
+    }
 
-  function checkLogin() {
-    auth.onAuthStateChanged(user => {
-      if (!user) {
-        window.location.href = 'login.html';
-      } else {
-        userId = user.uid;
-        startRealtimeListener(userId);
-      }
-    });
-  }
-
-  function startRealtimeListener(uid) {
-    const ref = db.ref('usuarios/' + uid);
-    ref.once('value').then(snapshot => {
-      const data = snapshot.val();
-      if (data) {
-        progresso = data.progresso || 0;
-        saldoMinerado = data.saldoMinerado || 0.000001;
-        paraColetar = data.paraColetar || 0;
-        recebido = data.recebido || 0;
-        rendaDiaria = data.rendaDiaria || 0;
-        poder = data.poder || 10;
-        vip = data.vip || 0;
-        ultimaMineracao = data.ultimaMineracao || Date.now();
-
+    function carregarDados() {
+      db.ref('usuarios/' + mineracao.userId).once('value').then(snapshot => {
+        const data = snapshot.val();
+        if (data) {
+          Object.assign(mineracao, data);
+        }
         aplicarMineracaoOffline();
+        atualizarUI();
+        iniciarMineracao();
+      });
+    }
+
+    function aplicarMineracaoOffline() {
+      const agora = Date.now();
+      const segundos = Math.floor((agora - mineracao.ultimaMineracao) / 1000);
+      if (segundos > 0) {
+        const ganho = mineracao.poder * getVipMultiplicador(mineracao.vip) * baseRate * segundos;
+        mineracao.saldoMinerado += ganho;
+        mineracao.rendaDiaria += ganho;
+        mineracao.progresso = Math.min(mineracao.progresso + segundos * 0.1, 100);
       }
-
-      atualizarUI();
-      iniciarMineracao();
-    });
-  }
-
-  function aplicarMineracaoOffline() {
-    const agora = Date.now();
-    const segundosPassados = Math.floor((agora - ultimaMineracao) / 1000);
-    if (segundosPassados > 0) {
-      const minerado = segundosPassados * 0.000001;
-      saldoMinerado += minerado;
-      progresso += segundosPassados * 0.1;
-      if (progresso > 100) progresso = 100;
-    }
-    ultimaMineracao = agora;
-    salvarFirebase();
-  }
-
-  function iniciarMineracao() {
-    if (intervaloMineracao) clearInterval(intervaloMineracao);
-
-    intervaloMineracao = setInterval(() => {
-      progresso += 0.1;
-      if (progresso > 100) progresso = 100;
-      saldoMinerado += 0.000001;
-      ultimaMineracao = Date.now();
-      atualizarUI();
+      mineracao.ultimaMineracao = agora;
       salvarFirebase();
-    }, 1000);
-  }
-
-  function atualizarUI() {
-    document.getElementById("vipLevel").innerText = "VIP" + vip;
-    document.getElementById("miningPower").innerText = poder.toFixed(4) + " GH/s";
-    document.getElementById("dailyIncome").innerText = rendaDiaria.toFixed(6) + " USDT";
-    document.getElementById("progressBar").style.width = progresso + "%";
-    document.getElementById("miningBalance").innerText = saldoMinerado.toFixed(6);
-    document.getElementById("toCollect").innerText = paraColetar.toFixed(6);
-    document.getElementById("received").innerText = recebido.toFixed(6);
-  }
-
-  function coletar() {
-    if (saldoMinerado > 0) {
-      paraColetar += saldoMinerado;
-      rendaDiaria += saldoMinerado;
-      saldoMinerado = 0.000001;
-      progresso = 0;
-      salvarFirebase();
-      alert("Rendimento coletado com sucesso!");
-    } else {
-      alert("Nenhum saldo disponível para coletar.");
     }
-  }
 
-  function salvarFirebase() {
-    if (!userId) return;
-    db.ref('usuarios/' + userId).update({
-      progresso,
-      saldoMinerado,
-      paraColetar,
-      recebido,
-      rendaDiaria,
-      poder,
-      vip,
-      ultimaMineracao
-    });
-  }
+    function iniciarMineracao() {
+      if (mineracao.intervalo) clearInterval(mineracao.intervalo);
+      mineracao.intervalo = setInterval(() => {
+        const ganho = mineracao.poder * getVipMultiplicador(mineracao.vip) * baseRate;
+        mineracao.saldoMinerado += ganho;
+        mineracao.rendaDiaria += ganho;
+        mineracao.progresso = Math.min(mineracao.progresso + 0.1, 100);
+        mineracao.ultimaMineracao = Date.now();
+        atualizarUI();
+        salvarFirebase();
+      }, 1000);
+    }
 
-  function verParaColetar() {
-    alert("Você tem " + paraColetar.toFixed(6) + " USDT para coletar.");
-  }
+    function coletar() {
+      if (mineracao.saldoMinerado > 0.000001) {
+        mineracao.rendaDiaria += mineracao.saldoMinerado;
+        mineracao.recebido += mineracao.saldoMinerado;
+        mineracao.saldoMinerado = 0.000001;
+        mineracao.progresso = 0;
+        salvarFirebase();
+        atualizarUI();
+        alert("Rendimento enviado para a carteira com sucesso!");
+      } else {
+        alert("Nenhum saldo disponível para coletar.");
+      }
+    }
 
-  checkLogin();
-</script>
+    function atualizarUI() {
+      document.getElementById("vipLevel").innerText = "VIP" + mineracao.vip;
+      document.getElementById("miningPower").innerText = mineracao.poder.toFixed(4) + " GH/s";
+      document.getElementById("dailyIncome").innerText = (mineracao.poder * getVipMultiplicador(mineracao.vip) * baseRate * 86400).toFixed(6) + " USDT";
+      document.getElementById("progressBar").style.width = mineracao.progresso + "%";
+      document.getElementById("miningBalance").innerText = mineracao.saldoMinerado.toFixed(6);
+      document.getElementById("toCollect").innerText = mineracao.saldoMinerado.toFixed(6);
+      document.getElementById("received").innerText = mineracao.recebido.toFixed(6);
+    }
+
+    function salvarFirebase() {
+      db.ref('usuarios/' + mineracao.userId).update({
+        progresso: mineracao.progresso,
+        saldoMinerado: mineracao.saldoMinerado,
+        recebido: mineracao.recebido,
+        rendaDiaria: mineracao.rendaDiaria,
+        poder: mineracao.poder,
+        vip: mineracao.vip,
+        ultimaMineracao: mineracao.ultimaMineracao
+      });
+    }
+
+    checkLogin();
+  </script>
 </body>
 </html>
