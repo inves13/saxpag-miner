@@ -1,1 +1,113 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Página de Usuário</title>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(to bottom, #000028, #001640);
+      color: white;
+      min-height: 100vh;
+      margin: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    .container {
+      background: #0e1e2a;
+      padding: 30px;
+      border-radius: 10px;
+      width: 320px;
+      box-shadow: 0 0 15px #00bfff88;
+    }
+    h2 {
+      text-align: center;
+    }
+    button {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+      border-radius: 6px;
+      border: none;
+      font-size: 14px;
+      cursor: pointer;
+    }
+    button.primary {
+      background-color: #00bfff;
+      color: white;
+      font-weight: bold;
+    }
+    button.primary:hover {
+      background-color: #0091cc;
+    }
+    button.secondary {
+      background-color: #f44336;
+      color: white;
+    }
+    button.secondary:hover {
+      background-color: #d32f2f;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Bem-vindo!</h2>
+    <p id="emailDisplay">E-mail: <strong>carregando...</strong></p>
 
+    <!-- Botões para acessar os links -->
+    <button class="primary" id="whatsappButton">Acessar Grupo WhatsApp</button>
+    <button class="primary" id="telegramButton">Acessar Grupo Telegram</button>
+    <button class="primary" id="suporteButton">Acessar Suporte</button>
+
+    <button class="secondary" onclick="sair()">Sair</button>
+  </div>
+
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+
+  <script>
+    // Configurações Firebase
+    const firebaseConfig = {
+      apiKey: "AIzaSyDzOgL6cvc0b4AO0vAEay1CeSAv_-WqaWQ",
+      authDomain: "saxpag-miner.firebaseapp.com",
+      databaseURL: "https://saxpag-miner-default-rtdb.firebaseio.com",
+      projectId: "saxpag-miner",
+      storageBucket: "saxpag-miner.appspot.com",
+      messagingSenderId: "154250189626",
+      appId: "1:154250189626:web:83c232a5c539e3f9fe0e03",
+      measurementId: "G-LEV5TL9P7H"
+    };
+    firebase.initializeApp(firebaseConfig);
+
+    // Exibe o e-mail do usuário
+    firebase.auth().onAuthStateChanged(user => {
+      if (user) {
+        document.getElementById("emailDisplay").innerHTML = `E-mail: <strong>${user.email}</strong>`;
+      } else {
+        window.location.href = "index.html"; // Redireciona se não estiver logado
+      }
+    });
+
+    // Função para adicionar os links aos botões
+    const whatsappLink = "https://chat.whatsapp.com/SEU_LINK_AQUI";  // Substitua pelo seu link do WhatsApp
+    const telegramLink = "https://t.me/SEU_LINK_AQUI";  // Substitua pelo seu link do Telegram
+    const suporteLink = "https://t.me/SEU_LINK_AQUI";  // Substitua pelo seu link de Suporte
+
+    // Adicionando links aos botões
+    document.getElementById("whatsappButton").onclick = () => window.location.href = whatsappLink;
+    document.getElementById("telegramButton").onclick = () => window.location.href = telegramLink;
+    document.getElementById("suporteButton").onclick = () => window.location.href = suporteLink;
+
+    // Função de Logout
+    function sair() {
+      firebase.auth().signOut().then(() => {
+        window.location.href = "index.html"; // Redireciona para a página inicial (login)
+      });
+    }
+  </script>
+</body>
+</html>
