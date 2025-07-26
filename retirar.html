@@ -1,11 +1,16 @@
+<!-- SALVAR COMO: carteira.html -->
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Carteira - Retirar</title>
+
+  <!-- Firebase SDK -->
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -24,7 +29,7 @@
       font-size: 14px;
       display: block;
     }
-    input, select, button {
+    input, button {
       width: 100%;
       padding: 10px;
       margin-top: 8px;
@@ -67,7 +72,7 @@
     }
   </style>
 </head>
-<body onload="mostrarSaldo()">
+<body onload="iniciarCarteira()">
   <h2>Retirar</h2>
 
   <p><strong>Ativos disponíveis atualmente</strong></p>
@@ -97,35 +102,41 @@
   </div>
 
   <script>
-    // Configuração correta do Firebase
     const firebaseConfig = {
       apiKey: "AIzaSyDzOgL6cvc0b4AO0vAEay1CeSAv_-WqaWQ",
       authDomain: "saxpag-miner.firebaseapp.com",
       databaseURL: "https://saxpag-miner-default-rtdb.firebaseio.com",
       projectId: "saxpag-miner",
-      storageBucket: "saxpag-miner.firebasestorage.app",
+      storageBucket: "saxpag-miner.appspot.com",
       messagingSenderId: "154250189626",
-      appId: "1:154250189626:web:83c232a5c539e3f9fe0e03",
-      measurementId: "G-LEV5TL9P7H"
+      appId: "1:154250189626:web:83c232a5c539e3f9fe0e03"
     };
 
     firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
     const db = firebase.database();
+    let userId = null;
 
-    let userId = localStorage.getItem("userId") || gerarUserId();
-    localStorage.setItem("userId", userId);
+    function iniciarCarteira() {
+      auth.onAuthStateChanged(user => {
+        if (!user) {
+          alert("Faça login primeiro.");
+          window.location.href = "login.html";
+        } else {
+          userId = user.uid;
+          mostrarSaldo();
+        }
+      });
 
-    function gerarUserId() {
-      return 'user_' + Math.random().toString(36).substr(2, 9);
+      document.getElementById("valorUsdt").addEventListener("input", calcularTaxas);
     }
 
     async function mostrarSaldo() {
       const snap = await db.ref("usuarios/" + userId + "/rendaDiaria").once("value");
       const saldo = parseFloat(snap.val() || 0);
       document.getElementById("saldo").innerText = "$" + saldo.toFixed(6) + " USDT";
+      calcularTaxas();
     }
-
-    document.getElementById("valorUsdt").addEventListener("input", calcularTaxas);
 
     function calcularTaxas() {
       const valor = parseFloat(document.getElementById("valorUsdt").value || '0');
@@ -154,8 +165,11 @@
         return;
       }
 
+      // Atualiza saldo
       saldo -= valor;
       await db.ref("usuarios/" + userId).update({ rendaDiaria: saldo });
+
+      // Aqui você pode salvar um histórico ou notificação para o admin processar o saque
 
       alert(`Saque solicitado com sucesso!\nValor: ${valor.toFixed(6)} USDT\nEndereço: ${endereco}`);
       window.location.href = 'index.html';
