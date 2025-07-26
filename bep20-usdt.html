@@ -21,11 +21,11 @@
       font-weight: bold;
     }
 
-    .qr-code {
-      margin: 20px auto;
+    .qr-code img {
       width: 200px;
       height: 200px;
-      background-color: #fff;
+      border-radius: 10px;
+      margin: 15px 0;
     }
 
     .info {
@@ -79,16 +79,33 @@
       font-weight: bold;
       display: none;
     }
+
+    .binance-img {
+      margin-top: 20px;
+    }
+
+    .binance-img img {
+      max-width: 100%;
+      border-radius: 10px;
+      box-shadow: 0 0 10px #000;
+    }
   </style>
 </head>
 <body>
 
   <header>🔙 Recarregar - BEP20-USDT</header>
 
-  <div class="qr-code">
-    <img src="https://chart.googleapis.com/chart?chs=200x200&cht=qr&chl=0xe724896a45384aa8eff6c15339" alt="QR Code" width="200" height="200">
+  <!-- Imagem da Binance -->
+  <div class="binance-img">
+    <img src="Screenshot_20250726_134516_Binance.jpg" alt="Instrução Binance" />
   </div>
 
+  <!-- QR Code -->
+  <div class="qr-code">
+    <img src="https://chart.googleapis.com/chart?chs=200x200&cht=qr&chl=UQC4tDEKt6c_cU0yFS5S-Psj5HSl4X9zHyW_NAKFnTBC4kb9" alt="QR Code">
+  </div>
+
+  <!-- Informações de pagamento -->
   <div class="info">
     <p><strong>BEP20-USDT</strong></p>
     <p>Endereço de depósito:</p>
@@ -101,6 +118,7 @@
     <div class="sucesso" id="sucesso">✅ Sua recarga foi registrada com sucesso!</div>
   </div>
 
+  <!-- Alerta e instruções -->
   <div class="alerta">
     <p><strong>⚠️ Lembrete:</strong></p>
     <p>1. Copie o endereço acima ou digitalize o QR Code e selecione a rede <strong>BNB Smart Chain (BEP20)</strong> para USDT.</p>
@@ -115,7 +133,7 @@
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
 
   <script>
-    // Configuração correta do Firebase
+    // Configuração do Firebase
     const firebaseConfig = {
       apiKey: "AIzaSyDzOgL6cvc0b4AO0vAEay1CeSAv_-WqaWQ",
       authDomain: "saxpag-miner.firebaseapp.com",
@@ -126,20 +144,18 @@
       appId: "1:154250189626:web:83c232a5c539e3f9fe0e03",
       measurementId: "G-LEV5TL9P7H"
     };
-
-    // Inicializar Firebase
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
+    // Função de copiar
     function copiarEndereco() {
       const endereco = document.getElementById("wallet").innerText;
-      navigator.clipboard.writeText(endereco).then(() => {
-        alert("Endereço copiado com sucesso!");
-      }).catch(() => {
-        alert("Não foi possível copiar o endereço.");
-      });
+      navigator.clipboard.writeText(endereco)
+        .then(() => alert("Endereço copiado com sucesso!"))
+        .catch(() => alert("Erro ao copiar endereço."));
     }
 
+    // Confirmação da recarga
     function confirmarRecarga() {
       let userId = localStorage.getItem("userId");
       if (!userId) {
@@ -148,14 +164,12 @@
       }
 
       const recargaData = {
-        valor: 10, // Valor fixo da recarga
+        valor: 10,
         data: new Date().toISOString()
       };
 
-      // Registra a recarga no banco
       db.ref('recargas/' + userId).push(recargaData)
         .then(() => {
-          // Atualiza saldo e VIP do usuário
           db.ref('usuarios/' + userId).once('value').then(snapshot => {
             const usuario = snapshot.val() || {};
             const saldoAtual = usuario.saldo || 0;
@@ -170,7 +184,7 @@
             document.getElementById("sucesso").style.display = "block";
           });
         })
-        .catch((error) => {
+        .catch(error => {
           alert("Erro ao registrar recarga: " + error.message);
         });
     }
