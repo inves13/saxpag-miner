@@ -1,4 +1,3 @@
-<!-- SALVAR COMO: carteira.html -->
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -168,6 +167,12 @@
       // Atualiza saldo
       saldo -= valor;
       await db.ref("usuarios/" + userId).update({ rendaDiaria: saldo });
+
+      // Adiciona o valor retirado na "Carteira de Corretagem"
+      const snapCarteira = await db.ref("usuarios/" + userId + "/carteiraCorretagem").once("value");
+      let carteiraCorretagem = parseFloat(snapCarteira.val() || 0);
+      carteiraCorretagem += valor;
+      await db.ref("usuarios/" + userId).update({ carteiraCorretagem: carteiraCorretagem });
 
       // Aqui você pode salvar um histórico ou notificação para o admin processar o saque
 
