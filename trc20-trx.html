@@ -1,1 +1,194 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Recarregar - BEP20 USDT</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: linear-gradient(to bottom, #0b0f3b, #041830);
+      color: white;
+      text-align: center;
+      padding: 20px;
+    }
 
+    header {
+      background-color: #001F4A;
+      padding: 15px;
+      font-size: 18px;
+      font-weight: bold;
+    }
+
+    .qr-code img {
+      width: 200px;
+      height: 200px;
+      border-radius: 10px;
+      margin: 15px 0;
+    }
+
+    .info {
+      background-color: #101f3a;
+      padding: 20px;
+      border-radius: 10px;
+      margin-top: 15px;
+    }
+
+    .address {
+      background-color: #1c2d4a;
+      padding: 10px;
+      margin: 10px auto;
+      border-radius: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      word-break: break-all;
+    }
+
+    button.copy-btn {
+      background: #0ad4a4;
+      border: none;
+      color: #000;
+      font-weight: bold;
+      padding: 6px 10px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    button.confirm-btn {
+      margin-top: 20px;
+      padding: 12px 20px;
+      font-size: 16px;
+      background: linear-gradient(to right, #6441a5, #2a0845);
+      border: none;
+      color: white;
+      border-radius: 10px;
+      cursor: pointer;
+    }
+
+    .alerta {
+      text-align: left;
+      font-size: 14px;
+      margin-top: 20px;
+    }
+
+    .sucesso {
+      margin-top: 20px;
+      color: #00ff8c;
+      font-weight: bold;
+      display: none;
+    }
+
+    .binance-img {
+      margin-top: 20px;
+    }
+
+    .binance-img img {
+      max-width: 100%;
+      border-radius: 10px;
+      box-shadow: 0 0 10px #000;
+    }
+  </style>
+</head>
+<body>
+
+  <header>🔙 Recarregar - BEP20-USDT</header>
+
+  <!-- Imagem da Binance -->
+  <div class="binance-img">
+    <img src="Screenshot_20250726_134516_Binance.jpg" alt="Instrução Binance" />
+  </div>
+
+  <!-- QR Code -->
+  <div class="qr-code">
+    <img src="https://chart.googleapis.com/chart?chs=200x200&cht=qr&chl=UQC4tDEKt6c_cU0yFS5S-Psj5HSl4X9zHyW_NAKFnTBC4kb9" alt="QR Code">
+  </div>
+
+  <!-- Informações de pagamento -->
+  <div class="info">
+    <p><strong>BEP20-USDT</strong></p>
+    <p>Endereço de depósito:</p>
+    <div class="address">
+      <span id="wallet">UQC4tDEKt6c_cU0yFS5S-Psj5HSl4X9zHyW_NAKFnTBC4kb9</span>
+      <button class="copy-btn" onclick="copiarEndereco()">Copiar</button>
+    </div>
+
+    <button class="confirm-btn" onclick="confirmarRecarga()">✅ RECARGA CONCLUÍDA</button>
+    <div class="sucesso" id="sucesso">✅ Sua recarga foi registrada com sucesso!</div>
+  </div>
+
+  <!-- Alerta e instruções -->
+  <div class="alerta">
+    <p><strong>⚠️ Lembrete:</strong></p>
+    <p>1. Copie o endereço acima ou digitalize o QR Code e selecione a rede <strong>BNB Smart Chain (BEP20)</strong> para USDT.</p>
+    <p>2. O valor mínimo de recarga é <strong>10 USDT</strong>. Valores menores não serão creditados.</p>
+    <p>3. Não envie moedas de outras redes para este endereço.</p>
+    <p>4. Após o envio, os fundos levam de 1 a 3 minutos para aparecer.</p>
+    <p>5. Se demorar mais, atualize a página ou contate o suporte.</p>
+  </div>
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+
+  <script>
+    // Configuração do Firebase
+    const firebaseConfig = {
+      apiKey: "AIzaSyDzOgL6cvc0b4AO0vAEay1CeSAv_-WqaWQ",
+      authDomain: "saxpag-miner.firebaseapp.com",
+      databaseURL: "https://saxpag-miner-default-rtdb.firebaseio.com",
+      projectId: "saxpag-miner",
+      storageBucket: "saxpag-miner.firebasestorage.app",
+      messagingSenderId: "154250189626",
+      appId: "1:154250189626:web:83c232a5c539e3f9fe0e03",
+      measurementId: "G-LEV5TL9P7H"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    // Função de copiar
+    function copiarEndereco() {
+      const endereco = document.getElementById("wallet").innerText;
+      navigator.clipboard.writeText(endereco)
+        .then(() => alert("Endereço copiado com sucesso!"))
+        .catch(() => alert("Erro ao copiar endereço."));
+    }
+
+    // Confirmação da recarga
+    function confirmarRecarga() {
+      let userId = localStorage.getItem("userId");
+      if (!userId) {
+        userId = 'user_' + Math.random().toString(36).substr(2, 9);
+        localStorage.setItem("userId", userId);
+      }
+
+      const recargaData = {
+        valor: 10,
+        data: new Date().toISOString()
+      };
+
+      db.ref('recargas/' + userId).push(recargaData)
+        .then(() => {
+          db.ref('usuarios/' + userId).once('value').then(snapshot => {
+            const usuario = snapshot.val() || {};
+            const saldoAtual = usuario.saldo || 0;
+            const novoSaldo = saldoAtual + recargaData.valor;
+            const novoVip = novoSaldo >= 10 ? 1 : (usuario.vip || 0);
+
+            db.ref('usuarios/' + userId).update({
+              saldo: novoSaldo,
+              vip: novoVip
+            });
+
+            document.getElementById("sucesso").style.display = "block";
+          });
+        })
+        .catch(error => {
+          alert("Erro ao registrar recarga: " + error.message);
+        });
+    }
+  </script>
+
+</body>
+</html>
