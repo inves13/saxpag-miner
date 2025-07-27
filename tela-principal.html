@@ -206,9 +206,10 @@
           db.ref("usuarios/" + userId).update({ vip: vip });
         }
 
+        // Atualiza os saldos das carteiras
         document.getElementById("saldoCarteira").innerText = `$${saldo.toFixed(2)}`;
-        document.getElementById("investido").innerText = `$${saldo.toFixed(2)}`;
-        document.getElementById("carteiraCorretagem").innerText = `$0.00`;
+        document.getElementById("investido").innerText = `$${saldo.toFixed(2)}`;  // Valor de "Investir Carteira"
+        document.getElementById("carteiraCorretagem").innerText = `$0.00`;  // Atualize conforme a lógica da corretagem
         document.getElementById("vipLevel").innerText = `VIP ${vip}`;
       });
     }
