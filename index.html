@@ -70,12 +70,10 @@
       font-weight: bold;
       border-bottom: 2px solid #00bfff;
     }
-
-    /* Aumentando o tamanho da logo */
     .logo {
       display: block;
       margin: 0 auto 20px;
-      width: 250px; /* Ajuste o tamanho desejado */
+      width: 250px;
       height: auto;
     }
   </style>
@@ -83,7 +81,6 @@
 <body>
   <div class="container">
     <img src="SaxPagMiner1.png" class="logo" alt="Logo" />
-
     <div class="form-toggle">
       <button id="btnCadastro" class="active" onclick="mostrarCadastro()">Cadastro</button>
       <button id="btnLogin" onclick="mostrarLogin()">Login</button>
@@ -109,9 +106,7 @@
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-
   <script>
-    // Configurações Firebase
     const firebaseConfig = {
       apiKey: "AIzaSyDzOgL6cvc0b4AO0vAEay1CeSAv_-WqaWQ",
       authDomain: "saxpag-miner.firebaseapp.com",
@@ -119,8 +114,7 @@
       projectId: "saxpag-miner",
       storageBucket: "saxpag-miner.appspot.com",
       messagingSenderId: "154250189626",
-      appId: "1:154250189626:web:83c232a5c539e3f9fe0e03",
-      measurementId: "G-LEV5TL9P7H"
+      appId: "1:154250189626:web:83c232a5c539e3f9fe0e03"
     };
     firebase.initializeApp(firebaseConfig);
 
@@ -152,9 +146,11 @@
         .createUserWithEmailAndPassword(email, senha)
         .then(cred => {
           const uid = cred.user.uid;
+          const codigoConvite = uid.substring(0, 6);
           return firebase.database().ref("usuarios/" + uid).set({
             email,
             indicacao: indicacao || "",
+            codigoConvite: codigoConvite,
             saldo: 0
           });
         })
@@ -184,8 +180,6 @@
 
     window.addEventListener("DOMContentLoaded", () => {
       mostrarCadastro();
-
-      // Puxa o "ref" da hash: #/reg?ref=CODIGO
       const hash = window.location.hash;
       const params = new URLSearchParams(hash.split("?")[1]);
       const code = params.get("ref");
