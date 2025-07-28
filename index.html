@@ -76,11 +76,19 @@
       width: 250px;
       height: auto;
     }
+    #mensagem {
+      text-align: center;
+      margin-bottom: 15px;
+      font-weight: bold;
+    }
   </style>
 </head>
 <body>
   <div class="container">
     <img src="SaxPagMiner1.png" class="logo" alt="Logo" />
+    
+    <div id="mensagem"></div>
+
     <div class="form-toggle">
       <button id="btnCadastro" class="active" onclick="mostrarCadastro()">Cadastro</button>
       <button id="btnLogin" onclick="mostrarLogin()">Login</button>
@@ -118,6 +126,14 @@
     };
     firebase.initializeApp(firebaseConfig);
 
+    function mostrarMensagem(texto, cor = 'lightgreen') {
+      const msg = document.getElementById("mensagem");
+      msg.textContent = texto;
+      msg.style.color = cor;
+      msg.style.display = "block";
+      setTimeout(() => msg.textContent = '', 4000);
+    }
+
     function mostrarLogin() {
       document.getElementById("cadastroArea").classList.add("hidden");
       document.getElementById("loginArea").classList.remove("hidden");
@@ -138,7 +154,7 @@
       const indicacao = document.getElementById("indicacao").value.trim();
 
       if (!email || !senha) {
-        alert("Preencha e‑mail e senha.");
+        mostrarMensagem("Preencha e‑mail e senha.", "red");
         return;
       }
 
@@ -155,10 +171,10 @@
           });
         })
         .then(() => {
-          alert("Cadastro realizado!");
+          mostrarMensagem("✅ Cadastro realizado com sucesso!");
           mostrarLogin();
         })
-        .catch(err => alert("Erro: " + err.message));
+        .catch(err => mostrarMensagem("Erro: " + err.message, "red"));
     }
 
     function login() {
@@ -166,16 +182,19 @@
       const senha = document.getElementById("senhaLogin").value;
 
       if (!email || !senha) {
-        alert("Preencha e‑mail e senha.");
+        mostrarMensagem("Preencha e‑mail e senha.", "red");
         return;
       }
 
       firebase.auth()
         .signInWithEmailAndPassword(email, senha)
         .then(() => {
-          window.location.href = "tela-principal.html";
+          mostrarMensagem("✅ Login realizado com sucesso!");
+          setTimeout(() => {
+            window.location.href = "tela-principal.html";
+          }, 1500);
         })
-        .catch(err => alert("Erro: " + err.message));
+        .catch(err => mostrarMensagem("Erro: " + err.message, "red"));
     }
 
     window.addEventListener("DOMContentLoaded", () => {
