@@ -132,9 +132,9 @@
 
   <div class="card">
     <h2>Ativos totais</h2>
-    <div class="saldo" id="saldoCarteira">$10.00</div>
+    <div class="saldo" id="saldoCarteira">$0.00</div>
     <div class="subinfo">
-      <div>Investir Carteira<br><strong id="investido">$10.00</strong></div>
+      <div>Investir Carteira<br><strong id="investido">$0.00</strong></div>
       <div>Carteira de corretagem<br><strong id="carteiraCorretagem">$0.00</strong></div>
     </div>
   </div>
@@ -163,12 +163,12 @@
     <div onclick="abrir('meu.html')">📱<br>Meu</div>
   </div>
 
+  <!-- Firebase -->
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
 
   <script>
-    // Configuração do Firebase
     const firebaseConfig = {
       apiKey: "AIzaSyDzOgL6cvc0b4AO0vAEay1CeSAv_-WqaWQ",
       authDomain: "saxpag-miner.firebaseapp.com",
@@ -176,40 +176,38 @@
       projectId: "saxpag-miner",
       storageBucket: "saxpag-miner.firebasestorage.app",
       messagingSenderId: "154250189626",
-      appId: "1:154250189626:web:83c232a5c539e3f9fe0e03",
-      measurementId: "G-LEV5TL9P7H"
+      appId: "1:154250189626:web:83c232a5c539e3f9fe0e03"
     };
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
-    const auth = firebase.auth();
 
-    // Verifica se o usuário está logado
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.database();
+
     function checkLogin() {
       auth.onAuthStateChanged(user => {
         if (!user) {
-          window.location.href = 'login.html'; // Redireciona para a página de login
+          window.location.href = 'login.html';
         } else {
-          loadData(user.uid);  // Carrega os dados do usuário
+          loadData(user.uid);
         }
       });
     }
 
     function loadData(userId) {
-      db.ref("usuarios/" + userId).once("value", (snapshot) => {
+      db.ref("usuarios/" + userId).once("value").then(snapshot => {
         const data = snapshot.val() || {};
-        let saldo = data.saldo || 10;  // O saldo padrão de $10
+        let saldo = data.saldo || 10;
         let vip = data.vip || 0;
+        let carteiraCorretagem = data.carteiraCorretagem || 0;
 
-        // Se o saldo for maior ou igual a 10, o usuário pode ser promovido ao VIP 1
         if (saldo >= 10 && vip === 0) {
           vip = 1;
           db.ref("usuarios/" + userId).update({ vip: vip });
         }
 
-        // Atualiza os saldos das carteiras
         document.getElementById("saldoCarteira").innerText = `$${saldo.toFixed(2)}`;
-        document.getElementById("investido").innerText = `$${saldo.toFixed(2)}`;  // Valor de "Investir Carteira"
-        document.getElementById("carteiraCorretagem").innerText = `$0.00`;  // Atualize conforme a lógica da corretagem
+        document.getElementById("investido").innerText = `$${saldo.toFixed(2)}`;
+        document.getElementById("carteiraCorretagem").innerText = `$${carteiraCorretagem.toFixed(2)}`;
         document.getElementById("vipLevel").innerText = `VIP ${vip}`;
       });
     }
@@ -219,7 +217,10 @@
     }
 
     function fazerCheckin() {
-      const userId = auth.currentUser.uid;
+      const user = auth.currentUser;
+      if (!user) return;
+
+      const userId = user.uid;
       const checkinKey = "ultimoCheckin_" + userId;
       const ultimaColeta = localStorage.getItem(checkinKey);
       const agora = new Date().getTime();
@@ -232,8 +233,9 @@
 
       const saldoRef = db.ref("usuarios/" + userId + "/saldo");
       saldoRef.once("value").then(snapshot => {
-        let saldoAtual = snapshot.val() || 10;  // Mantém $10 até a recarga
-        saldoAtual += 0.08;  // Coleta diária de 0.08 USDT
+        let saldoAtual = snapshot.val() || 10;
+        saldoAtual += 0.08;
+
         db.ref("usuarios/" + userId).update({ saldo: saldoAtual });
         localStorage.setItem(checkinKey, agora);
 
