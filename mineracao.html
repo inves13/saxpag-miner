@@ -64,12 +64,12 @@
 
     function getVipMultiplicador(n) {
       switch (n) {
-        case 1: return 1.1;
-        case 2: return 1.2;
-        case 3: return 1.4;
-        case 4: return 1.6;
-        case 5: return 2.0;
-        case 6: return 2.5;
+        case 1: return 1.03;
+        case 2: return 1.05;
+        case 3: return 1.06;
+        case 4: return 1.07;
+        case 5: return 1.08;
+        case 6: return 1.09;
         default: return 1.0;
       }
     }
@@ -89,22 +89,23 @@
         const data = snapshot.val();
         if (data) {
           Object.assign(mineracao, data);
-          if (mineracao.vip === 0 && mineracao.saldo >= 70) {
+          // Ajuste do VIP e poder de mineração com base na tabela de recarga
+          if (mineracao.saldo >= 70 && mineracao.saldo < 200) {
             mineracao.vip = 1;
             mineracao.poder = 10;
-          } else if (mineracao.vip === 1 && mineracao.saldo >= 200) {
+          } else if (mineracao.saldo >= 200 && mineracao.saldo < 1000) {
             mineracao.vip = 2;
             mineracao.poder = 20;
-          } else if (mineracao.vip === 2 && mineracao.saldo >= 1000) {
+          } else if (mineracao.saldo >= 1000 && mineracao.saldo < 3000) {
             mineracao.vip = 3;
             mineracao.poder = 30;
-          } else if (mineracao.vip === 3 && mineracao.saldo >= 3000) {
+          } else if (mineracao.saldo >= 3000 && mineracao.saldo < 8000) {
             mineracao.vip = 4;
             mineracao.poder = 40;
-          } else if (mineracao.vip === 4 && mineracao.saldo >= 8000) {
+          } else if (mineracao.saldo >= 8000 && mineracao.saldo < 30000) {
             mineracao.vip = 5;
             mineracao.poder = 50;
-          } else if (mineracao.vip === 5 && mineracao.saldo >= 30000) {
+          } else if (mineracao.saldo >= 30000) {
             mineracao.vip = 6;
             mineracao.poder = 60;
           }
