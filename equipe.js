@@ -43,9 +43,10 @@ function contarEquipe(codigo) {
       mapaDados[uid] = user;
     }
 
+    // Agora buscamos todos os usuários que se cadastraram com o código de indicação correto
     for (let uid1 in mapaIndicacao) {
       const indicacao1 = mapaIndicacao[uid1].indicacao;
-      if (indicacao1 === codigo) {
+      if (indicacao1 === codigo) { // Confirma que o código de convite do usuário corresponde ao seu
         lev1++;
         if (mapaIndicacao[uid1].vip >= 1) validos1++;
 
@@ -53,6 +54,7 @@ function contarEquipe(codigo) {
         recargaEquipe += user1.recarga || 0;
         retiradaEquipe += user1.retirada || 0;
 
+        // Busca os usuários de nível 2
         for (let uid2 in mapaIndicacao) {
           const indicacao2 = mapaIndicacao[uid2].indicacao;
           if (indicacao2 === uid1) {
@@ -63,6 +65,7 @@ function contarEquipe(codigo) {
             recargaEquipe += user2.recarga || 0;
             retiradaEquipe += user2.retirada || 0;
 
+            // Busca os usuários de nível 3
             for (let uid3 in mapaIndicacao) {
               const indicacao3 = mapaIndicacao[uid3].indicacao;
               if (indicacao3 === uid2) {
