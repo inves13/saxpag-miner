@@ -121,8 +121,23 @@
       carteiraCorretagem += valor;
       await db.ref("usuarios/" + userId).update({ carteiraCorretagem });
 
+      // Adiciona a atividade de saque
+      adicionarAtividade(userId, 'Retirada Solicitada', `Você solicitou um saque de ${valor.toFixed(6)} USDT para o endereço ${endereco}.`);
+
       alert(`Saque solicitado com sucesso!\nValor: ${valor.toFixed(6)} USDT\nEndereço: ${endereco}`);
       window.location.href = 'index.html';
+    }
+
+    // Função para adicionar a atividade no banco de dados
+    function adicionarAtividade(uid, titulo, descricao) {
+      const atividade = {
+        titulo: titulo,
+        descricao: descricao,
+        dataHora: Date.now()  // Timestamp atual
+      };
+
+      // Adiciona a atividade no caminho correto
+      db.ref('usuarios/' + uid + '/atividades').push(atividade);
     }
   </script>
 </body>
