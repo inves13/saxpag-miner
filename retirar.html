@@ -5,70 +5,20 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Carteira - Retirar</title>
 
-  <!-- Firebase SDK -->
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
 
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #000014;
-      color: #fff;
-      padding: 20px;
-      max-width: 480px;
-      margin: auto;
-    }
-    h2 {
-      text-align: center;
-      color: #00ffcc;
-    }
-    label, p {
-      margin-top: 10px;
-      font-size: 14px;
-      display: block;
-    }
-    input, button {
-      width: 100%;
-      padding: 10px;
-      margin-top: 8px;
-      border-radius: 5px;
-      border: none;
-      font-size: 14px;
-      box-sizing: border-box;
-    }
-    input {
-      background-color: #fff;
-      color: #000;
-    }
-    button {
-      background-color: #00ffcc;
-      color: #000;
-      font-weight: bold;
-      cursor: pointer;
-      margin-top: 15px;
-    }
-    .info {
-      font-size: 12px;
-      color: #ccc;
-      margin-top: 5px;
-    }
-    .resumo {
-      margin-top: 20px;
-      font-size: 14px;
-    }
-    .resumo p {
-      margin: 4px 0;
-    }
-    .lembrete {
-      background: #111;
-      padding: 15px;
-      margin-top: 25px;
-      border-radius: 8px;
-      font-size: 13px;
-      line-height: 1.5;
-      color: #ccc;
-    }
+    body { font-family: Arial; background: #000014; color: #fff; padding: 20px; max-width: 480px; margin: auto; }
+    h2 { text-align: center; color: #00ffcc; }
+    label, p { margin-top: 10px; font-size: 14px; display: block; }
+    input, button { width: 100%; padding: 10px; margin-top: 8px; border-radius: 5px; border: none; font-size: 14px; box-sizing: border-box; }
+    input { background-color: #fff; color: #000; }
+    button { background-color: #00ffcc; color: #000; font-weight: bold; cursor: pointer; margin-top: 15px; }
+    .resumo { margin-top: 20px; font-size: 14px; }
+    .resumo p { margin: 4px 0; }
+    .lembrete { background: #111; padding: 15px; margin-top: 25px; border-radius: 8px; font-size: 13px; color: #ccc; line-height: 1.5; }
   </style>
 </head>
 <body onload="iniciarCarteira()">
@@ -126,7 +76,6 @@
           mostrarSaldo();
         }
       });
-
       document.getElementById("valorUsdt").addEventListener("input", calcularTaxas);
     }
 
@@ -164,17 +113,13 @@
         return;
       }
 
-      // Atualiza saldo
       saldo -= valor;
       await db.ref("usuarios/" + userId).update({ rendaDiaria: saldo });
 
-      // Adiciona o valor retirado na "Carteira de Corretagem"
       const snapCarteira = await db.ref("usuarios/" + userId + "/carteiraCorretagem").once("value");
       let carteiraCorretagem = parseFloat(snapCarteira.val() || 0);
       carteiraCorretagem += valor;
-      await db.ref("usuarios/" + userId).update({ carteiraCorretagem: carteiraCorretagem });
-
-      // Aqui você pode salvar um histórico ou notificação para o admin processar o saque
+      await db.ref("usuarios/" + userId).update({ carteiraCorretagem });
 
       alert(`Saque solicitado com sucesso!\nValor: ${valor.toFixed(6)} USDT\nEndereço: ${endereco}`);
       window.location.href = 'index.html';
