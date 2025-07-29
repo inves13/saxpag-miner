@@ -9,7 +9,9 @@ auth.onAuthStateChanged(user => {
 
     db.ref('usuarios/' + uid).once('value').then(snapshot => {
       const dados = snapshot.val();
-      const meuCodigo = dados.codigoConvite;
+      const codigoBruto = dados?.codigoConvite || uid;
+      const meuCodigo = codigoBruto.substring(0, 8);
+
       document.getElementById('meuCodigo').innerText = meuCodigo;
       document.getElementById('meuLink').innerText = `https://inves13.github.io/saxpag-miner/#/reg?ref=${meuCodigo}`;
 
@@ -27,32 +29,33 @@ function contarEquipe(codigo) {
     let recargaEquipe = 0;
     let retiradaEquipe = 0;
 
-    const usuarios = snapshot.val();
+    const usuarios = snapshot.val() || {};
     const mapaIndicacao = {};
     const mapaDados = {};
 
+    // Mapeia os dados dos usuários
     for (let uid in usuarios) {
       const user = usuarios[uid];
       mapaIndicacao[uid] = {
-        indicacao: user.indicacao,
+        indicacao: (user.indicacao || '').substring(0, 8),
         vip: user.vip || 0
       };
       mapaDados[uid] = user;
     }
 
-    for (let uid in mapaIndicacao) {
-      const nivel1 = mapaIndicacao[uid].indicacao;
-      if (nivel1 === codigo) {
+    for (let uid1 in mapaIndicacao) {
+      const indicacao1 = mapaIndicacao[uid1].indicacao;
+      if (indicacao1 === codigo) {
         lev1++;
-        if (mapaIndicacao[uid].vip >= 1) validos1++;
+        if (mapaIndicacao[uid1].vip >= 1) validos1++;
 
-        const user1 = mapaDados[uid];
+        const user1 = mapaDados[uid1];
         recargaEquipe += user1.recarga || 0;
         retiradaEquipe += user1.retirada || 0;
 
-        const nivel2 = uid;
         for (let uid2 in mapaIndicacao) {
-          if (mapaIndicacao[uid2].indicacao === nivel2) {
+          const indicacao2 = mapaIndicacao[uid2].indicacao;
+          if (indicacao2 === uid1) {
             lev2++;
             if (mapaIndicacao[uid2].vip >= 1) validos2++;
 
@@ -60,9 +63,9 @@ function contarEquipe(codigo) {
             recargaEquipe += user2.recarga || 0;
             retiradaEquipe += user2.retirada || 0;
 
-            const nivel3 = uid2;
             for (let uid3 in mapaIndicacao) {
-              if (mapaIndicacao[uid3].indicacao === nivel3) {
+              const indicacao3 = mapaIndicacao[uid3].indicacao;
+              if (indicacao3 === uid2) {
                 lev3++;
                 if (mapaIndicacao[uid3].vip >= 1) validos3++;
 
@@ -76,15 +79,16 @@ function contarEquipe(codigo) {
       }
     }
 
+    const totalEquipe = lev1 + lev2 + lev3;
+    const totalComissao = (validos1 * 0.5 + validos2 * 0.3 + validos3 * 0.2).toFixed(2);
+
+    // Exibir na página
     document.getElementById('lev1Total').innerText = lev1;
     document.getElementById('lev1Validos').innerText = validos1;
     document.getElementById('lev2Total').innerText = lev2;
     document.getElementById('lev2Validos').innerText = validos2;
     document.getElementById('lev3Total').innerText = lev3;
     document.getElementById('lev3Validos').innerText = validos3;
-
-    const totalEquipe = lev1 + lev2 + lev3;
-    const totalComissao = (validos1 * 0.5 + validos2 * 0.3 + validos3 * 0.2).toFixed(2);
 
     document.getElementById('totalEquipe').innerText = totalEquipe;
     document.getElementById('totalComissao').innerText = `$${totalComissao}`;
