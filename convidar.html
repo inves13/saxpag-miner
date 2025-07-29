@@ -43,6 +43,7 @@
 
     .input-box span {
       font-size: 16px;
+      word-break: break-all;
     }
 
     button.copy-btn {
@@ -154,24 +155,30 @@
     firebase.auth().onAuthStateChanged(function(user) {
       if (user) {
         const uid = user.uid;
-        const link = `https://inves13.github.io/saxpag-miner/#/reg?ref=${uid}`;
 
-        document.getElementById("codigoConvite").innerText = uid;
-        document.getElementById("linkConvite").innerText = link;
+        // Pega código já salvo ou usa UID e limita a 8 caracteres
+        firebase.database().ref("usuarios/" + uid).once("value").then(snapshot => {
+          const dados = snapshot.val();
+          const codigo = (dados?.codigoConvite || uid).substring(0, 8);
+          const link = `https://inves13.github.io/saxpag-miner/#/reg?ref=${codigo}`;
 
-        QRCode.toCanvas(document.getElementById('qrcode'), link, {
-          color: { dark: "#ffffff", light: "#0000" },
-          width: 180
-        });
+          document.getElementById("codigoConvite").innerText = codigo;
+          document.getElementById("linkConvite").innerText = link;
 
-        // Salvar no banco, se quiser:
-        firebase.database().ref("usuarios/" + uid).update({
-          codigoConvite: uid,
-          linkConvite: link
+          QRCode.toCanvas(document.getElementById('qrcode'), link, {
+            color: { dark: "#ffffff", light: "#0000" },
+            width: 180
+          });
+
+          // Atualiza no banco
+          firebase.database().ref("usuarios/" + uid).update({
+            codigoConvite: codigo,
+            linkConvite: link
+          });
         });
 
       } else {
-        window.location.href = "login.html"; // redireciona se não logado
+        window.location.href = "login.html";
       }
     });
   </script>
