@@ -5,129 +5,35 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Sax Mining - VIP</title>
   <style>
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background: linear-gradient(to bottom, #000028, #001640);
-      color: white;
-    }
-
-    header {
-      background: linear-gradient(to right, #1a2c3b, #0a2f2f);
-      padding: 10px 20px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-
-    .logo {
-      display: flex;
-      align-items: center;
-    }
-
-    .logo span {
-      font-size: 20px;
-      font-weight: bold;
-      margin-left: 10px;
-      color: #fff;
-    }
-
-    .card-topo {
-      background: #0e1e2a;
-      margin: 20px;
-      padding: 15px;
-      border-radius: 15px;
-    }
-
-    .card-topo p {
-      margin: 5px 0;
-    }
-
-    .btn-recarregar {
-      background: linear-gradient(to right, #7a5fff, #01d0ff);
-      border: none;
-      width: 100%;
-      padding: 12px;
-      border-radius: 10px;
-      font-size: 16px;
-      font-weight: bold;
-      color: white;
-      cursor: pointer;
-      margin: 15px 0;
-    }
-
-    .tab-container {
-      display: flex;
-      justify-content: space-around;
-      margin-bottom: 10px;
-    }
-
-    .tab {
-      flex: 1;
-      padding: 10px;
-      text-align: center;
-      border-radius: 8px;
-      cursor: pointer;
-      font-size: 14px;
-    }
-
-    .tab.active {
-      background: linear-gradient(to right, #7a5fff, #01d0ff);
-      color: white;
-    }
-
-    .vip-box {
-      background: #162d45;
-      margin: 10px 20px;
-      padding: 15px;
-      border-radius: 12px;
-    }
-
-    .vip-box h3 {
-      margin-top: 0;
-      color: #7ad3ff;
-    }
-
-    .vip-box p {
-      margin: 4px 0;
-      font-size: 14px;
-    }
-
-    .bottom-nav {
-      position: fixed;
-      bottom: 0;
-      width: 100%;
-      background: #1b2a38;
-      display: flex;
-      justify-content: space-around;
-      padding: 10px 0;
-      border-top: 1px solid #333;
-    }
-
-    .bottom-nav div {
-      color: white;
-      text-align: center;
-      font-size: 12px;
-      cursor: pointer;
-    }
-
-    .bottom-nav .active {
-      color: #ff69b4;
-    }
+    body { margin: 0; font-family: Arial, sans-serif; background: linear-gradient(to bottom, #000028, #001640); color: white; }
+    header { background: linear-gradient(to right, #1a2c3b, #0a2f2f); padding: 10px 20px; display: flex; align-items: center; justify-content: space-between; }
+    .logo { display: flex; align-items: center; }
+    .logo span { font-size: 20px; font-weight: bold; margin-left: 10px; color: #fff; }
+    .card-topo { background: #0e1e2a; margin: 20px; padding: 15px; border-radius: 15px; }
+    .card-topo p { margin: 5px 0; }
+    .btn-recarregar { background: linear-gradient(to right, #7a5fff, #01d0ff); border: none; width: 100%; padding: 12px; border-radius: 10px; font-size: 16px; font-weight: bold; color: white; cursor: pointer; margin: 15px 0; }
+    .tab-container { display: flex; justify-content: space-around; margin-bottom: 10px; }
+    .tab { flex: 1; padding: 10px; text-align: center; border-radius: 8px; cursor: pointer; font-size: 14px; }
+    .tab.active { background: linear-gradient(to right, #7a5fff, #01d0ff); color: white; }
+    .vip-box { background: #162d45; margin: 10px 20px; padding: 15px; border-radius: 12px; }
+    .vip-box h3 { margin-top: 0; color: #7ad3ff; }
+    .vip-box p { margin: 4px 0; font-size: 14px; }
+    .bottom-nav { position: fixed; bottom: 0; width: 100%; background: #1b2a38; display: flex; justify-content: space-around; padding: 10px 0; border-top: 1px solid #333; }
+    .bottom-nav div { color: white; text-align: center; font-size: 12px; cursor: pointer; }
+    .bottom-nav .active { color: #ff69b4; }
   </style>
 </head>
-<body onload="checkLogin()">
-
+<body onload="checkLogin()"> 
   <header>
     <div class="logo">
       <span>Sax Mining</span>
     </div>
     <div style="color: white; font-size: 14px;">🌐 Português</div>
   </header>
-
+  
   <div class="card-topo">
     <p><strong>Nível</strong>: <span id="vipLevel" style="color: #00ff66;">VIP0</span></p>
-    <p><strong>Valor da recarga</strong>: <span id="recargaValor">$0</span></p>
+    <p><strong>Valor da recarga</strong>: <span id="recargaValor">$0.00</span></p>
     <button class="btn-recarregar" onclick="abrir('recarregar.html')">RECARREGAR</button>
   </div>
 
@@ -226,11 +132,10 @@
         const data = snapshot.val() || {};
         let saldo = data.saldo || 0;  // O saldo padrão é 0
         let vip = data.vip || 0;
-        let recargaValor = data.recargaValor || 0;  // Valor da recarga
 
-        // Atualiza o nível VIP e o valor da recarga
+        // Atualiza o nível VIP e o valor da recarga com o saldo
         document.getElementById("vipLevel").innerText = `VIP${vip}`;
-        document.getElementById("recargaValor").innerText = `$${recargaValor.toFixed(2)}`;
+        document.getElementById("recargaValor").innerText = `$${saldo.toFixed(2)}`;
       });
     }
 
@@ -239,6 +144,5 @@
       window.location.href = pagina;
     }
   </script>
-
 </body>
 </html>
