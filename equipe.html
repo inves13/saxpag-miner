@@ -152,31 +152,28 @@
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
-  <!-- Firebase Config -->
   <script>
-    const firebaseConfig = {
-      apiKey: "AIzaSyDzOgL6cvc0b4AO0vAEay1CeSAv_-WqaWQ",
-      authDomain: "saxpag-miner.firebaseapp.com",
-      databaseURL: "https://saxpag-miner-default-rtdb.firebaseio.com",
-      projectId: "saxpag-miner",
-      storageBucket: "saxpag-miner.appspot.com",
-      messagingSenderId: "154250189626",
-      appId: "1:154250189626:web:83c232a5c539e3f9fe0e03"
-    };
+    // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+const firebaseConfig = {
+  apiKey: "AIzaSyDzOgL6cvc0b4AO0vAEay1CeSAv_-WqaWQ",
+  authDomain: "saxpag-miner.firebaseapp.com",
+  databaseURL: "https://saxpag-miner-default-rtdb.firebaseio.com",
+  projectId: "saxpag-miner",
+  storageBucket: "saxpag-miner.firebasestorage.app",
+  messagingSenderId: "154250189626",
+  appId: "1:154250189626:web:83c232a5c539e3f9fe0e03",
+  measurementId: "G-LEV5TL9P7H"
+};
     firebase.initializeApp(firebaseConfig);
-  </script>
 
-  <script>
     function copiarTexto(id) {
-      const el = document.getElementById(id);
-      const texto = el.innerText || el.textContent;
-      navigator.clipboard.writeText(texto).then(() => {
-        alert('Copiado com sucesso!');
-      });
+      const text = document.getElementById(id).innerText;
+      navigator.clipboard.writeText(text);
+      alert("Copiado: " + text);
     }
 
     function gerarLinkIndicacao(codigo) {
-      return `https://inves13.github.io/saxpag-miner/#/reg?ref=${codigo}`;
+      return `https://saxpag.com/?codigo=${codigo}`;
     }
 
     function buscarIndicadosNivel(codigo, nivel = 1) {
@@ -195,10 +192,18 @@
     function buscarIndicadosNivelSequencial(lista, nivelAlvo, nivelAtual) {
       if (nivelAtual >= nivelAlvo) return Promise.resolve(lista);
       const proximos = [];
-      const promises = lista.map(user => firebase.database().ref("usuarios").orderByChild("indicacao").equalTo(user.codigoConvite || user.uid.substring(0, 6)).once("value").then(snapshot => {
-        snapshot.forEach(child => proximos.push(child.val()));
-      }));
-      return Promise.all(promises).then(() => buscarIndicadosNivelSequencial(proximos, nivelAlvo, nivelAtual + 1));
+      const promises = lista.map(user =>
+        firebase.database().ref("usuarios")
+          .orderByChild("indicacao")
+          .equalTo((user.codigoConvite || user.uid).substring(0, 8))
+          .once("value")
+          .then(snapshot => {
+            snapshot.forEach(child => proximos.push(child.val()));
+          })
+      );
+      return Promise.all(promises).then(() =>
+        buscarIndicadosNivelSequencial(proximos, nivelAlvo, nivelAtual + 1)
+      );
     }
 
     function detalhesNivel(n) {
@@ -207,6 +212,7 @@
 
     function renderNiveis(dados) {
       const container = document.getElementById('listaNiveis');
+      container.innerHTML = "";
       for (let i = 1; i <= 6; i++) {
         const nivel = dados[`lev${i}`] || { total: 0, validos: 0 };
         container.innerHTML += `
@@ -241,21 +247,28 @@
         return;
       }
 
-      const codigoUsuario = dados.codigoConvite || uid.substring(0, 6);
+      const codigoUsuario = (dados.codigoConvite || uid).substring(0, 8);
       document.getElementById("codigoConvite").innerText = codigoUsuario;
       document.getElementById("linkConvite").innerText = gerarLinkIndicacao(codigoUsuario);
 
-      // Total fixado em 0.00
       document.getElementById("totalEquipe").innerText = "0";
       document.getElementById("comissaoTotal").innerText = "0.00";
       document.getElementById("recargaTotal").innerText = "0.00";
       document.getElementById("retiradaTotal").innerText = "0.00";
 
       const todosNiveis = {};
+      let totalEquipe = 0;
+
       for (let n = 1; n <= 6; n++) {
         const info = await buscarIndicadosNivel(codigoUsuario, n);
+        const nivel = info[`lev${n}`];
+        if (nivel && typeof nivel.total === "number") {
+          totalEquipe += nivel.total;
+        }
         Object.assign(todosNiveis, info);
       }
+
+      document.getElementById("totalEquipe").innerText = totalEquipe;
       renderNiveis(todosNiveis);
     });
   </script>
