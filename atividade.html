@@ -2,95 +2,99 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Convidar - SaxPag Miner</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Atividade - SaxPag Miner</title>
   <style>
     body {
       margin: 0;
       font-family: Arial, sans-serif;
-      background: linear-gradient(to bottom, #0b0f3b, #041830);
-      color: white;
-      padding: 20px;
+      background: #111;
+      color: #fff;
     }
 
     header {
+      background-color: #222;
+      padding: 15px;
       text-align: center;
       font-size: 20px;
       font-weight: bold;
-      margin-bottom: 20px;
+      border-bottom: 1px solid #444;
     }
 
-    .box {
-      background: #101c3a;
-      border-radius: 12px;
+    .atividade-container {
       padding: 20px;
     }
 
-    .label {
-      font-size: 14px;
-      margin-bottom: 5px;
-    }
-
-    .input-box {
-      background: #1b2a4d;
-      border-radius: 8px;
-      padding: 10px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
+    .atividade-item {
+      background: #1e1e1e;
       margin-bottom: 15px;
-    }
-
-    .input-box span {
-      font-size: 16px;
-      word-break: break-all;
-    }
-
-    button.copy-btn {
-      background: #5b5fff;
-      border: none;
-      border-radius: 6px;
-      color: white;
-      padding: 5px 10px;
-      cursor: pointer;
-      font-size: 14px;
-    }
-
-    .qr-code {
-      text-align: center;
-      margin: 20px 0;
-    }
-
-    .share-icons {
-      display: flex;
-      justify-content: center;
-      gap: 12px;
-      margin-bottom: 20px;
-    }
-
-    .share-icons img {
-      width: 32px;
-      height: 32px;
-      cursor: pointer;
-    }
-
-    .instructions {
-      background: #1b2a4d;
-      border-radius: 8px;
       padding: 15px;
+      border-radius: 8px;
+      border-left: 4px solid #0f0;
+    }
+
+    .atividade-item h3 {
+      margin: 0 0 5px 0;
+      font-size: 18px;
+    }
+
+    .atividade-item p {
+      margin: 0;
+      color: #ccc;
       font-size: 14px;
-      line-height: 1.6;
+    }
+
+    .sem-atividade {
+      text-align: center;
+      color: #777;
+      margin-top: 50px;
+    }
+
+    footer {
+      position: fixed;
+      bottom: 0;
+      width: 100%;
+      background: #222;
+      display: flex;
+      justify-content: space-around;
+      padding: 10px 0;
+    }
+
+    footer div {
+      text-align: center;
+      color: white;
+      font-size: 14px;
+    }
+
+    footer div:hover {
+      color: #0f0;
+      cursor: pointer;
     }
   </style>
-  <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
+</head>
+<body onload="checkLogin()">
 
-  <!-- Firebase SDK -->
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+  <header>📊 Atividade</header>
 
-  <!-- Firebase Config -->
+  <div class="atividade-container" id="atividadeContainer">
+    <div class="sem-atividade">Carregando atividades...</div>
+  </div>
+
+  <footer>
+    <div onclick="window.location.href='tela-principal.html'">🏠<br>Início</div>
+    <div onclick="window.location.href='equipe.html'">👥<br>Equipe</div>
+    <div onclick="window.location.href='carteira.html'">💼<br>Carteira</div>
+    <div onclick="window.location.href='atividade.html'">📊<br>Atividade</div>
+    <div onclick="window.location.href='perfil.html'">👤<br>Perfil</div>
+  </footer>
+
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+
   <script>
+    // Configuração do Firebase
     const firebaseConfig = {
       apiKey: "AIzaSyDzOgL6cvc0b4AO0vAEay1CeSAv_-WqaWQ",
       authDomain: "saxpag-miner.firebaseapp.com",
@@ -98,89 +102,49 @@
       projectId: "saxpag-miner",
       storageBucket: "saxpag-miner.appspot.com",
       messagingSenderId: "154250189626",
-      appId: "1:154250189626:web:83c232a5c539e3f9fe0e03"
+      appId: "1:154250189626:web:83c232a5c539e3f9fe0e03",
+      measurementId: "G-LEV5TL9P7H"
     };
+
+    // Inicializa o Firebase
     firebase.initializeApp(firebaseConfig);
-  </script>
-</head>
-<body>
+    const auth = firebase.auth();
+    const db = firebase.database();
 
-  <header>🔗 Convidar</header>
-
-  <div class="box">
-    <div class="label">Código de convite:</div>
-    <div class="input-box">
-      <span id="codigoConvite">Carregando...</span>
-      <button class="copy-btn" onclick="copiarTexto('codigoConvite')">Cópia</button>
-    </div>
-
-    <div class="label">Compartilhe seu link e comece a ganhar dinheiro</div>
-    <div class="input-box">
-      <span id="linkConvite">Carregando...</span>
-      <button class="copy-btn" onclick="copiarTexto('linkConvite')">Cópia</button>
-    </div>
-
-    <div class="qr-code">
-      <canvas id="qrcode"></canvas>
-    </div>
-
-    <div class="share-icons">
-      <img src="https://cdn-icons-png.flaticon.com/512/3670/3670151.png" alt="X" />
-      <img src="https://cdn-icons-png.flaticon.com/512/733/733547.png" alt="Facebook" />
-      <img src="https://cdn-icons-png.flaticon.com/512/2111/2111644.png" alt="Telegram" />
-      <img src="https://cdn-icons-png.flaticon.com/512/733/733585.png" alt="WhatsApp" />
-      <img src="https://cdn-icons-png.flaticon.com/512/2111/2111421.png" alt="Instagram" />
-      <img src="https://cdn-icons-png.flaticon.com/512/3046/3046122.png" alt="TikTok" />
-    </div>
-
-    <div class="instructions">
-      <strong>📢 Instruções para convite</strong><br>
-      Junte-se à SaxPag Miner e torne-se um agente global, e deixe que seus esforços gerem retornos irrestritos!<br>
-      Basta investir um pouco de tempo para promover e construir uma rede de subordinados, compartilhar as vantagens da plataforma e você poderá continuar recebendo descontos de agente sobre investimentos subordinados.<br><br>
-      <strong>📊 Estrutura de desconto do agente:</strong><br>
-      • Nível 1 (convidado diretamente por você): 10,00%<br>
-      • Nível 2 (convite do seu amigo): 4,00%<br>
-      • Nível 3 (convite do amigo do amigo): 2,00%
-    </div>
-  </div>
-
-  <script>
-    function copiarTexto(id) {
-      const texto = document.getElementById(id).innerText;
-      navigator.clipboard.writeText(texto).then(() => {
-        alert('Copiado com sucesso!');
+    // Verifica se o usuário está logado
+    function checkLogin() {
+      auth.onAuthStateChanged(user => {
+        if (!user) {
+          window.location.href = "login.html"; // Redireciona para a página de login
+        } else {
+          carregarAtividades(user.uid); // Carrega as atividades do usuário
+        }
       });
     }
 
-    firebase.auth().onAuthStateChanged(function(user) {
-      if (user) {
-        const uid = user.uid;
+    // Carrega as atividades do usuário
+    function carregarAtividades(uid) {
+      const container = document.getElementById('atividadeContainer');
+      db.ref('usuarios/' + uid + '/atividades').once('value', snapshot => {
+        container.innerHTML = ''; // Limpa o conteúdo anterior
 
-        // Pega código já salvo ou usa UID e limita a 8 caracteres
-        firebase.database().ref("usuarios/" + uid).once("value").then(snapshot => {
-          const dados = snapshot.val();
-          const codigo = (dados?.codigoConvite || uid).substring(0, 8);
-          const link = `https://inves13.github.io/saxpag-miner/#/reg?ref=${codigo}`;
-
-          document.getElementById("codigoConvite").innerText = codigo;
-          document.getElementById("linkConvite").innerText = link;
-
-          QRCode.toCanvas(document.getElementById('qrcode'), link, {
-            color: { dark: "#ffffff", light: "#0000" },
-            width: 180
+        if (snapshot.exists()) {
+          snapshot.forEach(child => {
+            const data = child.val(); // Pega os dados de cada atividade
+            const item = document.createElement('div');
+            item.className = 'atividade-item';
+            item.innerHTML = `
+              <h3>${data.titulo}</h3>
+              <p>${data.descricao}</p>
+              <p><small>${new Date(data.dataHora).toLocaleString()}</small></p>
+            `;
+            container.appendChild(item);
           });
-
-          // Atualiza no banco
-          firebase.database().ref("usuarios/" + uid).update({
-            codigoConvite: codigo,
-            linkConvite: link
-          });
-        });
-
-      } else {
-        window.location.href = "login.html";
-      }
-    });
+        } else {
+          container.innerHTML = '<div class="sem-atividade">Nenhuma atividade encontrada.</div>';
+        }
+      });
+    }
   </script>
 
 </body>
