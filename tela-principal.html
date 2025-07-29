@@ -240,8 +240,24 @@
         localStorage.setItem(checkinKey, agora);
 
         alert("Check-in realizado com sucesso! +0.08 USDT");
+        
+        // Adiciona a atividade de check-in
+        adicionarAtividade(userId, 'Check-in diário', 'Você realizou o check-in e ganhou +0.08 USDT.');
+
         loadData(userId);
       });
+    }
+
+    // Função para adicionar a atividade no banco de dados
+    function adicionarAtividade(uid, titulo, descricao) {
+      const atividade = {
+        titulo: titulo,
+        descricao: descricao,
+        dataHora: Date.now()  // Timestamp atual
+      };
+
+      // Adiciona a atividade no caminho correto
+      db.ref('usuarios/' + uid + '/atividades').push(atividade);
     }
   </script>
 </body>
