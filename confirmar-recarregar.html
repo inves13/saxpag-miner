@@ -1,1 +1,114 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Confirmar Recarga</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #041830;
+      color: white;
+      padding: 20px;
+    }
 
+    .container {
+      background: #0b0f3b;
+      padding: 20px;
+      border-radius: 10px;
+      border: 1px solid #00ffcc;
+      max-width: 400px;
+      margin: 0 auto;
+    }
+
+    h2 {
+      color: #00ffcc;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    p {
+      font-size: 16px;
+      line-height: 1.6;
+    }
+
+    button {
+      margin-top: 20px;
+      padding: 10px 15px;
+      background-color: #00ffcc;
+      border: none;
+      border-radius: 5px;
+      font-weight: bold;
+      cursor: pointer;
+      width: 100%;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Confirmar Recarga</h2>
+    <p id="info-recarga">Carregando dados...</p>
+    <p>Depois de realizar a transferência, clique em <strong>Confirmar</strong> abaixo para que possamos validar sua recarga.</p>
+    <button onclick="confirmarRecarga()">Confirmar Recarga</button>
+  </div>
+
+  <!-- Firebase Modular -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+    import { getDatabase, ref, push, get, update } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDzOgL6cvc0b4AO0vAEay1CeSAv_-WqaWQ",
+      authDomain: "saxpag-miner.firebaseapp.com",
+      databaseURL: "https://saxpag-miner-default-rtdb.firebaseio.com",
+      projectId: "saxpag-miner",
+      storageBucket: "saxpag-miner.appspot.com",
+      messagingSenderId: "154250189626",
+      appId: "1:154250189626:web:83c232a5c539e3f9fe0e03",
+      measurementId: "G-LEV5TL9P7H"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+    const auth = getAuth(app);
+
+    const valor = parseFloat(localStorage.getItem("valorRecarga") || "0");
+    const rede = localStorage.getItem("redeSelecionada") || "BEP20-USDT";
+    document.getElementById("info-recarga").innerText = `Valor: $${valor.toFixed(2)} - Rede: ${rede}`;
+
+    window.confirmarRecarga = function () {
+      onAuthStateChanged(auth, async user => {
+        if (!user) {
+          alert("Você precisa estar logado.");
+          return;
+        }
+
+        const userId = user.uid;
+        const dataAtual = new Date().toLocaleString();
+
+        // Salva a recarga no histórico
+        const recargaRef = ref(db, `recargas`);
+        await push(recargaRef, {
+          usuario: user.email || "desconhecido",
+          valor: valor,
+          rede: rede,
+          status: "confirmado",
+          data: dataAtual
+        });
+
+        // Atualiza saldo do usuário
+        const saldoRef = ref(db, `usuarios/${userId}/saldo`);
+        const snapshot = await get(saldoRef);
+        const saldoAtual = snapshot.exists() ? parseFloat(snapshot.val()) : 0;
+        const novoSaldo = saldoAtual + valor;
+        await update(ref(db, `usuarios/${userId}`), { saldo: novoSaldo });
+
+        alert("Recarga confirmada e saldo atualizado!");
+        window.location.href = "tela-principal.html";
+      });
+    }
+  </script>
+</body>
+</html>
