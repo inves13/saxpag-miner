@@ -11,6 +11,7 @@
       background: linear-gradient(to bottom, #0b0f3b, #041830);
       color: white;
     }
+
     header {
       padding: 15px;
       background: #001F4A;
@@ -18,9 +19,11 @@
       font-size: 18px;
       font-weight: bold;
     }
-    .crypto-list {
+
+    .crypto-list, .recarga-box {
       padding: 10px;
     }
+
     .crypto-item {
       background: rgba(255, 255, 255, 0.05);
       margin: 8px 0;
@@ -32,15 +35,36 @@
       cursor: pointer;
       border: 1px solid #1f2f45;
     }
-    .crypto-item:hover {
-      background: rgba(255, 255, 255, 0.1);
-    }
+
     .crypto-label {
       font-size: 16px;
     }
+
     .arrow {
       font-size: 16px;
       color: #aaa;
+    }
+
+    .valor-recarga {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .valor-btn {
+      padding: 10px 15px;
+      background-color: #1a2a45;
+      border: 1px solid #00ffcc;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    .valor-btn.selected {
+      background-color: #00ffcc;
+      color: #000;
+      font-weight: bold;
     }
   </style>
 </head>
@@ -48,46 +72,44 @@
 
   <header>🔙 Recarregue Selecione</header>
 
-  <div class="crypto-list">
-    <div class="crypto-item" onclick="selecionar('bep20-usdt.html')">
-      <span class="crypto-label">BEP20-USDT</span> <span class="arrow">➔</span>
-    </div>
-    <div class="crypto-item" onclick="selecionar('bnb.html')">
-      <span class="crypto-label">BNB</span> <span class="arrow">➔</span>
-    </div>
-    <div class="crypto-item" onclick="selecionar('bep20-usdc.html')">
-      <span class="crypto-label">BEP20-USDC</span> <span class="arrow">➔</span>
-    </div>
-    <div class="crypto-item" onclick="selecionar('trc20-trx.html')">
-      <span class="crypto-label">TRC20-TRX</span> <span class="arrow">➔</span>
-    </div>
-    <div class="crypto-item" onclick="selecionar('trc20-usdt.html')">
-      <span class="crypto-label">TRC20-USDT</span> <span class="arrow">➔</span>
+  <div class="recarga-box">
+    <h3 style="text-align:center; color:#00ffcc;">💵 Escolha o valor da recarga</h3>
+    <div class="valor-recarga">
+      <div class="valor-btn" onclick="selecionarValor(10)">10</div>
+      <div class="valor-btn" onclick="selecionarValor(50)">50</div>
+      <div class="valor-btn" onclick="selecionarValor(100)">100</div>
+      <div class="valor-btn" onclick="selecionarValor(200)">200</div>
+      <div class="valor-btn" onclick="selecionarValor(500)">500</div>
+      <div class="valor-btn" onclick="selecionarValor(1000)">1000</div>
     </div>
   </div>
 
-  <!-- Firebase SDK -->
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+  <div class="crypto-list">
+    <div class="crypto-item" onclick="enviarPara('bep20-usdt.html', 'BEP20-USDT')">
+      <span class="crypto-label" id="label-usdt">BEP20-USDT</span> 
+      <span class="arrow">➔</span>
+    </div>
+  </div>
 
   <script>
-    // Configuração do Firebase
-    const firebaseConfig = {
-      apiKey: "AIzaSyDzOgL6cvc0b4AO0vAEay1CeSAv_-WqaWQ",
-      authDomain: "saxpag-miner.firebaseapp.com",
-      databaseURL: "https://saxpag-miner-default-rtdb.firebaseio.com",
-      projectId: "saxpag-miner",
-      storageBucket: "saxpag-miner.firebasestorage.app",
-      messagingSenderId: "154250189626",
-      appId: "1:154250189626:web:83c232a5c539e3f9fe0e03",
-      measurementId: "G-LEV5TL9P7H"
-    };
+    let valorSelecionado = null;
 
-    // Inicializar Firebase
-    firebase.initializeApp(firebaseConfig);
+    function selecionarValor(valor) {
+      const botoes = document.querySelectorAll(".valor-btn");
+      botoes.forEach(btn => btn.classList.remove("selected"));
+      event.target.classList.add("selected");
 
-    // Redirecionamento ao clicar
-    function selecionar(pagina) {
+      valorSelecionado = valor;
+      document.getElementById("label-usdt").innerText = `BEP20-USDT ${valorSelecionado}`;
+    }
+
+    function enviarPara(pagina, rede) {
+      if (!valorSelecionado) {
+        alert("Por favor, selecione um valor antes de continuar.");
+        return;
+      }
+      localStorage.setItem("valorRecarga", valorSelecionado);
+      localStorage.setItem("redeSelecionada", rede);
       window.location.href = pagina;
     }
   </script>
