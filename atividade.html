@@ -83,60 +83,104 @@
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyDzOgL6cvc0b4AO0vAEay1CeSAv_-WqaWQ",
+    authDomain: "saxpag-miner.firebaseapp.com",
+    databaseURL: "https://saxpag-miner-default-rtdb.firebaseio.com",
+    projectId: "saxpag-miner",
+    storageBucket: "saxpag-miner.appspot.com",
+    messagingSenderId: "154250189626",
+    appId: "1:154250189626:web:83c232a5c539e3f9fe0e03",
+    measurementId: "G-LEV5TL9P7H"
+  };
 
-  <script>
-    // Configuração do Firebase
-    const firebaseConfig = {
-      apiKey: "AIzaSyDzOgL6cvc0b4AO0vAEay1CeSAv_-WqaWQ",
-      authDomain: "saxpag-miner.firebaseapp.com",
-      databaseURL: "https://saxpag-miner-default-rtdb.firebaseio.com",
-      projectId: "saxpag-miner",
-      storageBucket: "saxpag-miner.appspot.com",
-      messagingSenderId: "154250189626",
-      appId: "1:154250189626:web:83c232a5c539e3f9fe0e03",
-      measurementId: "G-LEV5TL9P7H"
-    };
+  firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+  const db = firebase.database();
 
-    // Inicializa o Firebase
-    firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth();
-    const db = firebase.database();
+  function checkLogin() {
+    auth.onAuthStateChanged(user => {
+      if (!user) {
+        window.location.href = "login.html";
+      } else {
+        carregarTodasAtividades(user);
+      }
+    });
+  }
 
-    // Verifica se o usuário está logado
-    function checkLogin() {
-      auth.onAuthStateChanged(user => {
-        if (!user) {
-          window.location.href = "login.html"; // Redireciona para a página de login
-        } else {
-          carregarAtividades(user.uid); // Carrega as atividades do usuário
-        }
-      });
-    }
+  function carregarTodasAtividades(user) {
+    const container = document.getElementById('atividadeContainer');
+    container.innerHTML = '';
 
-    // Carrega as atividades do usuário
-    function carregarAtividades(uid) {
-      const container = document.getElementById('atividadeContainer');
-      db.ref('usuarios/' + uid + '/atividades').once('value', snapshot => {
-        container.innerHTML = ''; // Limpa o conteúdo anterior
+    let atividades = [];
+    let recargas = [];
 
-        if (snapshot.exists()) {
-          snapshot.forEach(child => {
-            const data = child.val(); // Pega os dados de cada atividade
-            const item = document.createElement('div');
-            item.className = 'atividade-item';
-            item.innerHTML = `
-              <h3>${data.titulo}</h3>
-              <p>${data.descricao}</p>
-              <p><small>${new Date(data.dataHora).toLocaleString()}</small></p>
-            `;
-            container.appendChild(item);
+    // Atividades pessoais do usuário
+    const atividadesPromise = db.ref('usuarios/' + user.uid + '/atividades').once('value').then(snapshot => {
+      if (snapshot.exists()) {
+        snapshot.forEach(child => {
+          const data = child.val();
+          atividades.push({
+            tipo: 'atividade',
+            titulo: data.titulo,
+            descricao: data.descricao,
+            dataHora: new Date(data.dataHora)
           });
-        } else {
-          container.innerHTML = '<div class="sem-atividade">Nenhuma atividade encontrada.</div>';
-        }
-      });
-    }
-  </script>
+        });
+      }
+    });
 
+    // Recargas específicas do usuário (usando e-mail)
+    const recargasPromise = db.ref('recargas').once('value').then(snapshot => {
+      if (snapshot.exists()) {
+        snapshot.forEach(child => {
+          const data = child.val();
+          if (data.usuario === user.email && data.status === 'confirmado') {
+            recargas.push({
+              tipo: 'recarga',
+              valor: data.valor,
+              rede: data.rede,
+              dataHora: new Date(data.data)
+            });
+          }
+        });
+      }
+    });
+
+    // Quando terminar as duas buscas, junta e exibe tudo
+    Promise.all([atividadesPromise, recargasPromise]).then(() => {
+      const todas = [...atividades, ...recargas];
+      todas.sort((a, b) => b.dataHora - a.dataHora); // mais recente primeiro
+
+      if (todas.length === 0) {
+        container.innerHTML = '<div class="sem-atividade">Nenhuma atividade encontrada.</div>';
+        return;
+      }
+
+      todas.forEach(item => {
+        const div = document.createElement('div');
+        div.className = 'atividade-item';
+
+        if (item.tipo === 'atividade') {
+          div.innerHTML = `
+            <h3>${item.titulo}</h3>
+            <p>${item.descricao}</p>
+            <p><small>${item.dataHora.toLocaleString()}</small></p>
+          `;
+        } else if (item.tipo === 'recarga') {
+          div.innerHTML = `
+            <h3>💰 Recarga Confirmada</h3>
+            <p>Valor: R$ ${item.valor}</p>
+            <p>Rede: ${item.rede}</p>
+            <p><small>${item.dataHora.toLocaleString()}</small></p>
+          `;
+        }
+
+        container.appendChild(div);
+      });
+    });
+  }
+</script>
 </body>
 </html>
