@@ -1,1 +1,106 @@
+<!-- confirmar-recarga.html -->
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Confirmar Recarga</title>
+  <style>
+    body {
+      background: #0a0f2c;
+      color: white;
+      font-family: Arial, sans-serif;
+      padding: 20px;
+    }
 
+    .box {
+      background: #0b0f3b;
+      padding: 20px;
+      border-radius: 10px;
+      border: 1px solid #00ffcc;
+    }
+
+    h2 {
+      color: #00ffcc;
+      text-align: center;
+    }
+
+    p {
+      font-size: 16px;
+      margin-top: 15px;
+      white-space: pre-wrap;
+    }
+
+    button {
+      margin-top: 25px;
+      width: 100%;
+      padding: 12px;
+      background-color: #00ffcc;
+      color: #000;
+      border: none;
+      border-radius: 8px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div class="box">
+    <h2>📩 Confirmar Recarga</h2>
+    <p id="resumo">Carregando informações...</p>
+    <button onclick="confirmarRecarga()">Confirmar que enviei</button>
+  </div>
+
+  <script type="module">
+    // Firebase SDK
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js";
+    import { getDatabase, ref, push } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-database.js";
+
+    // ✅ SUA CONFIGURAÇÃO DO FIREBASE AQUI:
+    const firebaseConfig = {
+      apiKey: "AIzaSyDzOgL6cvc0b4AO0vAEay1CeSAv_-WqaWQ",
+      authDomain: "saxpag-miner.firebaseapp.com",
+      databaseURL: "https://saxpag-miner-default-rtdb.firebaseio.com",
+      projectId: "saxpag-miner",
+      storageBucket: "saxpag-miner.firebasestorage.app",
+      messagingSenderId: "154250189626",
+      appId: "1:154250189626:web:83c232a5c539e3f9fe0e03",
+      measurementId: "G-LEV5TL9P7H"
+    };
+
+    // Iniciar Firebase
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    // Pegar dados salvos localmente
+    const valor = localStorage.getItem("valorRecarga") || "0";
+    const rede = localStorage.getItem("redeSelecionada") || "BEP20-USDT";
+    const email = localStorage.getItem("emailUsuario") || "desconhecido"; // caso queira saber o usuário
+
+    const chave = "123e4567-usdt-chave-pix-bep20"; // Chave PIX
+
+    // Mostrar resumo
+    document.getElementById("resumo").innerText = `Você selecionou recarregar $${valor} usando a rede ${rede}.\n\nEnvie para a chave:\n${chave}\n\nApós o envio, clique no botão abaixo para confirmar.`;
+
+    // Enviar confirmação
+    window.confirmarRecarga = function () {
+      const dados = {
+        valor,
+        rede,
+        chave,
+        email,
+        horario: new Date().toLocaleString()
+      };
+
+      push(ref(db, "confirmacoesRecarga"), dados)
+        .then(() => {
+          alert("✅ Recarga confirmada! Aguarde a verificação.");
+          window.location.href = "confirmar-recarregar.html"; // Redirecionar após confirmação
+        })
+        .catch((error) => {
+          alert("❌ Erro ao confirmar recarga: " + error.message);
+        });
+    };
+  </script>
+</body>
+</html>
