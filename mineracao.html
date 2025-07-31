@@ -29,7 +29,7 @@
 <body>
   <header><h1>SaxPag Miner</h1></header>
 
-  <div class="vip-status">Nível <strong id="vipLevel">VIP0</strong></div>
+  <div class="vip-status">Nível <strong id="vipLevel">VIP1</strong></div>
   <div class="info-box"><h2>Poder de Mineração</h2><div class="value" id="miningPower">0.0000 GH/s</div></div>
   <div class="info-box"><h2>Renda diária</h2><div class="value" id="dailyIncome">0.000000 USDT</div></div>
 
@@ -72,7 +72,7 @@
 
     const mineracao = {
       progresso: 0, saldoMinerado: 0.000001, paraColetar: 0, recebido: 0, rendaDiaria: 0,
-      poder: 10, vip: 0, ultimaMineracao: Date.now(), userId: null, intervalo: null, saldo: 0
+      poder: 10, vip: 1, ultimaMineracao: Date.now(), userId: null, intervalo: null, saldo: 0
     };
 
     const vipConfig = [
@@ -109,16 +109,16 @@
     }
 
     function atualizarVipEComputacao() {
-      const vip = vipConfig.findIndex(v => mineracao.saldo >= v.min && mineracao.saldo < v.max);
-      mineracao.vip = vip >= 0 ? vip : 0;
-      mineracao.poder = (vip + 1) * 10;
+      const vipIndex = vipConfig.findIndex(v => mineracao.saldo >= v.min && mineracao.saldo < v.max);
+      mineracao.vip = vipIndex + 1;
+      mineracao.poder = mineracao.vip * 10;
     }
 
     function aplicarMineracaoOffline() {
       const agora = Date.now();
       const segundos = Math.floor((agora - mineracao.ultimaMineracao) / 1000);
-      if (segundos > 0) {
-        const ganho = mineracao.poder * vipConfig[mineracao.vip].renda * baseRate * segundos;
+      if (segundos > 0 && vipConfig[mineracao.vip - 1]) {
+        const ganho = mineracao.poder * vipConfig[mineracao.vip - 1].renda * baseRate * segundos;
         mineracao.saldoMinerado += ganho;
         mineracao.rendaDiaria += ganho;
         mineracao.progresso = Math.min(mineracao.progresso + segundos * 0.1, 100);
@@ -130,13 +130,15 @@
     function iniciarMineracao() {
       if (mineracao.intervalo) clearInterval(mineracao.intervalo);
       mineracao.intervalo = setInterval(() => {
-        const ganho = mineracao.poder * vipConfig[mineracao.vip].renda * baseRate;
-        mineracao.saldoMinerado += ganho;
-        mineracao.rendaDiaria += ganho;
-        mineracao.progresso = Math.min(mineracao.progresso + 0.1, 100);
-        mineracao.ultimaMineracao = Date.now();
-        atualizarUI();
-        salvarFirebase();
+        if (vipConfig[mineracao.vip - 1]) {
+          const ganho = mineracao.poder * vipConfig[mineracao.vip - 1].renda * baseRate;
+          mineracao.saldoMinerado += ganho;
+          mineracao.rendaDiaria += ganho;
+          mineracao.progresso = Math.min(mineracao.progresso + 0.1, 100);
+          mineracao.ultimaMineracao = Date.now();
+          atualizarUI();
+          salvarFirebase();
+        }
       }, 1000);
     }
 
@@ -164,7 +166,7 @@
     function atualizarUI() {
       document.getElementById("vipLevel").innerText = "VIP" + mineracao.vip;
       document.getElementById("miningPower").innerText = mineracao.poder.toFixed(4) + " GH/s";
-      document.getElementById("dailyIncome").innerText = (mineracao.poder * vipConfig[mineracao.vip].renda * baseRate * 86400).toFixed(6) + " USDT";
+      document.getElementById("dailyIncome").innerText = (mineracao.poder * vipConfig[mineracao.vip - 1].renda * baseRate * 86400).toFixed(6) + " USDT";
       document.getElementById("progressBar").style.width = mineracao.progresso + "%";
       document.getElementById("miningBalance").innerText = mineracao.saldoMinerado.toFixed(6);
       document.getElementById("toCollect").innerText = mineracao.saldoMinerado.toFixed(6);
