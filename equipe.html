@@ -147,7 +147,6 @@
     </div>
   </main>
 
-  <!-- Firebase SDK -->
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
@@ -175,56 +174,21 @@
       return `https://inves13.github.io/saxpag-miner/#/reg?ref=${codigo}`;
     }
 
-    function buscarIndicadosNivel(codigo, nivel = 1) {
-      if (nivel > 6) return Promise.resolve([]);
+    function buscarTodosIndicados(codigo, nivel = 1, profundidade = 6, encontrados = [], mapa = {}) {
+      if (nivel > profundidade) return Promise.resolve(encontrados);
       return firebase.database().ref("usuarios").orderByChild("indicacao").equalTo(codigo).once("value").then(snapshot => {
         const diretos = [];
-        snapshot.forEach(child => diretos.push({ ...child.val(), uid: child.key }));
-        const validos = diretos.filter(i => i.saldo && i.saldo > 0);
-        if (nivel === 1) return { [`lev${nivel}`]: { total: diretos.length, validos: validos.length }, diretos };
-        return buscarIndicadosNivelSequencial(diretos, nivel, 1).then(result => ({
-          [`lev${nivel}`]: { total: result.length, validos: result.filter(i => i.saldo && i.saldo > 0).length }
-        }));
+        snapshot.forEach(child => {
+          const dados = child.val();
+          if (!mapa[child.key]) {
+            mapa[child.key] = true;
+            diretos.push({ ...dados, uid: child.key });
+            encontrados.push({ ...dados, uid: child.key, nivel });
+          }
+        });
+        return Promise.all(diretos.map(u => buscarTodosIndicados((u.codigoConvite || u.uid).substring(0, 8), nivel + 1, profundidade, encontrados, mapa)))
+          .then(() => encontrados);
       });
-    }
-
-    function buscarIndicadosNivelSequencial(lista, nivelAlvo, nivelAtual) {
-      if (nivelAtual >= nivelAlvo) return Promise.resolve(lista);
-      const proximos = [];
-      const promises = lista.map(user =>
-        firebase.database().ref("usuarios")
-          .orderByChild("indicacao")
-          .equalTo((user.codigoConvite || user.uid).substring(0, 8))
-          .once("value")
-          .then(snapshot => {
-            snapshot.forEach(child => proximos.push(child.val()));
-          })
-      );
-      return Promise.all(promises).then(() =>
-        buscarIndicadosNivelSequencial(proximos, nivelAlvo, nivelAtual + 1)
-      );
-    }
-
-    function detalhesNivel(n) {
-      alert('Detalhes do nível ' + n + ' ainda serão implementados.');
-    }
-
-    function renderNiveis(dados) {
-      const container = document.getElementById('listaNiveis');
-      container.innerHTML = "";
-      for (let i = 1; i <= 6; i++) {
-        const nivel = dados[`lev${i}`] || { total: 0, validos: 0 };
-        container.innerHTML += `
-          <div class="nivel">
-            <div class="nivel-info">
-              <div><strong>LEV ${i}</strong></div>
-              <div>Número de pessoas: ${nivel.total}</div>
-              <div>Válido: ${nivel.validos}</div>
-            </div>
-            <button class="btn-detalhes" onclick="detalhesNivel(${i})">Detalhes</button>
-          </div>
-        `;
-      }
     }
 
     firebase.auth().onAuthStateChanged(async (user) => {
@@ -250,26 +214,59 @@
       document.getElementById("codigoConvite").innerText = codigoUsuario;
       document.getElementById("linkConvite").innerText = gerarLinkIndicacao(codigoUsuario);
 
-      document.getElementById("totalEquipe").innerText = "0";
-      document.getElementById("comissaoTotal").innerText = "0.00";
-      document.getElementById("recargaTotal").innerText = "0.00";
-      document.getElementById("retiradaTotal").innerText = "0.00";
+      const todos = await buscarTodosIndicados(codigoUsuario);
 
-      const todosNiveis = {};
-      let totalEquipe = 0;
+      const niveis = {};
+      let totalRecarga = 0;
+      let totalRetirada = 0;
+      let totalComissao = 0;
 
-      for (let n = 1; n <= 6; n++) {
-        const info = await buscarIndicadosNivel(codigoUsuario, n);
-        const nivel = info[`lev${n}`];
-        if (nivel && typeof nivel.total === "number") {
-          totalEquipe += nivel.total;
-        }
-        Object.assign(todosNiveis, info);
+      for (let i = 1; i <= 6; i++) {
+        const filtrado = todos.filter(u => u.nivel === i);
+        const validos = filtrado.filter(u => u.saldo && u.saldo > 0);
+        niveis[`lev${i}`] = {
+          total: filtrado.length,
+          validos: validos.length
+        };
+
+        // Somar recarga e retirada da equipe
+        filtrado.forEach(user => {
+          totalRecarga += user.recarga || 0;
+          totalRetirada += user.retirada || 0;
+          totalComissao += (user.comissao || 0);
+        });
       }
 
+      const totalEquipe = todos.length;
+
       document.getElementById("totalEquipe").innerText = totalEquipe;
-      renderNiveis(todosNiveis);
+      document.getElementById("comissaoTotal").innerText = `$${totalComissao.toFixed(2)}`;
+      document.getElementById("recargaTotal").innerText = `$${totalRecarga.toFixed(2)}`;
+      document.getElementById("retiradaTotal").innerText = `$${totalRetirada.toFixed(2)}`;
+      renderNiveis(niveis);
     });
+
+    function renderNiveis(dados) {
+      const container = document.getElementById('listaNiveis');
+      container.innerHTML = "";
+      for (let i = 1; i <= 6; i++) {
+        const nivel = dados[`lev${i}`] || { total: 0, validos: 0 };
+        container.innerHTML += `
+          <div class="nivel">
+            <div class="nivel-info">
+              <div><strong>LEV ${i}</strong></div>
+              <div>Número de pessoas: ${nivel.total}</div>
+              <div>Válido: ${nivel.validos}</div>
+            </div>
+            <button class="btn-detalhes" onclick="detalhesNivel(${i})">Detalhes</button>
+          </div>
+        `;
+      }
+    }
+
+    function detalhesNivel(n) {
+      alert('Detalhes do nível ' + n + ' ainda serão implementados.');
+    }
   </script>
 </body>
 </html>
