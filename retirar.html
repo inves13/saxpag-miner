@@ -10,15 +10,95 @@
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
 
   <style>
-    body { font-family: Arial; background: #000014; color: #fff; padding: 20px; max-width: 480px; margin: auto; }
-    h2 { text-align: center; color: #00ffcc; }
-    label, p { margin-top: 10px; font-size: 14px; display: block; }
-    input, button { width: 100%; padding: 10px; margin-top: 8px; border-radius: 5px; border: none; font-size: 14px; box-sizing: border-box; }
-    input { background-color: #fff; color: #000; }
-    button { background-color: #00ffcc; color: #000; font-weight: bold; cursor: pointer; margin-top: 15px; }
-    .resumo { margin-top: 20px; font-size: 14px; }
-    .resumo p { margin: 4px 0; }
-    .lembrete { background: #111; padding: 15px; margin-top: 25px; border-radius: 8px; font-size: 13px; color: #ccc; line-height: 1.5; }
+    body {
+      font-family: Arial;
+      background: #000014;
+      color: #fff;
+      padding: 20px;
+      max-width: 480px;
+      margin: auto;
+    }
+
+    h2 {
+      text-align: center;
+      color: #00ffcc;
+    }
+
+    label, p {
+      margin-top: 10px;
+      font-size: 14px;
+      display: block;
+    }
+
+    input, button {
+      width: 100%;
+      padding: 10px;
+      margin-top: 8px;
+      border-radius: 5px;
+      border: none;
+      font-size: 14px;
+      box-sizing: border-box;
+    }
+
+    input {
+      background-color: #fff;
+      color: #000;
+    }
+
+    button {
+      background-color: #00ffcc;
+      color: #000;
+      font-weight: bold;
+      cursor: pointer;
+      margin-top: 15px;
+    }
+
+    .resumo {
+      margin-top: 20px;
+      font-size: 14px;
+    }
+
+    .resumo p {
+      margin: 4px 0;
+    }
+
+    .lembrete {
+      background: #111;
+      padding: 15px;
+      margin-top: 25px;
+      border-radius: 8px;
+      font-size: 13px;
+      color: #ccc;
+      line-height: 1.5;
+    }
+
+    /* Notificação personalizada */
+    #notificacao {
+      position: fixed;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #00ffcc;
+      color: #000;
+      padding: 16px 24px;
+      border-radius: 12px;
+      font-weight: bold;
+      font-size: 14px;
+      box-shadow: 0 0 15px #00ffd5;
+      display: none;
+      animation: fadein 0.5s ease-in-out, fadeout 0.5s ease-in-out 3.5s;
+      z-index: 9999;
+    }
+
+    @keyframes fadein {
+      from { bottom: 0; opacity: 0; }
+      to { bottom: 30px; opacity: 1; }
+    }
+
+    @keyframes fadeout {
+      from { bottom: 30px; opacity: 1; }
+      to { bottom: 0; opacity: 0; }
+    }
   </style>
 </head>
 <body onload="iniciarCarteira()">
@@ -49,6 +129,9 @@
     Mínimo: 10 USDT | Máximo: 10.000 USDT | 1 saque por dia<br>
     Taxa: 2% | Chegada: até 5 minutos</p>
   </div>
+
+  <!-- Notificação -->
+  <div id="notificacao"></div>
 
   <script>
     const firebaseConfig = {
@@ -101,7 +184,7 @@
       const endereco = document.getElementById("endereco").value.trim();
 
       if (!senha || !endereco || valor < 10 || valor > 10000) {
-        alert("Preencha todos os campos corretamente. Valor mínimo 10 USDT.");
+        mostrarNotificacao("Preencha todos os campos corretamente. Valor mínimo 10 USDT.");
         return;
       }
 
@@ -109,7 +192,7 @@
       let saldo = parseFloat(snap.val() || 0);
 
       if (valor > saldo) {
-        alert("Saldo insuficiente.");
+        mostrarNotificacao("Saldo insuficiente para esta retirada.");
         return;
       }
 
@@ -121,23 +204,28 @@
       carteiraCorretagem += valor;
       await db.ref("usuarios/" + userId).update({ carteiraCorretagem });
 
-      // Adiciona a atividade de saque
       adicionarAtividade(userId, 'Retirada Solicitada', `Você solicitou um saque de ${valor.toFixed(6)} USDT para o endereço ${endereco}.`);
 
-      alert(`Saque solicitado com sucesso!\nValor: ${valor.toFixed(6)} USDT\nEndereço: ${endereco}`);
-      window.location.href = 'index.html';
+      mostrarNotificacao(`💸 Retirada de ${valor.toFixed(6)} USDT enviada para ${endereco}.`);
+      setTimeout(() => window.location.href = 'index.html', 3500);
     }
 
-    // Função para adicionar a atividade no banco de dados
     function adicionarAtividade(uid, titulo, descricao) {
       const atividade = {
         titulo: titulo,
         descricao: descricao,
-        dataHora: Date.now()  // Timestamp atual
+        dataHora: Date.now()
       };
-
-      // Adiciona a atividade no caminho correto
       db.ref('usuarios/' + uid + '/atividades').push(atividade);
+    }
+
+    function mostrarNotificacao(mensagem) {
+      const div = document.getElementById("notificacao");
+      div.innerText = mensagem;
+      div.style.display = "block";
+      setTimeout(() => {
+        div.style.display = "none";
+      }, 4000);
     }
   </script>
 </body>
