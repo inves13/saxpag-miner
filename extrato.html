@@ -2,171 +2,96 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Sax Mining - Extrato</title>
+  <title>Tabela de Níveis VIP</title>
   <style>
     body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background: linear-gradient(to bottom, #000028, #001640);
-      color: white;
-    }
-
-    header {
-      background: linear-gradient(to right, #1a2c3b, #0a2f2f);
-      padding: 10px 20px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-
-    .logo {
-      display: flex;
-      align-items: center;
-    }
-
-    .logo span {
-      font-size: 20px;
-      font-weight: bold;
-      margin-left: 10px;
+      background: #111;
+      font-family: 'Arial', sans-serif;
       color: #fff;
+      padding: 20px;
     }
-
-    .extrato-box {
-      background: #0e1e2a;
-      margin: 20px;
-      padding: 15px;
-      border-radius: 15px;
-    }
-
-    .extrato-box h3 {
-      margin-top: 0;
-      color: #7ad3ff;
-    }
-
-    .extrato-item {
-      background: #162d45;
-      margin: 10px 0;
-      padding: 12px;
-      border-radius: 10px;
-      display: flex;
-      justify-content: space-between;
-      font-size: 14px;
-    }
-
-    .extrato-item p {
-      margin: 0;
-    }
-
-    .bottom-nav {
-      position: fixed;
-      bottom: 0;
-      width: 100%;
-      background: #1b2a38;
-      display: flex;
-      justify-content: space-around;
-      padding: 10px 0;
-      border-top: 1px solid #333;
-    }
-
-    .bottom-nav div {
-      color: white;
+    h2 {
       text-align: center;
-      font-size: 12px;
-      cursor: pointer;
+      color: #00ffcc;
+      margin-bottom: 20px;
     }
-
-    .bottom-nav .active {
-      color: #ff69b4;
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: #1c1c1c;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    th, td {
+      padding: 15px;
+      text-align: center;
+    }
+    th {
+      background: linear-gradient(to right, #00ffcc, #0099ff);
+      color: #000;
+      font-size: 18px;
+    }
+    tr:nth-child(even) {
+      background-color: #2a2a2a;
+    }
+    tr:nth-child(odd) {
+      background-color: #333;
+    }
+    td {
+      color: #fff;
+      font-weight: bold;
+    }
+    td::before {
+      content: "";
     }
   </style>
 </head>
-<body onload="checkLogin()">
+<body>
 
-  <header>
-    <div class="logo">
-      <span>Sax Mining</span>
-    </div>
-    <div style="color: white; font-size: 14px;">🌐 Português</div>
-  </header>
+  <h2>Tabela de Níveis VIP (USDT)</h2>
 
-  <div class="extrato-box">
-    <h3>Extrato de Transações</h3>
-    <div id="transacoes">
-      <!-- Transações serão carregadas aqui -->
-    </div>
-  </div>
-
-  <!-- Menu fixo -->
-  <div class="bottom-nav">
-    <div onclick="abrir('tela-principal.html')">🏠<br>Lar</div>
-    <div onclick="abrir('vip.html')">👑<br>VIP</div>
-    <div onclick="abrir('mineracao.html')">⛏️<br>Piscina de Mineração</div>
-    <div onclick="abrir('equipe.html')">👥<br>Equipe</div>
-    <div onclick="abrir('meu.html')">📱<br>Meu</div>
-  </div>
-
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
-
-  <script>
-    // Configuração do Firebase
-    const firebaseConfig = {
-      apiKey: "AIzaSyDzOgL6cvc0b4AO0vAEay1CeSAv_-WqaWQ",
-      authDomain: "saxpag-miner.firebaseapp.com",
-      databaseURL: "https://saxpag-miner-default-rtdb.firebaseio.com",
-      projectId: "saxpag-miner",
-      storageBucket: "saxpag-miner.firebasestorage.app",
-      messagingSenderId: "154250189626",
-      appId: "1:154250189626:web:83c232a5c539e3f9fe0e03",
-      measurementId: "G-LEV5TL9P7H"
-    };
-
-    // Inicializa o Firebase
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
-    const auth = firebase.auth();
-
-    // Verifica se o usuário está logado
-    function checkLogin() {
-      auth.onAuthStateChanged(user => {
-        if (!user) {
-          window.location.href = 'login.html'; // Redireciona para a página de login
-        } else {
-          loadData(user.uid);  // Carrega os dados do usuário
-        }
-      });
-    }
-
-    // Carrega transações do usuário
-    function loadData(userId) {
-      db.ref("usuarios/" + userId + "/transacoes").once("value", (snapshot) => {
-        const transacoes = snapshot.val() || {};
-        const transacoesContainer = document.getElementById("transacoes");
-        transacoesContainer.innerHTML = ""; // Limpa transações existentes
-
-        // Exibe as transações
-        for (const id in transacoes) {
-          const transacao = transacoes[id];
-          const transacaoItem = document.createElement("div");
-          transacaoItem.classList.add("extrato-item");
-
-          transacaoItem.innerHTML = `
-            <p><strong>${transacao.tipo}</strong></p>
-            <p>Valor: $${transacao.valor.toFixed(2)}</p>
-            <p>${transacao.data}</p>
-          `;
-          transacoesContainer.appendChild(transacaoItem);
-        }
-      });
-    }
-
-    // Função para redirecionar para a página
-    function abrir(pagina) {
-      window.location.href = pagina;
-    }
-  </script>
+  <table>
+    <tr>
+      <th>Nível VIP</th>
+      <th>Saldo Mínimo (USDT)</th>
+      <th>Saldo Máximo (USDT)</th>
+    </tr>
+    <tr>
+      <td>VIP 1</td>
+      <td>$0</td>
+      <td>$49.99</td>
+    </tr>
+    <tr>
+      <td>VIP 2</td>
+      <td>$50</td>
+      <td>$99.99</td>
+    </tr>
+    <tr>
+      <td>VIP 3</td>
+      <td>$100</td>
+      <td>$499.99</td>
+    </tr>
+    <tr>
+      <td>VIP 4</td>
+      <td>$500</td>
+      <td>$999.99</td>
+    </tr>
+    <tr>
+      <td>VIP 5</td>
+      <td>$1000</td>
+      <td>$1999.99</td>
+    </tr>
+    <tr>
+      <td>VIP 6</td>
+      <td>$2000</td>
+      <td>$4999.99</td>
+    </tr>
+    <tr>
+      <td>VIP 7</td>
+      <td>$5000</td>
+      <td>Acima de $5000</td>
+    </tr>
+  </table>
 
 </body>
 </html>
