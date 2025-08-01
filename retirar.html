@@ -208,6 +208,13 @@
       // Adicionar atividade de retirada
       adicionarAtividade(userId, 'Retirada Solicitada', `Você solicitou um saque de ${valor.toFixed(6)} USDT para o endereço ${endereco}.`);
 
+      // Registrar a retirada no banco
+      db.ref('usuarios/' + userId + '/retiradas').push({
+        valor: valor,
+        endereco: endereco,
+        data: Date.now()
+      });
+
       mostrarNotificacao(`✅ Retirada de ${valor.toFixed(6)} USDT enviada para ${endereco}.`);
       setTimeout(() => window.location.href = 'index.html', 3500);
     }
