@@ -1,4 +1,3 @@
-<!-- pagamento.html -->
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -52,6 +51,24 @@
       cursor: pointer;
       font-weight: bold;
     }
+
+    /* Estilo da bolinha de carregamento */
+    .loader {
+      border: 4px solid #f3f3f3;
+      border-top: 4px solid #00ffcc;
+      border-radius: 50%;
+      width: 24px;
+      height: 24px;
+      animation: spin 1s linear infinite;
+      margin-left: 10px;
+    }
+
+    /* Animação de rotação */
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
   </style>
 </head>
 <body>
@@ -63,10 +80,12 @@
     </div>
 
     <div class="chave" id="chavePix">
-      0xe24dca3069B2a473274CCAf64CD5083075f9f3Fa
+      123e4567-usdt-chave-pix-bep20
     </div>
 
-    <button onclick="copiarChave()">Copiar Chave</button>
+    <button onclick="copiarChave()">Copiar Chave
+      <span id="loading" class="loader" style="display:none;"></span>
+    </button>
   </div>
 
   <!-- Firebase SDKs -->
@@ -89,19 +108,21 @@
     // Inicializa o Firebase
     firebase.initializeApp(firebaseConfig);
     const database = firebase.database();
-  </script>
 
-  <script>
     const valor = localStorage.getItem("valorRecarga") || "0";
     const rede = localStorage.getItem("redeSelecionada") || "BEP20-USDT";
     document.getElementById("mensagem-valor").innerText = `Copie a chave abaixo e envie exatamente $${valor} via ${rede} usando sua corretora de preferência.`;
 
     function copiarChave() {
       const chave = document.getElementById("chavePix").innerText;
+      // Mostrar o loader de carregamento
+      document.getElementById("loading").style.display = "inline-block";
       navigator.clipboard.writeText(chave).then(() => {
         alert("Chave copiada!");
-        // Redireciona para a página de confirmação
-        window.location.href = "confirmar-recarga.html";
+        // Esperar 2 segundos para a animação antes de redirecionar
+        setTimeout(() => {
+          window.location.href = "confirmar-recarga.html";
+        }, 2000); // 2 segundos de espera
       });
     }
   </script>
