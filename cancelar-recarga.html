@@ -1,1 +1,61 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Recarga Cancelada</title>
+  <style>
+    body {
+      background: #0a0f2c;
+      color: white;
+      font-family: Arial, sans-serif;
+      padding: 20px;
+    }
 
+    .box {
+      background: #0b0f3b;
+      padding: 20px;
+      border-radius: 10px;
+      border: 1px solid #00ffcc;
+      text-align: center;
+    }
+
+    h2 {
+      color: #00ffcc;
+      font-size: 24px;
+    }
+
+    p {
+      font-size: 18px;
+      margin-top: 15px;
+    }
+
+    button {
+      margin-top: 25px;
+      width: 100%;
+      padding: 12px;
+      background-color: #00ffcc;
+      color: #000;
+      border: none;
+      border-radius: 8px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div class="box">
+    <h2>⚠️ Recarga Cancelada</h2>
+    <p>Você cancelou a recarga. Caso tenha feito isso por engano, você pode tentar novamente.</p>
+
+    <button onclick="redirecionar()">Voltar para a página de recarga</button>
+  </div>
+
+  <script>
+    // Função para redirecionar o usuário de volta à página de recarga
+    function redirecionar() {
+      window.location.href = "tela-principal.html"; // Página de recarga, ou onde o usuário deve voltar
+    }
+  </script>
+</body>
+</html>
