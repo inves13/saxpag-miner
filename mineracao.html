@@ -111,7 +111,7 @@
     function atualizarVipEComputacao() {
       const vipIndex = vipConfig.findIndex(v => mineracao.saldo >= v.min && mineracao.saldo < v.max);
       mineracao.vip = vipIndex + 1;
-      mineracao.poder = mineracao.vip * 10;
+      mineracao.poder = mineracao.saldo; // Agora o poder de mineração é igual ao saldo depositado
     }
 
     function aplicarMineracaoOffline() {
