@@ -87,7 +87,7 @@
   <div class="crypto-list">
     <div class="crypto-item" onclick="enviarPara('bep20-usdt.html', 'BEP20-USDT')">
       <span class="crypto-label">
-        <img src="usdt-icon.png" alt="USDT" style="width: 30px; margin-right: 10px;"> <!-- Imagem da moeda -->
+        <img src="bep20-usdt.webp" alt="USDT" style="width: 30px; margin-right: 10px;"> <!-- Imagem da moeda -->
         BEP20-USDT
       </span> 
       <span class="arrow">➔</span>
@@ -115,25 +115,6 @@
       localStorage.setItem("redeSelecionada", rede);
       window.location.href = pagina;
     }
-  </script>
-
-  <!-- Firebase SDK (não está sendo usado diretamente, apenas para referência) -->
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-
-  <script>
-    const firebaseConfig = {
-      apiKey: "AIzaSyDzOgL6cvc0b4AO0vAEay1CeSAv_-WqaWQ",
-      authDomain: "saxpag-miner.firebaseapp.com",
-      databaseURL: "https://saxpag-miner-default-rtdb.firebaseio.com",
-      projectId: "saxpag-miner",
-      storageBucket: "saxpag-miner.appspot.com",
-      messagingSenderId: "154250189626",
-      appId: "1:154250189626:web:83c232a5c539e3f9fe0e03"
-    };
-
-    firebase.initializeApp(firebaseConfig);
   </script>
 
 </body>
