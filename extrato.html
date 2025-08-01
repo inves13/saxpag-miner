@@ -1,129 +1,196 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Saxpag-miner - VIP</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=0.8, maximum-scale=1.0, user-scalable=no"/>
+  <title>Tabela de Investimentos - SaxPag Miner</title>
   <style>
     body {
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #0a0f1e;
+      color: #fff;
       margin: 0;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: linear-gradient(to bottom, #0d0d0d, #1a1a1a);
-      color: white;
       padding: 20px;
-      text-align: center;
+      overflow-x: hidden;
     }
 
-    h1 {
-      color: #00ffcc;
-      margin-bottom: 30px;
+    header {
+      text-align: center;
+      padding: 20px;
+      background: linear-gradient(to right, #1f2a48, #283c66);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.4);
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 22px;
+      color: #00ffd5;
+      text-shadow: 0 0 10px #00ffd5;
     }
 
     table {
       width: 100%;
-      max-width: 600px;
-      margin: auto;
       border-collapse: collapse;
-      border-radius: 12px;
-      overflow: hidden;
-      box-shadow: 0 0 10px #00ffcc;
+      margin-top: 20px;
+      font-size: 12px;
     }
 
     th, td {
-      padding: 15px;
-      font-size: 18px;
+      padding: 10px;
+      text-align: center;
+      border: 1px solid #1a3a6d;
     }
 
-    tr:nth-child(odd) {
-      background-color: #111;
-    }
-
-    tr:nth-child(even) {
-      background-color: #222;
-    }
-
-    td:first-child {
-      font-weight: bold;
-      color: #00ffcc;
-    }
-
-    td:last-child {
+    th {
+      background: linear-gradient(to right, #00bfa6, #00ffd5);
       color: #fff;
     }
 
-    .menu {
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      width: 100%;
-      background-color: #111;
+    tr:nth-child(even) {
+      background-color: #1a3a6d;
+    }
+
+    tr:nth-child(odd) {
+      background-color: #283c66;
+    }
+
+    .btn-recarregar {
+      padding: 8px 15px;
+      background: #00bfa6;
+      border: none;
+      border-radius: 15px;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.3s ease;
+      font-size: 12px;
+    }
+
+    .btn-recarregar:hover {
+      background: #00ffd5;
+    }
+
+    .info-box {
+      background: #1a3a6d;
+      border-radius: 10px;
+      margin: 20px 0;
+      padding: 10px;
+      text-align: center;
+      font-size: 14px;
+    }
+
+    .info-box h2 {
+      font-size: 16px;
+      color: #00ffd5;
+    }
+
+    .value {
+      font-size: 18px;
+      color: #00ffd5;
+      font-weight: bold;
+    }
+
+    .vip-status {
+      font-size: 14px;
+      margin-bottom: 10px;
+    }
+
+    .record-buttons {
       display: flex;
       justify-content: space-around;
-      padding: 10px 0;
-      border-top: 1px solid #333;
+      margin: 15px 10px;
     }
 
-    .menu div {
-      color: white;
-      font-size: 14px;
+    .record-buttons button {
+      flex: 1;
+      margin: 0 5px;
+      padding: 10px;
+      border-radius: 10px;
+      background: #1A3A6D;
+      color: #fff;
+      border: none;
+      font-size: 11px;
+    }
+
+    .mining-balance {
       text-align: center;
+      font-size: 18px;
+      margin-top: 10px;
+      color: #00ffd5;
+      text-shadow: 0 0 6px #00ffd5;
     }
 
-    .menu div:hover {
-      color: #00ffcc;
-      cursor: pointer;
+    .loader {
+      text-align: center;
+      margin-top: 30px;
+      display: none;
     }
   </style>
 </head>
 <body>
+  <header>
+    <h1>SaxPag Miner - Tabela de Investimentos</h1>
+  </header>
 
-  <h1>Tabela de VIPSaxpag-miner </h1>
+  <div class="info-box">
+    <h2>Invista a partir de <span class="value">$10 USDT</span> para começar a minerar e aumentar seu poder de computação!</h2>
+  </div>
 
   <table>
-    <tr>
-      <td>VIP 1</td>
-      <td>$0 - $49,99</td>
-    </tr>
-    <tr>
-      <td>VIP 2</td>
-      <td>$50 - $199,99</td>
-    </tr>
-    <tr>
-      <td>VIP 3</td>
-      <td>$200 - $499,99</td>
-    </tr>
-    <tr>
-      <td>VIP 4</td>
-      <td>$500 - $999,99</td>
-    </tr>
-    <tr>
-      <td>VIP 5</td>
-      <td>$1000 - $1499,99</td>
-    </tr>
-    <tr>
-      <td>VIP 6</td>
-      <td>$1500 - $1999,99</td>
-    </tr>
-    <tr>
-      <td>VIP 7</td>
-      <td>$2000 ou mais</td>
-    </tr>
+    <thead>
+      <tr>
+        <th>Pacote de Investimento</th>
+        <th>Valor de Investimento (USDT)</th>
+        <th>Rendimento Diário</th>
+        <th>Ação</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Pacote Básico (VIP 1)</td>
+        <td>$10 - $69</td>
+        <td>0.5% diário</td>
+        <td><a href="recarregar.html" class="btn-recarregar">Recarregar</a></td>
+      </tr>
+      <tr>
+        <td>Pacote Intermediário (VIP 2)</td>
+        <td>$70 - $199</td>
+        <td>3.0% diário</td>
+        <td><a href="recarregar.html" class="btn-recarregar">Recarregar</a></td>
+      </tr>
+      <tr>
+        <td>Pacote Avançado (VIP 3)</td>
+        <td>$200 - $999</td>
+        <td>5.0% diário</td>
+        <td><a href="recarregar.html" class="btn-recarregar">Recarregar</a></td>
+      </tr>
+      <tr>
+        <td>Pacote Premium (VIP 4)</td>
+        <td>$1000 - $2999</td>
+        <td>6.0% diário</td>
+        <td><a href="recarregar.html" class="btn-recarregar">Recarregar</a></td>
+      </tr>
+      <tr>
+        <td>Pacote Elite (VIP 5)</td>
+        <td>$3000 - $7999</td>
+        <td>7.0% diário</td>
+        <td><a href="recarregar.html" class="btn-recarregar">Recarregar</a></td>
+      </tr>
+      <tr>
+        <td>Pacote Ouro (VIP 6)</td>
+        <td>$8000 - $30000</td>
+        <td>8.0% diário</td>
+        <td><a href="recarregar.html" class="btn-recarregar">Recarregar</a></td>
+      </tr>
+      <tr>
+        <td>Pacote Diamante (VIP 7)</td>
+        <td>$30000+</td>
+        <td>9.0% diário</td>
+        <td><a href="recarregar.html" class="btn-recarregar">Recarregar</a></td>
+      </tr>
+    </tbody>
   </table>
-  <!-- Firebase SDKs -->
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-  <script>
-    const firebaseConfig = {
-      apiKey: "AIzaSyDzOgL6cvc0b4AO0vAEay1CeSAv_-WqaWQ",
-      authDomain: "saxpag-miner.firebaseapp.com",
-      databaseURL: "https://saxpag-miner-default-rtdb.firebaseio.com",
-      projectId: "saxpag-miner",
-      storageBucket: "saxpag-miner.firebasestorage.app",
-      messagingSenderId: "154250189626",
-      appId: "1:154250189626:web:83c232a5c539e3f9fe0e03",
-      measurementId: "G-LEV5TL9P7H"
-    };
-    firebase.initializeApp(firebaseConfig);
-  </script>
+  <div class="loader" id="loader"><span>Carregando usuário...</span></div>
+
 </body>
 </html>
