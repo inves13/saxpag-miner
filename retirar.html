@@ -199,11 +199,13 @@
       saldo -= valor;
       await db.ref("usuarios/" + userId).update({ rendaDiaria: saldo });
 
+      // Atualizando carteira de corretagem
       const snapCarteira = await db.ref("usuarios/" + userId + "/carteiraCorretagem").once("value");
       let carteiraCorretagem = parseFloat(snapCarteira.val() || 0);
       carteiraCorretagem += valor;
       await db.ref("usuarios/" + userId).update({ carteiraCorretagem });
 
+      // Adicionar atividade de retirada
       adicionarAtividade(userId, 'Retirada Solicitada', `Você solicitou um saque de ${valor.toFixed(6)} USDT para o endereço ${endereco}.`);
 
       mostrarNotificacao(`✅ Retirada de ${valor.toFixed(6)} USDT enviada para ${endereco}.`);
