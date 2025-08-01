@@ -66,6 +66,14 @@
       color: #000;
       font-weight: bold;
     }
+
+    /* Novo estilo para mostrar o valor selecionado */
+    .valor-selecionado {
+      margin-top: 20px;
+      text-align: center;
+      font-size: 18px;
+      color: #00ffcc;
+    }
   </style>
 </head>
 <body>
@@ -82,6 +90,11 @@
       <div class="valor-btn" onclick="selecionarValor(500)">$500</div>
       <div class="valor-btn" onclick="selecionarValor(1000)">$1000</div>
     </div>
+  </div>
+
+  <!-- Exibir o valor selecionado -->
+  <div class="valor-selecionado">
+    <span id="label-usdt">Nenhum valor selecionado</span>
   </div>
 
   <div class="crypto-list">
@@ -122,6 +135,7 @@
       event.target.classList.add("selected");
 
       valorSelecionado = valor;
+      // Agora, ao selecionar o valor, o texto será exibido no elemento correto
       document.getElementById("label-usdt").innerText = `BEP20-USDT ${valorSelecionado}`;
     }
 
