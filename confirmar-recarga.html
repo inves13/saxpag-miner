@@ -1,4 +1,3 @@
-<!-- confirmar-recarga.html -->
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -42,13 +41,46 @@
       font-weight: bold;
       cursor: pointer;
     }
+
+    /* Estilo da bolinha de carregamento */
+    .loader {
+      border: 4px solid #f3f3f3;
+      border-top: 4px solid #00ffcc;
+      border-radius: 50%;
+      width: 24px;
+      height: 24px;
+      animation: spin 1s linear infinite;
+      margin-left: 10px;
+    }
+
+    /* Animação de rotação */
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .countdown {
+      font-size: 18px;
+      text-align: center;
+      margin-top: 20px;
+      color: #ffcc00;
+    }
   </style>
 </head>
 <body>
   <div class="box">
     <h2>📩 Confirmar Recarga</h2>
     <p id="resumo">Carregando informações...</p>
+
+    <div id="loadingContainer" style="display: none;">
+      <span>Processando...</span>
+      <span id="loader" class="loader"></span>
+    </div>
+
     <button onclick="confirmarRecarga()">Confirmar que enviei</button>
+    <button onclick="cancelarRecarga()">Cancelar</button>
+
+    <div id="countdown" class="countdown">Tempo restante: <span id="timer">60</span> segundos</div>
   </div>
 
   <script type="module">
@@ -82,8 +114,23 @@
     // Mostrar resumo
     document.getElementById("resumo").innerText = `Você selecionou recarregar $${valor} usando a rede ${rede}.\n\nEnvie para a chave:\n${chave}\n\nApós o envio, clique no botão abaixo para confirmar.`;
 
-    // Enviar confirmação
+    // Função para iniciar a contagem regressiva
+    let countdown = 60;
+    const timerElement = document.getElementById('timer');
+    const countdownInterval = setInterval(function() {
+      countdown--;
+      timerElement.innerText = countdown;
+      if (countdown <= 0) {
+        clearInterval(countdownInterval);
+        alert("Tempo esgotado!");
+        window.location.href = "timeout.html"; // Redireciona para uma página caso o tempo se esgote
+      }
+    }, 1000);
+
+    // Função de confirmar recarga
     window.confirmarRecarga = function () {
+      // Mostrar bolinha de carregamento
+      document.getElementById("loadingContainer").style.display = "block";
       const dados = {
         valor,
         rede,
@@ -94,12 +141,20 @@
 
       push(ref(db, "confirmacoesRecarga"), dados)
         .then(() => {
-          alert("✅ Recarga confirmada! Aguarde a verificação.");
-          window.location.href = "confirmar-recarregar.html"; // Redirecionar após confirmação
+          setTimeout(() => {
+            alert("✅ Recarga confirmada! Aguarde a verificação.");
+            window.location.href = "confirmar-recarregar.html"; // Redirecionar após confirmação
+          }, 2000); // Espera 2 segundos para a animação de carregamento
         })
         .catch((error) => {
           alert("❌ Erro ao confirmar recarga: " + error.message);
         });
+    };
+
+    // Função para cancelar recarga
+    window.cancelarRecarga = function () {
+      alert("Recarga cancelada.");
+      window.location.href = "cancelar-recarga.html"; // Redirecionar para a página de cancelamento
     };
   </script>
 </body>
