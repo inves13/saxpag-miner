@@ -79,6 +79,7 @@
   <div class="atividade-container" id="atividadeContainer">
     <div class="sem-atividade">Carregando atividades...</div>
   </div>
+
  <!-- Firebase SDKs -->
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
@@ -115,6 +116,7 @@
 
     let atividades = [];
     let recargas = [];
+    let retiradas = [];
 
     // Atividades pessoais do usuário
     const atividadesPromise = db.ref('usuarios/' + user.uid + '/atividades').once('value').then(snapshot => {
@@ -148,9 +150,24 @@
       }
     });
 
-    // Quando terminar as duas buscas, junta e exibe tudo
-    Promise.all([atividadesPromise, recargasPromise]).then(() => {
-      const todas = [...atividades, ...recargas];
+    // Retiradas do usuário
+    const retiradasPromise = db.ref('usuarios/' + user.uid + '/retiradas').once('value').then(snapshot => {
+      if (snapshot.exists()) {
+        snapshot.forEach(child => {
+          const data = child.val();
+          retiradas.push({
+            tipo: 'retirada',
+            valor: data.valor,
+            endereco: data.endereco,
+            dataHora: new Date(data.data)
+          });
+        });
+      }
+    });
+
+    // Quando terminar as três buscas, junta e exibe tudo
+    Promise.all([atividadesPromise, recargasPromise, retiradasPromise]).then(() => {
+      const todas = [...atividades, ...recargas, ...retiradas];
       todas.sort((a, b) => b.dataHora - a.dataHora); // mais recente primeiro
 
       if (todas.length === 0) {
@@ -173,6 +190,13 @@
             <h3>💰 Recarga Confirmada</h3>
             <p>Valor: R$ ${item.valor}</p>
             <p>Rede: ${item.rede}</p>
+            <p><small>${item.dataHora.toLocaleString()}</small></p>
+          `;
+        } else if (item.tipo === 'retirada') {
+          div.innerHTML = `
+            <h3>💸 Retirada Solicitada</h3>
+            <p>Valor: R$ ${item.valor}</p>
+            <p>Endereço: ${item.endereco}</p>
             <p><small>${item.dataHora.toLocaleString()}</small></p>
           `;
         }
