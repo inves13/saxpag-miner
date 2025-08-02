@@ -123,6 +123,22 @@
       margin-top: 15px;
       display: none; /* Começa oculto */
     }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 15px;
+    }
+    table, th, td {
+      border: 1px solid #ddd;
+    }
+    th, td {
+      padding: 10px;
+      text-align: left;
+    }
+    th {
+      background-color: #1c3c56;
+      color: white;
+    }
   </style>
 </head>
 <body>
@@ -282,11 +298,10 @@
         <table>
           <thead>
             <tr>
-              <th>Nome</th>
               <th>E-mail</th>
-              <th>Recarga</th>
-              <th>Comissão</th>
-              <th>Retirada</th>
+              <th>Data de Cadastro</th>
+              <th>Valor do Investimento</th>
+              <th>Plano Ativado</th>
             </tr>
           </thead>
           <tbody>
@@ -294,21 +309,17 @@
       nivelDados.forEach(u => {
         detalhes += `
           <tr>
-            <td>${u.nome || 'Desconhecido'}</td>
             <td>${u.email || 'Não informado'}</td>
-            <td>$${u.recarga || 0}</td>
-            <td>$${u.comissao || 0}</td>
-            <td>$${u.retirada || 0}</td>
+            <td>${u.dataCadastro || 'Não disponível'}</td>
+            <td>$${u.valorInvestido || 0}</td>
+            <td>${u.planoAtivado || 'Não especificado'}</td>
           </tr>
         `;
       });
+      detalhes += `</tbody></table>`;
 
-      detalhes += "</tbody></table>";
-
-      // Exibe a seção de detalhes
-      const detalheSection = document.getElementById(`detalhesNível${n}`);
-      detalheSection.innerHTML = detalhes;
-      detalheSection.style.display = "block"; // Torna visível
+      document.getElementById(`detalhesNível${n}`).innerHTML = detalhes;
+      document.getElementById(`detalhesNível${n}`).style.display = 'block'; // Exibe o conteúdo
     }
   </script>
 </body>
