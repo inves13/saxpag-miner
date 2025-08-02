@@ -163,9 +163,17 @@
     }
 
     async function mostrarSaldo() {
-      const snap = await db.ref("usuarios/" + userId + "/rendaDiaria").once("value");
-      const saldo = parseFloat(snap.val() || 0);
+      const snap = await db.ref("usuarios/" + userId).once("value");
+      const data = snap.val() || {};
+      const saldo = parseFloat(data.rendaDiaria || 0);
+      const vip = data.vip || 0; // Pegando o nível de VIP do usuário
+
+      // Atualiza o nível VIP e o valor da recarga com o saldo
       document.getElementById("saldo").innerText = "$" + saldo.toFixed(6) + " USDT";
+
+      // Atualiza o nível de VIP na página
+      document.getElementById("vipLevel").innerText = `VIP${vip}`;
+      
       calcularTaxas();
     }
 
@@ -188,13 +196,26 @@
         return;
       }
 
-      // Buscar se o usuário tem recargas confirmadas
+      // Atualizando o VIP quando uma recarga é feita
       const snapRecarga = await db.ref("confirmacoesRecarga").orderByChild("usuario").equalTo(userId).once("value");
       const recargas = snapRecarga.val();
-      
-      if (!recargas || Object.keys(recargas).length < 2) {  // Verifica se tem pelo menos 2 recargas confirmadas
-        mostrarNotificacao("⚠️ Você precisa fazer pelo menos duas recargas antes de realizar um saque.");
-        return;
+
+      // Verificando a recarga e atualizando o nível de VIP
+      if (recargas) {
+        const valorRecarga = Object.values(recargas)[0].valor; // Pega o valor da última recarga
+        let novoVIP = 0;
+
+        // Atualizando o VIP com base na recarga
+        if (valorRecarga >= 10000) novoVIP = 6;
+        else if (valorRecarga >= 8000) novoVIP = 5;
+        else if (valorRecarga >= 3000) novoVIP = 4;
+        else if (valorRecarga >= 1000) novoVIP = 3;
+        else if (valorRecarga >= 200) novoVIP = 2;
+        else if (valorRecarga >= 10) novoVIP = 1;
+
+        // Atualizando o banco de dados
+        await db.ref("usuarios/" + userId).update({ vip: novoVIP });
+        document.getElementById("vipLevel").innerText = `VIP${novoVIP}`;
       }
 
       const snap = await db.ref("usuarios/" + userId + "/rendaDiaria").once("value");
