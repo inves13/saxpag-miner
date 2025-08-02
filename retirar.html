@@ -12,7 +12,7 @@
   <style>
     body {
       font-family: Arial, sans-serif;
-      background: #0a0e2a; /* Azul escuro elegante */
+      background: #0a0e2a;
       color: #fff;
       padding: 20px;
       max-width: 480px;
@@ -188,12 +188,12 @@
         return;
       }
 
-      // Buscar se o usuário tem recargas registradas
-      const snapRecarga = await db.ref("usuarios/" + userId + "/recargas").once("value");
-      const recarga = snapRecarga.val();
+      // Buscar se o usuário tem recargas confirmadas
+      const snapRecarga = await db.ref("confirmacoesRecarga").orderByChild("usuario").equalTo(userId).once("value");
+      const recargas = snapRecarga.val();
       
-      if (!recarga || recarga.length === 0) {
-        mostrarNotificacao("⚠️ Você precisa fazer uma recarga antes de realizar um saque.");
+      if (!recargas || Object.keys(recargas).length < 2) {  // Verifica se tem pelo menos 2 recargas confirmadas
+        mostrarNotificacao("⚠️ Você precisa fazer pelo menos duas recargas antes de realizar um saque.");
         return;
       }
 
