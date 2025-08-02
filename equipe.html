@@ -8,88 +8,91 @@
     body {
       margin: 0;
       font-family: Arial, sans-serif;
-      background: linear-gradient(to bottom, #000028, #001640);
+      background: linear-gradient(to bottom, #001f2d, #00334d);
       color: white;
       display: flex;
       flex-direction: column;
       min-height: 100vh;
     }
     header {
-      background: linear-gradient(to right, #1a2c3b, #0a2f2f);
-      padding: 10px 20px;
+      background: linear-gradient(to right, #006064, #004d4d);
+      padding: 20px 30px;
       display: flex;
       justify-content: space-between;
       align-items: center;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
     }
     .logo {
       font-weight: bold;
-      font-size: 20px;
-      color: #00bfff;
+      font-size: 24px;
+      color: #00bcd4;
     }
     .idioma {
-      font-size: 14px;
+      font-size: 16px;
       color: #ccc;
     }
     main {
       flex: 1;
-      padding: 15px 20px;
-      background: #0e1e2a;
-      margin: 10px 20px;
+      padding: 20px 25px;
+      background: #0e2a3b;
+      margin: 15px;
       border-radius: 15px;
       overflow-y: auto;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
     }
     h2 {
       margin-top: 0;
-      color: #00bfff;
+      color: #00bcd4;
       text-align: center;
     }
     .comissao-box, .total-box {
-      background: #142c43;
+      background: #1c3c56;
       border-radius: 10px;
-      padding: 12px 15px;
-      margin-bottom: 15px;
+      padding: 15px 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
     }
     .comissao-box p, .total-box p {
-      margin: 6px 0;
-      font-size: 14px;
+      margin: 10px 0;
+      font-size: 16px;
+      color: #f1f1f1;
     }
     .codigo-convite, .link-convite {
       display: flex;
       align-items: center;
-      margin: 10px 0;
+      margin: 15px 0;
       background: #1a2f4a;
       border-radius: 8px;
-      padding: 8px 10px;
+      padding: 12px 15px;
       font-size: 16px;
-      user-select: all;
       justify-content: space-between;
     }
     .btn-copiar {
-      margin-left: 10px;
-      background: #00bfff;
+      background: #00bcd4;
       border: none;
       color: white;
-      padding: 6px 10px;
+      padding: 8px 12px;
       border-radius: 6px;
       cursor: pointer;
       font-size: 14px;
       transition: background 0.3s ease;
     }
     .btn-copiar:hover {
-      background: #0091cc;
+      background: #0097a7;
     }
     .niveles {
-      margin-top: 20px;
+      margin-top: 25px;
     }
     .nivel {
-      background: #142c43;
+      background: #1c3c56;
       border-radius: 10px;
-      margin-bottom: 12px;
-      padding: 10px 15px;
+      margin-bottom: 15px;
+      padding: 15px;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      font-size: 14px;
+      font-size: 16px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
     }
     .nivel-info {
       display: flex;
@@ -98,20 +101,27 @@
       align-items: center;
     }
     .nivel-info > div {
-      min-width: 90px;
+      min-width: 120px;
     }
     .btn-detalhes {
-      background: #00bfff;
+      background: #00bcd4;
       border: none;
-      padding: 6px 12px;
+      padding: 8px 16px;
       border-radius: 8px;
       color: white;
       cursor: pointer;
+      font-size: 14px;
       transition: background 0.3s ease;
-      font-size: 13px;
     }
     .btn-detalhes:hover {
-      background: #0091cc;
+      background: #0097a7;
+    }
+    .detalhes-nivel {
+      background: #142c43;
+      border-radius: 10px;
+      padding: 20px;
+      margin-top: 15px;
+      display: none; /* Começa oculto */
     }
   </style>
 </head>
@@ -229,7 +239,7 @@
           validos: validos.length
         };
 
-        // Somar recarga e retirada da equipe
+        // Somar recarga, retirada e comissão da equipe
         filtrado.forEach(user => {
           totalRecarga += user.recarga || 0;
           totalRetirada += user.retirada || 0;
@@ -243,10 +253,10 @@
       document.getElementById("comissaoTotal").innerText = `$${totalComissao.toFixed(2)}`;
       document.getElementById("recargaTotal").innerText = `$${totalRecarga.toFixed(2)}`;
       document.getElementById("retiradaTotal").innerText = `$${totalRetirada.toFixed(2)}`;
-      renderNiveis(niveis);
+      renderNiveis(niveis, todos); // Passando a lista de todos os indicados
     });
 
-    function renderNiveis(dados) {
+    function renderNiveis(dados, todos) {
       const container = document.getElementById('listaNiveis');
       container.innerHTML = "";
       for (let i = 1; i <= 6; i++) {
@@ -258,14 +268,47 @@
               <div>Número de pessoas: ${nivel.total}</div>
               <div>Válido: ${nivel.validos}</div>
             </div>
-            <button class="btn-detalhes" onclick="detalhesNivel(${i})">Detalhes</button>
+            <button class="btn-detalhes" onclick="detalhesNivel(${i}, ${JSON.stringify(todos)})">Detalhes</button>
           </div>
+          <div id="detalhesNível${i}" class="detalhes-nivel"></div> <!-- Área de detalhes -->
         `;
       }
     }
 
-    function detalhesNivel(n) {
-      alert('Detalhes do nível ' + n + ' ainda serão implementados.');
+    function detalhesNivel(n, todos) {
+      const nivelDados = todos.filter(u => u.nivel === n);
+      let detalhes = `
+        <h3>Detalhes do Nível ${n}</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>Nome</th>
+              <th>E-mail</th>
+              <th>Recarga</th>
+              <th>Comissão</th>
+              <th>Retirada</th>
+            </tr>
+          </thead>
+          <tbody>
+      `;
+      nivelDados.forEach(u => {
+        detalhes += `
+          <tr>
+            <td>${u.nome || 'Desconhecido'}</td>
+            <td>${u.email || 'Não informado'}</td>
+            <td>$${u.recarga || 0}</td>
+            <td>$${u.comissao || 0}</td>
+            <td>$${u.retirada || 0}</td>
+          </tr>
+        `;
+      });
+
+      detalhes += "</tbody></table>";
+
+      // Exibe a seção de detalhes
+      const detalheSection = document.getElementById(`detalhesNível${n}`);
+      detalheSection.innerHTML = detalhes;
+      detalheSection.style.display = "block"; // Torna visível
     }
   </script>
 </body>
