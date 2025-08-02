@@ -11,7 +11,6 @@
       background: #111;
       color: #fff;
     }
-
     header {
       background-color: #222;
       padding: 15px;
@@ -20,11 +19,9 @@
       font-weight: bold;
       border-bottom: 1px solid #444;
     }
-
     .atividade-container {
       padding: 20px;
     }
-
     .atividade-item {
       background: #1e1e1e;
       margin-bottom: 15px;
@@ -32,24 +29,20 @@
       border-radius: 8px;
       border-left: 4px solid #0f0;
     }
-
     .atividade-item h3 {
       margin: 0 0 5px 0;
       font-size: 18px;
     }
-
     .atividade-item p {
       margin: 0;
       color: #ccc;
       font-size: 14px;
     }
-
     .sem-atividade {
       text-align: center;
       color: #777;
       margin-top: 50px;
     }
-
     footer {
       position: fixed;
       bottom: 0;
@@ -59,13 +52,11 @@
       justify-content: space-around;
       padding: 10px 0;
     }
-
     footer div {
       text-align: center;
       color: white;
       font-size: 14px;
     }
-
     footer div:hover {
       color: #0f0;
       cursor: pointer;
@@ -73,138 +64,137 @@
   </style>
 </head>
 <body onload="checkLogin()">
-
   <header>📊 Atividade</header>
-
   <div class="atividade-container" id="atividadeContainer">
     <div class="sem-atividade">Carregando atividades...</div>
   </div>
-
- <!-- Firebase SDKs -->
+  <!-- Firebase SDKs -->
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
-<script>
-  const firebaseConfig = {
-    apiKey: "AIzaSyDzOgL6cvc0b4AO0vAEay1CeSAv_-WqaWQ",
-    authDomain: "saxpag-miner.firebaseapp.com",
-    databaseURL: "https://saxpag-miner-default-rtdb.firebaseio.com",
-    projectId: "saxpag-miner",
-    storageBucket: "saxpag-miner.appspot.com",
-    messagingSenderId: "154250189626",
-    appId: "1:154250189626:web:83c232a5c539e3f9fe0e03",
-    measurementId: "G-LEV5TL9P7H"
-  };
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyDzOgL6cvc0b4AO0vAEay1CeSAv_-WqaWQ",
+      authDomain: "saxpag-miner.firebaseapp.com",
+      databaseURL: "https://saxpag-miner-default-rtdb.firebaseio.com",
+      projectId: "saxpag-miner",
+      storageBucket: "saxpag-miner.appspot.com",
+      messagingSenderId: "154250189626",
+      appId: "1:154250189626:web:83c232a5c539e3f9fe0e03",
+      measurementId: "G-LEV5TL9P7H"
+    };
 
-  firebase.initializeApp(firebaseConfig);
-  const auth = firebase.auth();
-  const db = firebase.database();
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.database();
 
-  function checkLogin() {
-    auth.onAuthStateChanged(user => {
-      if (!user) {
-        window.location.href = "login.html";
-      } else {
-        carregarTodasAtividades(user);
-      }
-    });
-  }
+    function checkLogin() {
+      auth.onAuthStateChanged(user => {
+        if (!user) {
+          window.location.href = "login.html";
+        } else {
+          carregarTodasAtividades(user);
+        }
+      });
+    }
 
-  function carregarTodasAtividades(user) {
-    const container = document.getElementById('atividadeContainer');
-    container.innerHTML = '';
+    function carregarTodasAtividades(user) {
+      const container = document.getElementById('atividadeContainer');
+      container.innerHTML = '';
 
-    let atividades = [];
-    let recargas = [];
-    let retiradas = [];
+      let atividades = [];
+      let recargas = [];
+      let retiradas = [];
 
-    // Atividades pessoais do usuário
-    const atividadesPromise = db.ref('usuarios/' + user.uid + '/atividades').once('value').then(snapshot => {
-      if (snapshot.exists()) {
-        snapshot.forEach(child => {
-          const data = child.val();
-          atividades.push({
-            tipo: 'atividade',
-            titulo: data.titulo,
-            descricao: data.descricao,
-            dataHora: new Date(data.dataHora)
+      // Atividades pessoais do usuário
+      const atividadesPromise = db.ref('usuarios/' + user.uid + '/atividades').once('value').then(snapshot => {
+        if (snapshot.exists()) {
+          snapshot.forEach(child => {
+            const data = child.val();
+            atividades.push({
+              tipo: 'atividade',
+              titulo: data.titulo,
+              descricao: data.descricao,
+              dataHora: new Date(data.dataHora)
+            });
           });
-        });
-      }
-    });
+        }
+      });
 
-    // Recargas específicas do usuário (usando e-mail)
-    const recargasPromise = db.ref('recargas').once('value').then(snapshot => {
-      if (snapshot.exists()) {
-        snapshot.forEach(child => {
-          const data = child.val();
-          if (data.usuario === user.email && data.status === 'confirmado') {
-            recargas.push({
-              tipo: 'recarga',
+      // Recargas específicas do usuário (usando e-mail)
+      const recargasPromise = db.ref('recargas').once('value').then(snapshot => {
+        if (snapshot.exists()) {
+          snapshot.forEach(child => {
+            const data = child.val();
+            if (data.usuario === user.email && data.status === 'confirmado') {
+              recargas.push({
+                tipo: 'recarga',
+                valor: data.valor,
+                rede: data.rede,
+                dataHora: new Date(data.data)
+              });
+            }
+          });
+        }
+      });
+
+      // Retiradas do usuário
+      const retiradasPromise = db.ref('usuarios/' + user.uid + '/retiradas').once('value').then(snapshot => {
+        if (snapshot.exists()) {
+          snapshot.forEach(child => {
+            const data = child.val();
+            const status = data.status === 'em revisão' ? 'Em Revisão' : data.status;
+            retiradas.push({
+              tipo: 'retirada',
               valor: data.valor,
-              rede: data.rede,
+              endereco: data.endereco,
+              status: status,
               dataHora: new Date(data.data)
             });
-          }
-        });
-      }
-    });
-
-    // Retiradas do usuário
-    const retiradasPromise = db.ref('usuarios/' + user.uid + '/retiradas').once('value').then(snapshot => {
-      if (snapshot.exists()) {
-        snapshot.forEach(child => {
-          const data = child.val();
-          retiradas.push({
-            tipo: 'retirada',
-            valor: data.valor,
-            endereco: data.endereco,
-            dataHora: new Date(data.data)
           });
-        });
-      }
-    });
+        }
+      });
 
-    // Quando terminar as três buscas, junta e exibe tudo
-    Promise.all([atividadesPromise, recargasPromise, retiradasPromise]).then(() => {
-      const todas = [...atividades, ...recargas, ...retiradas];
-      todas.sort((a, b) => b.dataHora - a.dataHora); // mais recente primeiro
+      // Quando terminar as três buscas, junta e exibe tudo
+      Promise.all([atividadesPromise, recargasPromise, retiradasPromise]).then(() => {
+        const todas = [...atividades, ...recargas, ...retiradas];
+        todas.sort((a, b) => b.dataHora - a.dataHora); // mais recente primeiro
 
-      if (todas.length === 0) {
-        container.innerHTML = '<div class="sem-atividade">Nenhuma atividade encontrada.</div>';
-        return;
-      }
-
-      todas.forEach(item => {
-        const div = document.createElement('div');
-        div.className = 'atividade-item';
-
-        if (item.tipo === 'atividade') {
-          div.innerHTML = `
-            <h3>${item.titulo}</h3>
-            <p>${item.descricao}</p>
-            <p><small>${item.dataHora.toLocaleString()}</small></p>
-          `;
-        } else if (item.tipo === 'recarga') {
-          div.innerHTML = `
-            <h3>💰 Recarga Confirmada</h3>
-            <p>Valor: R$ ${item.valor}</p>
-            <p>Rede: ${item.rede}</p>
-            <p><small>${item.dataHora.toLocaleString()}</small></p>
-          `;
-        } else if (item.tipo === 'retirada') {
-          div.innerHTML = `
-            <h3>💸 Retirada Solicitada</h3>
-            <p>Valor: R$ ${item.valor}</p>
-            <p>Endereço: ${item.endereco}</p>
-            <p><small>${item.dataHora.toLocaleString()}</small></p>
-          `;
+        if (todas.length === 0) {
+          container.innerHTML = '<div class="sem-atividade">Nenhuma atividade encontrada.</div>';
+          return;
         }
 
-        container.appendChild(div);
+        todas.forEach(item => {
+          const div = document.createElement('div');
+          div.className = 'atividade-item';
+
+          if (item.tipo === 'atividade') {
+            div.innerHTML = `
+              <h3>${item.titulo}</h3>
+              <p>${item.descricao}</p>
+              <p><small>${item.dataHora.toLocaleString()}</small></p>
+            `;
+          } else if (item.tipo === 'recarga') {
+            div.innerHTML = `
+              <h3>💰 Recarga Confirmada</h3>
+              <p>Valor: R$ ${item.valor}</p>
+              <p>Rede: ${item.rede}</p>
+              <p><small>${item.dataHora.toLocaleString()}</small></p>
+            `;
+          } else if (item.tipo === 'retirada') {
+            div.innerHTML = `
+              <h3>💸 Retirada Solicitada - Status: ${item.status}</h3>
+              <p>Valor: R$ ${item.valor}</p>
+              <p>Endereço: ${item.endereco}</p>
+              <p><small>${item.dataHora.toLocaleString()}</small></p>
+            `;
+          }
+
+          container.appendChild(div);
+        });
       });
-    });
-  }
-</script>
+    }
+  </script>
 </body>
 </html>
