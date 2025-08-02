@@ -188,6 +188,15 @@
         return;
       }
 
+      // Buscar se o usuário tem recargas registradas
+      const snapRecarga = await db.ref("usuarios/" + userId + "/recargas").once("value");
+      const recarga = snapRecarga.val();
+      
+      if (!recarga || recarga.length === 0) {
+        mostrarNotificacao("⚠️ Você precisa fazer uma recarga antes de realizar um saque.");
+        return;
+      }
+
       const snap = await db.ref("usuarios/" + userId + "/rendaDiaria").once("value");
       let saldo = parseFloat(snap.val() || 0);
 
@@ -199,11 +208,8 @@
       saldo -= valor;
       await db.ref("usuarios/" + userId).update({ rendaDiaria: saldo });
 
-      // Atualizando carteira de corretagem
-      const snapCarteira = await db.ref("usuarios/" + userId + "/carteiraCorretagem").once("value");
-      let carteiraCorretagem = parseFloat(snapCarteira.val() || 0);
-      carteiraCorretagem += valor;
-      await db.ref("usuarios/" + userId).update({ carteiraCorretagem });
+      // Registrar a retirada no painel do administrador
+      registrarRetiradaPainel(userId, valor, endereco);
 
       // Adicionar atividade de retirada
       adicionarAtividade(userId, 'Retirada Solicitada', `Você solicitou um saque de ${valor.toFixed(6)} USDT para o endereço ${endereco}.`);
@@ -235,6 +241,16 @@
       setTimeout(() => {
         div.style.display = "none";
       }, 4000);
+    }
+
+    function registrarRetiradaPainel(userId, valor, endereco) {
+      const dataHora = new Date().toLocaleString();
+      db.ref('painel/retiradas').push({
+        userId: userId,
+        valor: valor,
+        endereco: endereco,
+        dataHora: dataHora
+      });
     }
   </script>
 </body>
