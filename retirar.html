@@ -72,7 +72,6 @@
       line-height: 1.5;
     }
 
-    /* Nova Notificação moderna */
     #notificacao {
       position: fixed;
       bottom: 30px;
@@ -101,7 +100,7 @@
     }
   </style>
 </head>
-<body onload="iniciarCarteira()">
+<body>
   <h2>Retirar</h2>
 
   <p><strong>Ativos disponíveis atualmente</strong></p>
@@ -130,7 +129,6 @@
     Taxa: 2% | Chegada: até 5 minutos</p>
   </div>
 
-  <!-- Notificação -->
   <div id="notificacao"></div>
 
   <script>
@@ -149,6 +147,10 @@
     const db = firebase.database();
     let userId = null;
 
+    window.onload = function() {
+      iniciarCarteira();
+    };
+
     function iniciarCarteira() {
       auth.onAuthStateChanged(user => {
         if (!user) {
@@ -163,27 +165,30 @@
     }
 
     async function mostrarSaldo() {
-      const snap = await db.ref("usuarios/" + userId).once("value");
-      const data = snap.val() || {};
-      const saldo = parseFloat(data.rendaDiaria || 0);
-      const vip = data.vip || 0; // Pegando o nível de VIP do usuário
-
-      // Atualiza o nível VIP e o valor da recarga com o saldo
-      document.getElementById("saldo").innerText = "$" + saldo.toFixed(6) + " USDT";
-
-      // Atualiza o nível de VIP na página
-      document.getElementById("vipLevel").innerText = `VIP${vip}`;
-      
-      calcularTaxas();
+      const saldoElem = document.getElementById("saldo");
+      if (saldoElem) {  // Verifica se o elemento existe
+        const snap = await db.ref("usuarios/" + userId).once("value");
+        const data = snap.val() || {};
+        const saldo = parseFloat(data.rendaDiaria || 0);
+        saldoElem.innerText = "$" + saldo.toFixed(6) + " USDT";
+        calcularTaxas();
+      }
     }
 
     function calcularTaxas() {
       const valor = parseFloat(document.getElementById("valorUsdt").value || '0');
       const taxa = valor * 0.02;
       const chegada = valor - taxa;
-      document.getElementById("taxa").innerText = taxa.toFixed(6) + ' USDT';
-      document.getElementById("impostos").innerText = '0 USDT';
-      document.getElementById("chegada").innerText = chegada.toFixed(6) + ' USDT';
+
+      const taxaElem = document.getElementById("taxa");
+      const impostosElem = document.getElementById("impostos");
+      const chegadaElem = document.getElementById("chegada");
+
+      if (taxaElem && impostosElem && chegadaElem) {  // Verifica se os elementos existem
+        taxaElem.innerText = taxa.toFixed(6) + ' USDT';
+        impostosElem.innerText = '0 USDT';
+        chegadaElem.innerText = chegada.toFixed(6) + ' USDT';
+      }
     }
 
     async function confirmarSaque() {
@@ -196,28 +201,6 @@
         return;
       }
 
-      // Atualizando o VIP quando uma recarga é feita
-      const snapRecarga = await db.ref("confirmacoesRecarga").orderByChild("usuario").equalTo(userId).once("value");
-      const recargas = snapRecarga.val();
-
-      // Verificando a recarga e atualizando o nível de VIP
-      if (recargas) {
-        const valorRecarga = Object.values(recargas)[0].valor; // Pega o valor da última recarga
-        let novoVIP = 0;
-
-        // Atualizando o VIP com base na recarga
-        if (valorRecarga >= 10000) novoVIP = 6;
-        else if (valorRecarga >= 8000) novoVIP = 5;
-        else if (valorRecarga >= 3000) novoVIP = 4;
-        else if (valorRecarga >= 1000) novoVIP = 3;
-        else if (valorRecarga >= 200) novoVIP = 2;
-        else if (valorRecarga >= 10) novoVIP = 1;
-
-        // Atualizando o banco de dados
-        await db.ref("usuarios/" + userId).update({ vip: novoVIP });
-        document.getElementById("vipLevel").innerText = `VIP${novoVIP}`;
-      }
-
       const snap = await db.ref("usuarios/" + userId + "/rendaDiaria").once("value");
       let saldo = parseFloat(snap.val() || 0);
 
@@ -226,23 +209,38 @@
         return;
       }
 
+      const lastWithdrawalSnap = await db.ref("usuarios/" + userId + "/ultimoSaque").once("value");
+      const lastWithdrawal = lastWithdrawalSnap.val();
+
+      if (lastWithdrawal && (Date.now() - lastWithdrawal) < 86400000) {
+        mostrarNotificacao("⚠️ Você só pode sacar uma vez a cada 24 horas.");
+        return;
+      }
+
+      const currentHour = new Date().getHours();
+      if (currentHour < 9 || currentHour > 17) {
+        mostrarNotificacao("⚠️ Saques podem ser feitos apenas entre 09:00 e 17:00.");
+        return;
+      }
+
+      // Subtrai a taxa de 2%
+      const valorFinal = valor - (valor * 0.02);
       saldo -= valor;
-      await db.ref("usuarios/" + userId).update({ rendaDiaria: saldo });
+      await db.ref("usuarios/" + userId).update({ rendaDiaria: saldo, ultimoSaque: Date.now() });
 
-      // Registrar a retirada no painel do administrador
+      // Registrar a retirada no painel do administrador e nas atividades
       registrarRetiradaPainel(userId, valor, endereco);
-
-      // Adicionar atividade de retirada
-      adicionarAtividade(userId, 'Retirada Solicitada', `Você solicitou um saque de ${valor.toFixed(6)} USDT para o endereço ${endereco}.`);
-
-      // Registrar a retirada no banco
+      adicionarAtividade(userId, 'Retirada Solicitada', `Você solicitou um saque de ${valor.toFixed(6)} USDT para o endereço ${endereco}. Status: Aguardando Análise`);
+      
       db.ref('usuarios/' + userId + '/retiradas').push({
         valor: valor,
+        valorFinal: valorFinal,
         endereco: endereco,
-        data: Date.now()
+        data: Date.now(),
+        status: 'Aguardando Análise'
       });
 
-      mostrarNotificacao(`✅ Retirada de ${valor.toFixed(6)} USDT enviada para ${endereco}.`);
+      mostrarNotificacao(`✅ Retirada de ${valor.toFixed(6)} USDT enviada para ${endereco}. Você receberá ${valorFinal.toFixed(6)} USDT após a análise.`);
       setTimeout(() => window.location.href = 'index.html', 3500);
     }
 
@@ -257,11 +255,13 @@
 
     function mostrarNotificacao(mensagem) {
       const div = document.getElementById("notificacao");
-      div.innerText = mensagem;
-      div.style.display = "block";
-      setTimeout(() => {
-        div.style.display = "none";
-      }, 4000);
+      if (div) {  // Verifica se o elemento de notificação existe
+        div.innerText = mensagem;
+        div.style.display = "block";
+        setTimeout(() => {
+          div.style.display = "none";
+        }, 4000);
+      }
     }
 
     function registrarRetiradaPainel(userId, valor, endereco) {
@@ -270,7 +270,8 @@
         userId: userId,
         valor: valor,
         endereco: endereco,
-        dataHora: dataHora
+        dataHora: dataHora,
+        status: 'Aguardando Análise'
       });
     }
   </script>
