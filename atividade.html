@@ -139,17 +139,17 @@
       });
 
       // Retiradas do usuário
-      const retiradasPromise = db.ref('retiradas').once('value').then(snapshot => {
+      const retiradasPromise = db.ref('usuarios/' + user.uid + '/retiradas').once('value').then(snapshot => {
         if (snapshot.exists()) {
           snapshot.forEach(child => {
             const data = child.val();
-            const status = data.status === 'Aprovado' ? 'Aprovado' : (data.status === 'em revisão' ? 'Em Revisão' : 'Status desconhecido');
+            const status = data.status === 'em revisão' ? 'Em Revisão' : data.status;
             retiradas.push({
               tipo: 'retirada',
               valor: data.valor,
               endereco: data.endereco,
               status: status,
-              dataHora: new Date(data.dataHora)
+              dataHora: new Date(data.data)
             });
           });
         }
