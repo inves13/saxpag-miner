@@ -116,6 +116,42 @@
     .bottom-nav div.active {
       color: #ff69b4;
     }
+    /* Estilos para notificações */
+    .notification-container {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      max-height: 80%;
+      overflow-y: auto;
+      width: 300px;
+    }
+    .notification {
+      background-color: #2e3b48;
+      padding: 15px;
+      border-radius: 10px;
+      margin-bottom: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 14px;
+      color: white;
+      animation: slide-up 2s ease-out;
+    }
+    .notification i {
+      margin-right: 10px;
+      font-size: 18px;
+    }
+    .notification-content {
+      flex-grow: 1;
+    }
+    @keyframes slide-up {
+      0% {
+        transform: translateY(100%);
+      }
+      100% {
+        transform: translateY(0);
+      }
+    }
   </style>
 </head>
 <body onload="checkLogin()">
@@ -137,6 +173,11 @@
       <div>Investir Carteira<br><strong id="investido">$0.00</strong></div>
       <div>Carteira de corretagem<br><strong id="carteiraCorretagem">$0.00</strong></div>
     </div>
+  </div>
+
+  <!-- Notificações dinâmicas -->
+  <div class="notification-container" id="notification-container">
+    <!-- As notificações serão inseridas aqui via JavaScript -->
   </div>
 
   <div class="grid-menu">
@@ -248,17 +289,58 @@
       });
     }
 
-    // Função para adicionar a atividade no banco de dados
-    function adicionarAtividade(uid, titulo, descricao) {
-      const atividade = {
-        titulo: titulo,
-        descricao: descricao,
-        dataHora: Date.now()  // Timestamp atual
-      };
+    // Função para adicionar notificações
+    function adicionarNotificacao(nome, valor, tipo) {
+      const notificationContainer = document.getElementById('notification-container');
+      
+      // Verifica se há notificações e remove a anterior
+      if (notificationContainer.children.length > 0) {
+        notificationContainer.removeChild(notificationContainer.children[0]);
+      }
 
-      // Adiciona a atividade no caminho correto
-      db.ref('usuarios/' + uid + '/atividades').push(atividade);
+      const notification = document.createElement('div');
+      notification.classList.add('notification');
+      
+      // Mascarando a parte do e-mail
+      const emailMascarado = nome.replace(/(?<=.{2}).*(?=@)/, '*****');
+
+      notification.innerHTML = `
+        <div class="notification-content">
+          <strong>${emailMascarado}</strong> ${tipo} <strong>${valor} USDT</strong>
+        </div>
+        <i class="fas fa-times" onclick="this.parentElement.remove();"></i>
+      `;
+      notificationContainer.appendChild(notification);
+
+      // Remove a notificação após 5 segundos
+      setTimeout(() => {
+        notification.remove();
+      }, 5000);
     }
+
+    // Simulação de notificações com variações
+    const usuarios = [
+      { email: 'luiscap@gmail.com', valor: '10', tipo: 'Recarregar' },
+      { email: 'lucas123@gmail.com', valor: '20', tipo: 'Sacar' },
+      { email: 'joaosilva@gmail.com', valor: '20', tipo: 'Recarregar' },
+      { email: 'maria.jane@gmail.com', valor: '15', tipo: 'Sacar' },
+      { email: 'andre@exemplo.com', valor: '30', tipo: 'Recarregar' },
+      { email: 'felipe@exemplo.com', valor: '25', tipo: 'Sacar' },
+      { email: 'carla@exemplo.com', valor: '50', tipo: 'Recarregar' },
+      { email: 'ricardo@exemplo.com', valor: '45', tipo: 'Sacar' },
+      { email: 'jose@exemplo.com', valor: '70', tipo: 'Recarregar' },
+      { email: 'ana@exemplo.com', valor: '60', tipo: 'Sacar' },
+      { email: 'lucas@exemplo.com', valor: '90', tipo: 'Recarregar' },
+      { email: 'bruna@exemplo.com', valor: '100', tipo: 'Sacar' }
+    ];
+
+    // Alterando as notificações dinamicamente
+    let i = 0;
+    setInterval(() => {
+      const usuario = usuarios[i % usuarios.length];
+      adicionarNotificacao(usuario.email, usuario.valor, usuario.tipo);
+      i++;
+    }, 10000); // Atualiza a cada 10 segundos
   </script>
 </body>
 </html>
