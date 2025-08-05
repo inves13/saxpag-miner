@@ -2,117 +2,74 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Recarregue Selecione</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Confirmar Recarga</title>
+  <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database-compat.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <style>
     body {
-      margin: 0;
       font-family: Arial, sans-serif;
-      background: linear-gradient(to bottom, #0b0f3b, #041830);
-      color: white;
-    }
-
-    header {
-      padding: 15px;
-      background: #001F4A;
+      background-color: #f5f5f5;
+      padding: 20px;
       text-align: center;
-      font-size: 18px;
-      font-weight: bold;
     }
 
-    .crypto-list, .recarga-box {
-      padding: 10px;
-    }
-
-    .crypto-item {
-      background: rgba(255, 255, 255, 0.05);
-      margin: 8px 0;
-      padding: 15px;
+    .card {
+      background-color: white;
+      padding: 25px;
       border-radius: 10px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      cursor: pointer;
-      border: 1px solid #1f2f45;
+      max-width: 400px;
+      margin: 50px auto;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
     }
 
-    .crypto-label {
+    .titulo {
+      font-size: 22px;
+      margin-bottom: 20px;
+    }
+
+    .dado {
+      font-size: 18px;
+      margin-bottom: 15px;
+      color: #444;
+    }
+
+    button {
+      background-color: #00c853;
+      color: white;
+      border: none;
+      padding: 12px 25px;
       font-size: 16px;
-    }
-
-    .arrow {
-      font-size: 16px;
-      color: #aaa;
-    }
-
-    .valor-recarga {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      margin-top: 10px;
-    }
-
-    .valor-btn {
-      padding: 10px 15px;
-      background-color: #1a2a45;
-      border: 1px solid #00ffcc;
       border-radius: 8px;
       cursor: pointer;
-      font-size: 14px;
     }
 
-    .valor-btn.selected {
-      background-color: #00ffcc;
-      color: #000;
-      font-weight: bold;
+    button:hover {
+      background-color: #009624;
     }
 
-    /* Novo estilo para mostrar o valor selecionado */
-    .valor-selecionado {
-      margin-top: 20px;
-      text-align: center;
-      font-size: 18px;
-      color: #00ffcc;
+    .mensagem {
+      font-size: 15px;
+      color: #666;
+      margin-top: 25px;
     }
   </style>
 </head>
 <body>
 
-  <header>🔙 Recarregue Selecione</header>
+  <div class="card">
+    <div class="titulo">Confirmar Recarga</div>
+    <div class="dado"><strong>Rede:</strong> <span id="rede">BEP20-USDT</span></div>
+    <div class="dado"><strong>Valor:</strong> R$ <span id="valor">0</span></div>
 
-  <div class="recarga-box">
-    <h3 style="text-align:center; color:#00ffcc;">💵 Escolha o valor da recarga</h3>
-    <div class="valor-recarga">
-      <div class="valor-btn" onclick="selecionarValor(10)">$10</div>
-      <div class="valor-btn" onclick="selecionarValor(50)">$50</div>
-      <div class="valor-btn" onclick="selecionarValor(100)">$100</div>
-      <div class="valor-btn" onclick="selecionarValor(200)">$200</div>
-      <div class="valor-btn" onclick="selecionarValor(500)">$500</div>
-      <div class="valor-btn" onclick="selecionarValor(1000)">$1000</div>
-    </div>
+    <button onclick="confirmarRecarga()">Confirmar Recarga</button>
+
+    <div class="mensagem">Após realizar o envio na corretora, confirme aqui para concluir sua recarga.</div>
   </div>
-
-  <!-- Exibir o valor selecionado -->
-  <div class="valor-selecionado">
-    <span id="label-usdt">Nenhum valor selecionado</span>
-  </div>
-
-  <div class="crypto-list">
-    <div class="crypto-item" onclick="enviarPara('bep20-usdt.html', 'BEP20-USDT')">
-      <span class="crypto-label">
-        <img src="bep20-usdt.webp" alt="USDT" style="width: 30px; margin-right: 10px;"> <!-- Imagem da moeda -->
-         USDT - REDE - BEP20
-      </span> 
-      <span class="arrow">➔</span>
-    </div>
-  </div>
-
-  <!-- Firebase JS SDK -->
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
   <script>
+    // Firebase Configuração
     const firebaseConfig = {
       apiKey: "AIzaSyDzOgL6cvc0b4AO0vAEay1CeSAv_-WqaWQ",
       authDomain: "saxpag-miner.firebaseapp.com",
@@ -124,29 +81,40 @@
       measurementId: "G-LEV5TL9P7H"
     };
 
-    // Inicializa o Firebase
     firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
 
-    let valorSelecionado = null;
+    // Pega os dados da URL (rede e valor)
+    const urlParams = new URLSearchParams(window.location.search);
+    const valor = urlParams.get('valor');
+    const rede = urlParams.get('rede');
+    const usuario = urlParams.get('usuario'); // e-mail ou identificador
 
-    function selecionarValor(valor) {
-      const botoes = document.querySelectorAll(".valor-btn");
-      botoes.forEach(btn => btn.classList.remove("selected"));
-      event.target.classList.add("selected");
+    document.getElementById("valor").textContent = valor;
+    document.getElementById("rede").textContent = rede;
 
-      valorSelecionado = valor;
-      // Agora, ao selecionar o valor, o texto será exibido no elemento correto
-      document.getElementById("label-usdt").innerText = `BEP20-USDT ${valorSelecionado}`;
-    }
+    function confirmarRecarga() {
+      const dataAtual = new Date().toLocaleString("pt-BR");
 
-    function enviarPara(pagina, rede) {
-      if (!valorSelecionado) {
-        alert("Por favor, selecione um valor antes de continuar.");
-        return;
-      }
-      localStorage.setItem("valorRecarga", valorSelecionado);
-      localStorage.setItem("redeSelecionada", rede);
-      window.location.href = pagina;
+      const recarga = {
+        usuario: usuario || "desconhecido",
+        valor: parseFloat(valor),
+        rede: rede,
+        data: dataAtual,
+        status: "pendente"
+      };
+
+      db.ref("recargas").push(recarga).then(() => {
+        Swal.fire({
+          icon: 'success',
+          title: 'Recarga Confirmada!',
+          text: 'Sua recarga foi enviada para análise. Aguarde a aprovação.',
+          confirmButtonText: 'OK',
+          confirmButtonColor: '#00c853'
+        }).then(() => {
+          window.location.href = "index.html"; // ou qualquer outra página
+        });
+      });
     }
   </script>
 
