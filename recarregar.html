@@ -67,6 +67,7 @@
       font-weight: bold;
     }
 
+    /* Novo estilo para mostrar o valor selecionado */
     .valor-selecionado {
       margin-top: 20px;
       text-align: center;
@@ -91,6 +92,7 @@
     </div>
   </div>
 
+  <!-- Exibir o valor selecionado -->
   <div class="valor-selecionado">
     <span id="label-usdt">Nenhum valor selecionado</span>
   </div>
@@ -98,8 +100,8 @@
   <div class="crypto-list">
     <div class="crypto-item" onclick="enviarPara('bep20-usdt.html', 'BEP20-USDT')">
       <span class="crypto-label">
-        <img src="bep20-usdt.webp" alt="USDT" style="width: 30px; margin-right: 10px;">
-        USDT - REDE - BEP20
+        <img src="bep20-usdt.webp" alt="USDT" style="width: 30px; margin-right: 10px;"> <!-- Imagem da moeda -->
+         USDT - REDE - BEP20
       </span> 
       <span class="arrow">➔</span>
     </div>
@@ -133,6 +135,7 @@
       event.target.classList.add("selected");
 
       valorSelecionado = valor;
+      // Agora, ao selecionar o valor, o texto será exibido no elemento correto
       document.getElementById("label-usdt").innerText = `BEP20-USDT ${valorSelecionado}`;
     }
 
@@ -141,17 +144,9 @@
         alert("Por favor, selecione um valor antes de continuar.");
         return;
       }
-
-      // BLOQUEIO ATIVO - RECARGA INDISPONÍVEL
-      alert("🚫 Recarga não disponível no momento. Tente novamente mais tarde.");
-      return;
-
-      // DESBLOQUEAR FUTURAMENTE:
-      /*
       localStorage.setItem("valorRecarga", valorSelecionado);
       localStorage.setItem("redeSelecionada", rede);
       window.location.href = pagina;
-      */
     }
   </script>
 
