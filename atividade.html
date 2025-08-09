@@ -165,7 +165,6 @@
         }
       });
 
-      // Quando terminar as três buscas, junta e exibe tudo
       Promise.all([atividadesPromise, recargasPromise, retiradasPromise]).then(() => {
         const todas = [...atividades, ...recargas, ...retiradas];
         todas.sort((a, b) => b.dataHora - a.dataHora); // mais recente primeiro
@@ -194,14 +193,14 @@
           } else if (item.tipo === 'recarga') {
             div.innerHTML = `
               <h3>💰 Recarga Confirmada</h3>
-              <p>Valor: R$ ${item.valor}</p>
+              <p>Valor: $${item.valor.toFixed(6)}</p>
               <p>Rede: ${item.rede}</p>
               <p><small>${item.dataHora.toLocaleString()}</small></p>
             `;
           } else if (item.tipo === 'retirada') {
             div.innerHTML = `
               <h3>💸 Retirada Solicitada - Status: ${item.status}</h3>
-              <p>Valor: R$ ${item.valor}</p>
+              <p>Valor: $${item.valor.toFixed(6)}</p>
               <p>Endereço: ${item.endereco}</p>
               <p><small>${item.dataHora.toLocaleString()}</small></p>
             `;
