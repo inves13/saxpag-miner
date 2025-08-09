@@ -230,7 +230,7 @@
 
       // Registrar a retirada no painel do administrador e nas atividades
       registrarRetiradaPainel(userId, valor, endereco);
-      adicionarAtividade(userId, 'Retirada Solicitada', `Você solicitou um saque de ${valor.toFixed(6)} USDT para o endereço ${endereco}. Status: Aguardando Análise`);
+      adicionarAtividade(userId, 'Retirada Solicitada', `Você solicitou um saque de $${valor.toFixed(6)} USDT para o endereço ${endereco}. Status: Aguardando Análise`);
       
       db.ref('usuarios/' + userId + '/retiradas').push({
         valor: valor,
@@ -240,7 +240,7 @@
         status: 'Aguardando Análise'
       });
 
-      mostrarNotificacao(`✅ Retirada de ${valor.toFixed(6)} USDT enviada para ${endereco}. Você receberá ${valorFinal.toFixed(6)} USDT após a análise.`);
+      mostrarNotificacao(`✅ Retirada de $${valor.toFixed(6)} USDT enviada para ${endereco}. Você receberá $${valorFinal.toFixed(6)} USDT após a análise.`);
       setTimeout(() => window.location.href = 'tela-principal.html', 3500);
     }
 
@@ -274,64 +274,6 @@
         status: 'Aguardando Análise'
       });
     }
-
-    /*
-     * EXPLICAÇÃO PARA COMISSÃO AUTOMÁTICA NA PRIMEIRA RECARGA DO INDICADO
-     * 
-     * A comissão deve ser paga automaticamente para quem indicou o usuário quando este fizer a primeira recarga.
-     * Para isso, a lógica precisa estar no código onde é registrada a recarga do usuário (não no arquivo retirar.html).
-     * 
-     * Exemplo de função para registrar recarga e pagar comissão:
-     *
-     * async function registrarRecarga(uidAmigo, valorRecarga) {
-     *   const userRef = db.ref('usuarios/' + uidAmigo);
-     *   const snap = await userRef.once('value');
-     *   const dadosAmigo = snap.val();
-     *
-     *   if (!dadosAmigo) throw new Error("Usuário não encontrado");
-     *
-     *   // Atualiza recarga do amigo
-     *   const novaRecarga = (dadosAmigo.recarga || 0) + valorRecarga;
-     *   await userRef.update({ recarga: novaRecarga });
-     *
-     *   // Se for a primeira recarga, pagar comissão para quem indicou
-     *   if (!dadosAmigo.comissaoPaga) dadosAmigo.comissaoPaga = {};
-     *
-     *   if (!dadosAmigo.comissaoPaga[uidAmigo] && novaRecarga === valorRecarga) {
-     *     const codigoIndicacao = dadosAmigo.indicacao; // quem indicou
-     *
-     *     if (codigoIndicacao) {
-     *       // Buscar indicante pelo código de convite
-     *       const indicanteSnap = await db.ref('usuarios')
-     *         .orderByChild('codigoConvite')
-     *         .equalTo(codigoIndicacao)
-     *         .limitToFirst(1)
-     *         .once('value');
-     *
-     *       if (indicanteSnap.exists()) {
-     *         const indicanteKey = Object.keys(indicanteSnap.val())[0];
-     *         const indicanteDados = indicanteSnap.val()[indicanteKey];
-     *
-     *         const comissao = valorRecarga * 0.10; // 10% comissão
-     *
-     *         // Atualizar saldo do indicante
-     *         const saldoAtual = indicanteDados.saldo || 0;
-     *         const novoSaldo = saldoAtual + comissao;
-     *
-     *         await db.ref('usuarios/' + indicanteKey).update({ saldo: novoSaldo });
-     *
-     *         // Marca que já pagou comissão para esse amigo
-     *         await userRef.child('comissaoPaga/' + uidAmigo).set(true);
-     *
-     *         alert("Comissão paga automaticamente para o indicante!");
-     *       }
-     *     }
-     *   }
-     * }
-     *
-     * IMPORTANTE: essa função deve ser chamada no código que processa a recarga do amigo.
-     */
-
   </script>
 </body>
 </html>
