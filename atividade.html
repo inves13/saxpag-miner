@@ -61,6 +61,20 @@
       color: #0f0;
       cursor: pointer;
     }
+
+    /* Novas classes para status das retiradas */
+    .status-aprovado {
+      color: #4CAF50; /* verde */
+      font-weight: bold;
+    }
+    .status-em-revisao {
+      color: #ffeb3b; /* amarelo */
+      font-weight: bold;
+    }
+    .status-reprovado {
+      color: #f44336; /* vermelho */
+      font-weight: bold;
+    }
   </style>
 </head>
 <body onload="checkLogin()">
@@ -118,7 +132,6 @@
               dataHora: new Date(data.dataHora)
             });
 
-            // Verifique se é um "chequinho diário"
             if (data.titulo === "Chequinho Diário") {
               atividades.push({
                 tipo: 'chequinho_diario',
@@ -193,14 +206,28 @@
           } else if (item.tipo === 'recarga') {
             div.innerHTML = `
               <h3>💰 Recarga Confirmada</h3>
-              <p>Valor: $${item.valor.toFixed(6)}</p>
+              <p>Valor: R$ ${item.valor}</p>
               <p>Rede: ${item.rede}</p>
               <p><small>${item.dataHora.toLocaleString()}</small></p>
             `;
           } else if (item.tipo === 'retirada') {
+            // Aqui a sua parte para colocar a cor no status:
+            let statusClass = '';
+            let statusText = item.status;
+
+            if (statusText.toLowerCase() === 'aprovado') {
+              statusClass = 'status-aprovado';
+            } else if (statusText.toLowerCase() === 'em revisão') {
+              statusClass = 'status-em-revisao';
+            } else if (statusText.toLowerCase() === 'reprovado') {
+              statusClass = 'status-reprovado';
+            } else {
+              statusClass = '';
+            }
+
             div.innerHTML = `
-              <h3>💸 Retirada Solicitada - Status: ${item.status}</h3>
-              <p>Valor: $${item.valor.toFixed(6)}</p>
+              <h3>💸 Retirada Solicitada - Status: <span class="${statusClass}">${statusText}</span></h3>
+              <p>Valor: R$ ${item.valor}</p>
               <p>Endereço: ${item.endereco}</p>
               <p><small>${item.dataHora.toLocaleString()}</small></p>
             `;
