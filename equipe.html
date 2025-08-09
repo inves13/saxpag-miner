@@ -1,326 +1,267 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>SaxPag Miner - Equipe</title>
-  <style>
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background: linear-gradient(to bottom, #001f2d, #00334d);
-      color: white;
-      display: flex;
-      flex-direction: column;
-      min-height: 100vh;
-    }
-    header {
-      background: linear-gradient(to right, #006064, #004d4d);
-      padding: 20px 30px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-    }
-    .logo {
-      font-weight: bold;
-      font-size: 24px;
-      color: #00bcd4;
-    }
-    .idioma {
-      font-size: 16px;
-      color: #ccc;
-    }
-    main {
-      flex: 1;
-      padding: 20px 25px;
-      background: #0e2a3b;
-      margin: 15px;
-      border-radius: 15px;
-      overflow-y: auto;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
-    }
-    h2 {
-      margin-top: 0;
-      color: #00bcd4;
-      text-align: center;
-    }
-    .comissao-box, .total-box {
-      background: #1c3c56;
-      border-radius: 10px;
-      padding: 15px 20px;
-      margin-bottom: 20px;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-    }
-    .comissao-box p, .total-box p {
-      margin: 10px 0;
-      font-size: 16px;
-      color: #f1f1f1;
-    }
-    .codigo-convite, .link-convite {
-      display: flex;
-      align-items: center;
-      margin: 15px 0;
-      background: #1a2f4a;
-      border-radius: 8px;
-      padding: 12px 15px;
-      font-size: 16px;
-      justify-content: space-between;
-    }
-    .btn-copiar {
-      background: #00bcd4;
-      border: none;
-      color: white;
-      padding: 8px 12px;
-      border-radius: 6px;
-      cursor: pointer;
-      font-size: 14px;
-      transition: background 0.3s ease;
-    }
-    .btn-copiar:hover {
-      background: #0097a7;
-    }
-    .niveles {
-      margin-top: 25px;
-    }
-    .nivel {
-      background: #1c3c56;
-      border-radius: 10px;
-      margin-bottom: 15px;
-      padding: 15px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-size: 16px;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-    }
-    .nivel-info {
-      display: flex;
-      gap: 20px;
-      flex-wrap: wrap;
-      align-items: center;
-    }
-    .nivel-info > div {
-      min-width: 120px;
-    }
-    .btn-detalhes {
-      background: #00bcd4;
-      border: none;
-      padding: 8px 16px;
-      border-radius: 8px;
-      color: white;
-      cursor: pointer;
-      font-size: 14px;
-      transition: background 0.3s ease;
-    }
-    .btn-detalhes:hover {
-      background: #0097a7;
-    }
-    .detalhes-nivel {
-      background: #142c43;
-      border-radius: 10px;
-      padding: 20px;
-      margin-top: 15px;
-      display: none; /* Começa oculto */
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 15px;
-    }
-    table, th, td {
-      border: 1px solid #ddd;
-    }
-    th, td {
-      padding: 10px;
-      text-align: left;
-    }
-    th {
-      background-color: #1c3c56;
-      color: white;
-    }
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>SaxPag Miner - Equipe</title>
+<style>
+  body {margin:0;font-family:Arial,sans-serif;background:linear-gradient(to bottom,#001f2d,#00334d);color:white;display:flex;flex-direction:column;min-height:100vh;}
+  header{background:linear-gradient(to right,#006064,#004d4d);padding:20px 30px;display:flex;justify-content:space-between;align-items:center;box-shadow:0 4px 8px rgba(0,0,0,0.3);}
+  .logo{font-weight:bold;font-size:24px;color:#00bcd4;}
+  .idioma{font-size:16px;color:#ccc;}
+  main{flex:1;padding:20px 25px;background:#0e2a3b;margin:15px;border-radius:15px;overflow-y:auto;box-shadow:0 4px 6px rgba(0,0,0,0.2);}
+  h2{margin-top:0;color:#00bcd4;text-align:center;}
+  .comissao-box,.total-box{background:#1c3c56;border-radius:10px;padding:15px 20px;margin-bottom:20px;box-shadow:0 2px 4px rgba(0,0,0,0.3);}
+  .comissao-box p,.total-box p{margin:10px 0;font-size:16px;color:#f1f1f1;}
+  .codigo-convite,.link-convite{display:flex;align-items:center;margin:15px 0;background:#1a2f4a;border-radius:8px;padding:12px 15px;font-size:16px;justify-content:space-between;}
+  .btn-copiar{background:#00bcd4;border:none;color:white;padding:8px 12px;border-radius:6px;cursor:pointer;font-size:14px;transition:background 0.3s ease;}
+  .btn-copiar:hover{background:#0097a7;}
+  .niveles{margin-top:25px;}
+  .nivel{background:#1c3c56;border-radius:10px;margin-bottom:15px;padding:15px;display:flex;justify-content:space-between;align-items:center;font-size:16px;box-shadow:0 2px 4px rgba(0,0,0,0.3);}
+  .nivel-info{display:flex;gap:20px;flex-wrap:wrap;align-items:center;}
+  .nivel-info>div{min-width:120px;}
+  .btn-detalhes{background:#00bcd4;border:none;padding:8px 16px;border-radius:8px;color:white;cursor:pointer;font-size:14px;transition:background 0.3s ease;}
+  .btn-detalhes:hover{background:#0097a7;}
+  .detalhes-nivel{background:#142c43;border-radius:10px;padding:20px;margin-top:15px;display:none;}
+  table{width:100%;border-collapse:collapse;margin-top:15px;}
+  table,th,td{border:1px solid #ddd;}
+  th,td{padding:10px;text-align:left;}
+  th{background-color:#1c3c56;color:white;}
+</style>
 </head>
 <body>
-  <header>
-    <div class="logo">SaxPag Miner</div>
-    <div class="idioma">Português</div>
-  </header>
+<header>
+  <div class="logo">SaxPag Miner</div>
+  <div class="idioma">Português</div>
+</header>
 
-  <main>
-    <h2>Detalhes da Comissão</h2>
+<main>
+<h2>Detalhes da Comissão</h2>
+<div class="comissao-box">
+  <p><strong>Código de convite：</strong><span id="codigoConvite">...</span>
+    <button class="btn-copiar" onclick="copiarTexto('codigoConvite')">Cópia</button>
+  </p>
+  <p><strong>Compartilhe seu link e comece a ganhar dinheiro</strong></p>
+  <div class="link-convite" id="linkConvite">
+    ...
+    <button class="btn-copiar" onclick="copiarTexto('linkConvite')">Cópia</button>
+  </div>
+</div>
 
-    <div class="comissao-box">
-      <p><strong>Código de convite：</strong><span id="codigoConvite">...</span>
-        <button class="btn-copiar" onclick="copiarTexto('codigoConvite')">Cópia</button>
-      </p>
-      <p><strong>Compartilhe seu link e comece a ganhar dinheiro</strong></p>
-      <div class="link-convite" id="linkConvite">
-        ...
-        <button class="btn-copiar" onclick="copiarTexto('linkConvite')">Cópia</button>
+<div class="total-box">
+  <p><strong>Número total de equipes:</strong> <span id="totalEquipe">0</span></p>
+  <p><strong>Comissão total de promoção:</strong> <span id="comissaoTotal">0.00</span></p>
+  <p><strong>Recarga total da equipe:</strong> <span id="recargaTotal">0.00</span></p>
+  <p><strong>Total de retiradas da equipe:</strong> <span id="retiradaTotal">0.00</span></p>
+</div>
+
+<div class="niveles" id="listaNiveis"></div>
+</main>
+
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyDzOgL6cvc0b4AO0vAEay1CeSAv_-WqaWQ",
+  authDomain: "saxpag-miner.firebaseapp.com",
+  databaseURL: "https://saxpag-miner-default-rtdb.firebaseio.com",
+  projectId: "saxpag-miner",
+  storageBucket: "saxpag-miner.firebasestorage.app",
+  messagingSenderId: "154250189626",
+  appId: "1:154250189626:web:83c232a5c539e3f9fe0e03",
+  measurementId: "G-LEV5TL9P7H"
+};
+firebase.initializeApp(firebaseConfig);
+
+const auth = firebase.auth();
+const db = firebase.database();
+
+function copiarTexto(id){
+  const text=document.getElementById(id).innerText;
+  navigator.clipboard.writeText(text);
+  alert("Copiado: "+text);
+}
+
+function gerarLinkIndicacao(codigo){
+  return `https://inves13.github.io/saxpag-miner/#/reg?ref=${codigo}`;
+}
+
+function ocultarEmail(email) {
+  if (!email) return "Não informado";
+  const [local, dominio] = email.split("@");
+  if (!local || !dominio) return email;  
+  const metade = Math.floor(local.length / 2);
+  return local.substring(0, metade) + "****@" + dominio;
+}
+
+// Busca indicados recursivamente até 3 níveis (pode alterar profundidade)
+async function buscarIndicados(codigo, nivel = 1, encontrados = [], mapa = {}) {
+  if (nivel > 3) return encontrados;
+  const snapshot = await db.ref("usuarios").orderByChild("indicacao").equalTo(codigo).once("value");
+  let diretos = [];
+  snapshot.forEach(child => {
+    if (!mapa[child.key]) {
+      mapa[child.key] = true;
+      const data = child.val();
+      diretos.push({...data, uid: child.key, nivel});
+      encontrados.push({...data, uid: child.key, nivel});
+    }
+  });
+  for (let user of diretos) {
+    const codigoConvite = (user.codigoConvite || user.uid).substring(0,8);
+    await buscarIndicados(codigoConvite, nivel + 1, encontrados, mapa);
+  }
+  return encontrados;
+}
+
+// Calcula e atualiza comissão apenas para recargas novas (primeira vez)
+async function processarComissoes(usuarioUid, indicados) {
+  let totalComissao = 0;
+  let totalRecarga = 0;
+  let totalRetirada = 0;
+
+  const usuarioRef = db.ref('usuarios/' + usuarioUid);
+  const usuarioSnapshot = await usuarioRef.once('value');
+  const usuarioDados = usuarioSnapshot.val();
+
+  if (!usuarioDados.comissaoPaga) {
+    usuarioDados.comissaoPaga = {};
+  }
+
+  for (const indicado of indicados) {
+    const nivel = indicado.nivel;
+    const uidIndicado = indicado.uid;
+
+    if (!usuarioDados.comissaoPaga[uidIndicado] && indicado.recarga > 0) {
+      // Só paga comissão se o usuário indicou o indicado e o indicado tem recarga maior que 0 e não recebeu comissão ainda
+      let porcentagem = 0;
+      if (nivel === 1) porcentagem = 0.10; // 10%
+      else if (nivel === 2) porcentagem = 0.01; // 1%
+      else if (nivel === 3) porcentagem = 0.01; // 1%
+
+      const comissao = indicado.recarga * porcentagem;
+      totalComissao += comissao;
+
+      // Atualiza saldo do usuário que indicou (adiciona comissão)
+      const novoSaldo = (usuarioDados.saldo || 0) + comissao;
+      usuarioDados.saldo = novoSaldo;
+
+      // Marca comissão paga para este indicado
+      usuarioDados.comissaoPaga[uidIndicado] = true;
+
+      // Atualiza no banco
+      await usuarioRef.update({
+        saldo: novoSaldo,
+        comissaoPaga: usuarioDados.comissaoPaga
+      });
+    }
+
+    totalRecarga += indicado.recarga || 0;
+    totalRetirada += indicado.retirada || 0;
+  }
+
+  return { totalComissao, totalRecarga, totalRetirada };
+}
+
+auth.onAuthStateChanged(async user => {
+  if (!user) {
+    alert("Você precisa estar logado.");
+    window.location.href = "index.html";
+    return;
+  }
+  const uid = user.uid;
+  const userRef = db.ref("usuarios/" + uid);
+  const userSnap = await userRef.once("value");
+  const dados = userSnap.val();
+
+  if (!dados) {
+    alert("Usuário não encontrado.");
+    auth.signOut();
+    window.location.href = "index.html";
+    return;
+  }
+
+  const codigoUsuario = (dados.codigoConvite || uid).substring(0,8);
+  document.getElementById("codigoConvite").innerText = codigoUsuario;
+  document.getElementById("linkConvite").innerText = gerarLinkIndicacao(codigoUsuario);
+
+  // Busca indicados níveis 1, 2 e 3
+  const indicados = await buscarIndicados(codigoUsuario);
+
+  // Processa comissões automáticas
+  const { totalComissao, totalRecarga, totalRetirada } = await processarComissoes(uid, indicados);
+
+  // Conta totais e válidos
+  const niveis = {};
+  for (let i=1; i<=3; i++) {
+    const filtrado = indicados.filter(u => u.nivel === i);
+    const validos = filtrado.filter(u => (u.vip && u.vip >= 1));
+    niveis[`lev${i}`] = { total: filtrado.length, validos: validos.length };
+  }
+
+  document.getElementById("totalEquipe").innerText = indicados.length;
+  document.getElementById("comissaoTotal").innerText = totalComissao.toFixed(2);
+  document.getElementById("recargaTotal").innerText = totalRecarga.toFixed(2);
+  document.getElementById("retiradaTotal").innerText = totalRetirada.toFixed(2);
+
+  renderNiveis(niveis, indicados);
+});
+
+function renderNiveis(dados, todos) {
+  const container = document.getElementById('listaNiveis');
+  container.innerHTML = "";
+  for (let i=1; i<=3; i++) {
+    const nivel = dados[`lev${i}`] || { total: 0, validos: 0 };
+    container.innerHTML += `
+      <div class="nivel">
+        <div class="nivel-info">
+          <div><strong>LEV ${i}</strong></div>
+          <div>Número de pessoas: ${nivel.total}</div>
+          <div>Válido: ${nivel.validos}</div>
+        </div>
+        <button class="btn-detalhes" onclick='toggleDetalhesNivel(${i}, ${JSON.stringify(todos)})'>Detalhes</button>
       </div>
-    </div>
+      <div id="detalhesNivel${i}" class="detalhes-nivel"></div>
+    `;
+  }
+}
 
-    <div class="total-box">
-      <p><strong>Número total de equipes:</strong> <span id="totalEquipe">0</span></p>
-      <p><strong>Comissão total de promoção:</strong> $<span id="comissaoTotal">0.00</span></p>
-      <p><strong>Recarga total da equipe:</strong> $<span id="recargaTotal">0.00</span></p>
-      <p><strong>Total de retiradas da equipe:</strong> $<span id="retiradaTotal">0.00</span></p>
-    </div>
+function toggleDetalhesNivel(n, todos) {
+  const div = document.getElementById(`detalhesNivel${n}`);
+  if (div.style.display === 'block') {
+    div.style.display = 'none';
+    div.innerHTML = '';
+  } else {
+    detalhesNivel(n, todos);
+  }
+}
 
-    <div class="niveles" id="listaNiveis">
-      <!-- Níveis serão inseridos via JavaScript -->
-    </div>
-  </main>
-
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-
-  <script>
-    const firebaseConfig = {
-      apiKey: "AIzaSyDzOgL6cvc0b4AO0vAEay1CeSAv_-WqaWQ",
-      authDomain: "saxpag-miner.firebaseapp.com",
-      databaseURL: "https://saxpag-miner-default-rtdb.firebaseio.com",
-      projectId: "saxpag-miner",
-      storageBucket: "saxpag-miner.firebasestorage.app",
-      messagingSenderId: "154250189626",
-      appId: "1:154250189626:web:83c232a5c539e3f9fe0e03",
-      measurementId: "G-LEV5TL9P7H"
-    };
-    firebase.initializeApp(firebaseConfig);
-
-    function copiarTexto(id) {
-      const text = document.getElementById(id).innerText;
-      navigator.clipboard.writeText(text);
-      alert("Copiado: " + text);
-    }
-
-    function gerarLinkIndicacao(codigo) {
-      return `https://inves13.github.io/saxpag-miner/#/reg?ref=${codigo}`;
-    }
-
-    function buscarTodosIndicados(codigo, nivel = 1, profundidade = 6, encontrados = [], mapa = {}) {
-      if (nivel > profundidade) return Promise.resolve(encontrados);
-      return firebase.database().ref("usuarios").orderByChild("indicacao").equalTo(codigo).once("value").then(snapshot => {
-        const diretos = [];
-        snapshot.forEach(child => {
-          const dados = child.val();
-          if (!mapa[child.key]) {
-            mapa[child.key] = true;
-            diretos.push({ ...dados, uid: child.key });
-            encontrados.push({ ...dados, uid: child.key, nivel });
-          }
-        });
-        return Promise.all(diretos.map(u => buscarTodosIndicados((u.codigoConvite || u.uid).substring(0, 8), nivel + 1, profundidade, encontrados, mapa)))
-          .then(() => encontrados);
-      });
-    }
-
-    firebase.auth().onAuthStateChanged(async (user) => {
-      if (!user) {
-        alert("Você precisa estar logado.");
-        location.href = "index.html";
-        return;
-      }
-
-      const uid = user.uid;
-      const userRef = firebase.database().ref("usuarios/" + uid);
-      const snapshot = await userRef.once("value");
-      const dados = snapshot.val();
-
-      if (!dados) {
-        alert("Usuário não encontrado.");
-        firebase.auth().signOut();
-        location.href = "index.html";
-        return;
-      }
-
-      const codigoUsuario = (dados.codigoConvite || uid).substring(0, 8);
-      document.getElementById("codigoConvite").innerText = codigoUsuario;
-      document.getElementById("linkConvite").innerText = gerarLinkIndicacao(codigoUsuario);
-
-      const todos = await buscarTodosIndicados(codigoUsuario);
-
-      const niveis = {};
-      let totalRecarga = 0;
-      let totalRetirada = 0;
-      let totalComissao = 0;
-
-      for (let i = 1; i <= 6; i++) {
-        const filtrado = todos.filter(u => u.nivel === i);
-        const validos = filtrado.filter(u => u.saldo && u.saldo > 0);
-        niveis[`lev${i}`] = {
-          total: filtrado.length,
-          validos: validos.length
-        };
-
-        // Somar recarga, retirada e comissão da equipe
-        filtrado.forEach(user => {
-          totalRecarga += user.recarga || 0;
-          totalRetirada += user.retirada || 0;
-          totalComissao += (user.comissao || 0);
-        });
-      }
-
-      const totalEquipe = todos.length;
-
-      document.getElementById("totalEquipe").innerText = totalEquipe;
-      document.getElementById("comissaoTotal").innerText = `$${totalComissao.toFixed(2)}`;
-      document.getElementById("recargaTotal").innerText = `$${totalRecarga.toFixed(2)}`;
-      document.getElementById("retiradaTotal").innerText = `$${totalRetirada.toFixed(2)}`;
-      renderNiveis(niveis, todos); // Passando a lista de todos os indicados
-    });
-
-    function renderNiveis(dados, todos) {
-      const container = document.getElementById('listaNiveis');
-      container.innerHTML = "";
-      for (let i = 1; i <= 6; i++) {
-        const nivel = dados[`lev${i}`] || { total: 0, validos: 0 };
-        container.innerHTML += `
-          <div class="nivel">
-            <div class="nivel-info">
-              <div><strong>LEV ${i}</strong></div>
-              <div>Número de pessoas: ${nivel.total}</div>
-              <div>Válido: ${nivel.validos}</div>
-            </div>
-            <button class="btn-detalhes" onclick="detalhesNivel(${i}, ${JSON.stringify(todos)})">Detalhes</button>
-          </div>
-          <div id="detalhesNível${i}" class="detalhes-nivel"></div> <!-- Área de detalhes -->
-        `;
-      }
-    }
-
-    function detalhesNivel(n, todos) {
-      const nivelDados = todos.filter(u => u.nivel === n);
-      let detalhes = `
-        <h3>Detalhes do Nível ${n}</h3>
-        <table>
-          <thead>
-            <tr>
-              <th>E-mail</th>
-              <th>Data de Cadastro</th>
-              <th>Valor do Investimento</th>
-              <th>Plano Ativado</th>
-            </tr>
-          </thead>
-          <tbody>
-      `;
-      nivelDados.forEach(u => {
-        detalhes += `
-          <tr>
-            <td>${u.email || 'Não informado'}</td>
-            <td>${u.dataCadastro || 'Não disponível'}</td>
-            <td>$${u.valorInvestido || 0}</td>
-            <td>${u.planoAtivado || 'Não especificado'}</td>
-          </tr>
-        `;
-      });
-      detalhes += `</tbody></table>`;
-
-      document.getElementById(`detalhesNível${n}`).innerHTML = detalhes;
-      document.getElementById(`detalhesNível${n}`).style.display = 'block'; // Exibe o conteúdo
-    }
-  </script>
+function detalhesNivel(n, todos) {
+  const nivelDados = todos.filter(u => u.nivel === n);
+  let detalhes = `<h3>Detalhes do Nível ${n}</h3>
+    <table>
+      <thead><tr>
+        <th>E-mail</th>
+        <th>Data de Cadastro</th>
+        <th>Saldo/Investimento</th>
+        <th>Plano Ativado (VIP)</th>
+      </tr></thead><tbody>`;
+  nivelDados.forEach(u => {
+    const dataCad = u.data || (u.ultimaMineracao ? new Date(u.ultimaMineracao).toLocaleString() : "Não disponível");
+    detalhes += `<tr>
+      <td>${ocultarEmail(u.email)}</td>
+      <td>${dataCad}</td>
+      <td>$${u.saldo ? u.saldo.toFixed(2) : 0}</td>
+      <td>${u.vip || 'Nenhum'}</td>
+    </tr>`;
+  });
+  detalhes += `</tbody></table>`;
+  const div = document.getElementById(`detalhesNivel${n}`);
+  div.innerHTML = detalhes;
+  div.style.display = 'block';
+}
+</script>
 </body>
 </html>
