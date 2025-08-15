@@ -96,6 +96,7 @@
       font-size: 14px;
       float: right;
       cursor: pointer;
+      margin-left: 5px;
     }
     .bottom-nav {
       position: fixed;
@@ -116,7 +117,6 @@
     .bottom-nav div.active {
       color: #ff69b4;
     }
-    /* Estilos para notificações */
     .notification-container {
       position: fixed;
       top: 20px;
@@ -145,12 +145,8 @@
       flex-grow: 1;
     }
     @keyframes slide-up {
-      0% {
-        transform: translateY(100%);
-      }
-      100% {
-        transform: translateY(0);
-      }
+      0% { transform: translateY(100%); }
+      100% { transform: translateY(0); }
     }
   </style>
 </head>
@@ -175,10 +171,7 @@
     </div>
   </div>
 
-  <!-- Notificações dinâmicas -->
-  <div class="notification-container" id="notification-container">
-    <!-- As notificações serão inseridas aqui via JavaScript -->
-  </div>
+  <div class="notification-container" id="notification-container"></div>
 
   <div class="grid-menu">
     <div class="menu-item" onclick="abrir('recarregar.html')">💰<br>Recarregar</div>
@@ -192,7 +185,10 @@
   </div>
 
   <div class="tarefas">
-    <h3>Entrar na tarefa <button class="checkin" onclick="fazerCheckin()">Check-in</button></h3>
+    <h3>
+      Entrar na tarefa 
+      <button class="checkin" onclick="fazerCheckin()">Check-in</button>
+    </h3>
     <p>+0.08 USDT<br><small>Uma vez por dia</small></p>
   </div>
 
@@ -204,7 +200,6 @@
     <div onclick="abrir('meu.html')">📱<br>Meu</div>
   </div>
 
-  <!-- Firebase -->
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
@@ -257,6 +252,16 @@
       window.location.href = pagina;
     }
 
+    function adicionarAtividade(userId, titulo, descricao) {
+      const novaAtividadeRef = db.ref("atividades/" + userId).push();
+      novaAtividadeRef.set({
+        titulo: titulo,
+        descricao: descricao,
+        data: new Date().toISOString()
+      }).then(() => console.log("Atividade registrada!"))
+      .catch(error => console.error("Erro ao registrar atividade:", error));
+    }
+
     function fazerCheckin() {
       const user = auth.currentUser;
       if (!user) return;
@@ -272,8 +277,7 @@
         return;
       }
 
-      const saldoRef = db.ref("usuarios/" + userId + "/saldo");
-      saldoRef.once("value").then(snapshot => {
+      db.ref("usuarios/" + userId + "/saldo").once("value").then(snapshot => {
         let saldoAtual = snapshot.val() || 10;
         saldoAtual += 0.08;
 
@@ -281,29 +285,19 @@
         localStorage.setItem(checkinKey, agora);
 
         alert("Check-in realizado com sucesso! +0.08 USDT");
-        
-        // Adiciona a atividade de check-in
         adicionarAtividade(userId, 'Check-in diário', 'Você realizou o check-in e ganhou +0.08 USDT.');
-
         loadData(userId);
       });
     }
 
-    // Função para adicionar notificações
     function adicionarNotificacao(nome, valor, tipo) {
       const notificationContainer = document.getElementById('notification-container');
-      
-      // Verifica se há notificações e remove a anterior
       if (notificationContainer.children.length > 0) {
         notificationContainer.removeChild(notificationContainer.children[0]);
       }
-
       const notification = document.createElement('div');
       notification.classList.add('notification');
-      
-      // Mascarando a parte do e-mail
       const emailMascarado = nome.replace(/(?<=.{2}).*(?=@)/, '*****');
-
       notification.innerHTML = `
         <div class="notification-content">
           <strong>${emailMascarado}</strong> ${tipo} <strong>${valor} USDT</strong>
@@ -311,14 +305,9 @@
         <i class="fas fa-times" onclick="this.parentElement.remove();"></i>
       `;
       notificationContainer.appendChild(notification);
-
-      // Remove a notificação após 5 segundos
-      setTimeout(() => {
-        notification.remove();
-      }, 5000);
+      setTimeout(() => { notification.remove(); }, 5000);
     }
 
-    // Simulação de notificações com variações
     const usuarios = [
       { email: 'luiscap@gmail.com', valor: '10', tipo: 'Recarregar' },
       { email: 'lucas123@gmail.com', valor: '20', tipo: 'Sacar' },
@@ -334,13 +323,12 @@
       { email: 'bruna@exemplo.com', valor: '100', tipo: 'Sacar' }
     ];
 
-    // Alterando as notificações dinamicamente
     let i = 0;
     setInterval(() => {
       const usuario = usuarios[i % usuarios.length];
       adicionarNotificacao(usuario.email, usuario.valor, usuario.tipo);
       i++;
-    }, 10000); // Atualiza a cada 10 segundos
+    }, 10000);
   </script>
 </body>
 </html>
