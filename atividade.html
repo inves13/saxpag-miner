@@ -5,88 +5,35 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Atividade - SaxPag Miner</title>
   <style>
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background: #111;
-      color: #fff;
-    }
-    header {
-      background-color: #222;
-      padding: 15px;
-      text-align: center;
-      font-size: 20px;
-      font-weight: bold;
-      border-bottom: 1px solid #444;
-    }
-    .atividade-container {
-      padding: 20px;
-    }
-    .atividade-item {
-      background: #1e1e1e;
-      margin-bottom: 15px;
-      padding: 15px;
-      border-radius: 8px;
-      border-left: 4px solid #0f0;
-    }
-    .atividade-item h3 {
-      margin: 0 0 5px 0;
-      font-size: 18px;
-    }
-    .atividade-item p {
-      margin: 0;
-      color: #ccc;
-      font-size: 14px;
-    }
-    .sem-atividade {
-      text-align: center;
-      color: #777;
-      margin-top: 50px;
-    }
-    footer {
-      position: fixed;
-      bottom: 0;
-      width: 100%;
-      background: #222;
-      display: flex;
-      justify-content: space-around;
-      padding: 10px 0;
-    }
-    footer div {
-      text-align: center;
-      color: white;
-      font-size: 14px;
-    }
-    footer div:hover {
-      color: #0f0;
-      cursor: pointer;
-    }
-
-    /* Novas classes para status das retiradas */
-    .status-aprovado {
-      color: #4CAF50; /* verde */
-      font-weight: bold;
-    }
-    .status-em-revisao {
-      color: #ffeb3b; /* amarelo */
-      font-weight: bold;
-    }
-    .status-reprovado {
-      color: #f44336; /* vermelho */
-      font-weight: bold;
-    }
+    body { margin: 0; font-family: Arial, sans-serif; background: #111; color: #fff; }
+    header { background-color: #222; padding: 15px; text-align: center; font-size: 20px; font-weight: bold; border-bottom: 1px solid #444; }
+    .atividade-container { padding: 20px; }
+    .atividade-item { margin-bottom: 15px; padding: 15px; border-radius: 8px; border-left: 6px solid; }
+    .atividade-atividade { border-color: #2196F3; background: #1a1a2e; color: #bbdefb; }
+    .atividade-recarga { border-color: #FFC107; background: #2a2a1a; color: #fff59d; }
+    .atividade-retirada { border-color: #F44336; background: #2a1a1a; color: #ff8a80; }
+    .status-aprovado { color: #4CAF50; font-weight: bold; }
+    .status-pendente { color: #FFA500; font-weight: bold; }
+    .status-em-revisao { color: #FFEB3B; font-weight: bold; }
+    .status-reprovado { color: #F44336; font-weight: bold; }
+    .sem-atividade { text-align: center; color: #777; margin-top: 50px; }
+    footer { position: fixed; bottom: 0; width: 100%; background: #222; display: flex; justify-content: space-around; padding: 10px 0; }
+    footer div { text-align: center; color: white; font-size: 14px; }
+    footer div:hover { color: #0f0; cursor: pointer; }
   </style>
 </head>
-<body onload="checkLogin()">
+<body>
   <header>📊 Atividade</header>
   <div class="atividade-container" id="atividadeContainer">
     <div class="sem-atividade">Carregando atividades...</div>
   </div>
-  <!-- Firebase SDKs -->
+
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+
   <script>
+    // Configuração Firebase
     const firebaseConfig = {
       apiKey: "AIzaSyDzOgL6cvc0b4AO0vAEay1CeSAv_-WqaWQ",
       authDomain: "saxpag-miner.firebaseapp.com",
@@ -94,149 +41,119 @@
       projectId: "saxpag-miner",
       storageBucket: "saxpag-miner.appspot.com",
       messagingSenderId: "154250189626",
-      appId: "1:154250189626:web:83c232a5c539e3f9fe0e03",
-      measurementId: "G-LEV5TL9P7H"
+      appId: "1:154250189626:web:83c232a5c539e3f9fe0e03"
     };
-
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
     const db = firebase.database();
 
+    // Verifica login
     function checkLogin() {
       auth.onAuthStateChanged(user => {
         if (!user) {
           window.location.href = "login.html";
         } else {
-          carregarTodasAtividades(user);
+          carregarAtividadesUsuario(user);
         }
       });
     }
 
-    function carregarTodasAtividades(user) {
+    // Carrega atividades
+    function carregarAtividadesUsuario(user) {
       const container = document.getElementById('atividadeContainer');
       container.innerHTML = '';
+      const userId = user.uid;
+      const todasAtividades = [];
 
-      let atividades = [];
-      let recargas = [];
-      let retiradas = [];
-
-      // Atividades pessoais do usuário
-      const atividadesPromise = db.ref('usuarios/' + user.uid + '/atividades').once('value').then(snapshot => {
-        if (snapshot.exists()) {
-          snapshot.forEach(child => {
-            const data = child.val();
-            atividades.push({
-              tipo: 'atividade',
-              titulo: data.titulo,
-              descricao: data.descricao,
-              dataHora: new Date(data.dataHora)
-            });
-
-            if (data.titulo === "Chequinho Diário") {
-              atividades.push({
-                tipo: 'chequinho_diario',
-                titulo: data.titulo,
-                descricao: data.descricao,
-                dataHora: new Date(data.dataHora)
-              });
-            }
+      // 1️⃣ Check-ins / Questionários
+      db.ref('atividades/' + userId).once('value').then(snapshot => {
+        snapshot.forEach(child => {
+          const data = child.val();
+          todasAtividades.push({
+            tipo: 'atividade',
+            titulo: data.titulo,
+            descricao: data.descricao,
+            dataHora: new Date(data.data)
           });
-        }
-      });
+        });
 
-      // Recargas específicas do usuário (usando e-mail)
-      const recargasPromise = db.ref('recargas').once('value').then(snapshot => {
-        if (snapshot.exists()) {
-          snapshot.forEach(child => {
+        // 2️⃣ Recargas (qualquer status)
+        db.ref('recargas').once('value').then(snapshotRec => {
+          snapshotRec.forEach(child => {
             const data = child.val();
-            if (data.usuario === user.email && data.status === 'confirmado') {
-              recargas.push({
+            if (data.usuario === user.email) {
+              let statusClass = '';
+              if(data.status.toLowerCase() === 'confirmado') statusClass = 'status-aprovado';
+              else if(data.status.toLowerCase() === 'pendente') statusClass = 'status-pendente';
+              else if(data.status.toLowerCase() === 'reprovado') statusClass = 'status-reprovado';
+
+              todasAtividades.push({
                 tipo: 'recarga',
-                valor: data.valor,
-                rede: data.rede,
+                titulo: 'Recarga',
+                descricao: `Valor: ${data.valor} USDT | Rede: ${data.rede} | Status: <span class="${statusClass}">${data.status}</span>`,
                 dataHora: new Date(data.data)
               });
             }
           });
-        }
-      });
 
-      // Retiradas do usuário
-      const retiradasPromise = db.ref('usuarios/' + user.uid + '/retiradas').once('value').then(snapshot => {
-        if (snapshot.exists()) {
-          snapshot.forEach(child => {
-            const data = child.val();
-            const status = data.status === 'em revisão' ? 'Em Revisão' : data.status;
-            retiradas.push({
-              tipo: 'retirada',
-              valor: data.valor,
-              endereco: data.endereco,
-              status: status,
-              dataHora: new Date(data.data)
+          // 3️⃣ Retiradas
+          db.ref('usuarios/' + userId + '/retiradas').once('value').then(snapshotRet => {
+            snapshotRet.forEach(child => {
+              const data = child.val();
+              let statusClass = '';
+              if (data.status.toLowerCase() === 'aprovado') {
+                statusClass = 'status-aprovado';
+              } else if (data.status.toLowerCase() === 'em revisão') {
+                statusClass = 'status-em-revisao';
+              } else if (data.status.toLowerCase() === 'reprovado') {
+                statusClass = 'status-reprovado';
+              }
+
+              // Forçando atualização do status "Aprovado"
+              if (data.status === "Aprovado") {
+                data.status = "Aprovado";
+              }
+
+              todasAtividades.push({
+                tipo: 'retirada',
+                titulo: 'Retirada Solicitada',
+                descricao: `Valor: ${data.valor} USDT | Endereço: ${data.endereco} | Status: <span class="${statusClass}">${data.status}</span>`,
+                dataHora: new Date(data.data)
+              });
             });
-          });
-        }
-      });
 
-      Promise.all([atividadesPromise, recargasPromise, retiradasPromise]).then(() => {
-        const todas = [...atividades, ...recargas, ...retiradas];
-        todas.sort((a, b) => b.dataHora - a.dataHora); // mais recente primeiro
+            // Ordena da mais recente para a mais antiga
+            todasAtividades.sort((a, b) => b.dataHora - a.dataHora);
 
-        if (todas.length === 0) {
-          container.innerHTML = '<div class="sem-atividade">Nenhuma atividade encontrada.</div>';
-          return;
-        }
-
-        todas.forEach(item => {
-          const div = document.createElement('div');
-          div.className = 'atividade-item';
-
-          if (item.tipo === 'atividade') {
-            div.innerHTML = `
-              <h3>${item.titulo}</h3>
-              <p>${item.descricao}</p>
-              <p><small>${item.dataHora.toLocaleString()}</small></p>
-            `;
-          } else if (item.tipo === 'chequinho_diario') {
-            div.innerHTML = `
-              <h3>✅ Chequinho Diário</h3>
-              <p>${item.descricao}</p>
-              <p><small>${item.dataHora.toLocaleString()}</small></p>
-            `;
-          } else if (item.tipo === 'recarga') {
-            div.innerHTML = `
-              <h3>💰 Recarga Confirmada</h3>
-              <p>Valor: R$ ${item.valor}</p>
-              <p>Rede: ${item.rede}</p>
-              <p><small>${item.dataHora.toLocaleString()}</small></p>
-            `;
-          } else if (item.tipo === 'retirada') {
-            // Aqui a sua parte para colocar a cor no status:
-            let statusClass = '';
-            let statusText = item.status;
-
-            if (statusText.toLowerCase() === 'aprovado') {
-              statusClass = 'status-aprovado';
-            } else if (statusText.toLowerCase() === 'em revisão') {
-              statusClass = 'status-em-revisao';
-            } else if (statusText.toLowerCase() === 'reprovado') {
-              statusClass = 'status-reprovado';
-            } else {
-              statusClass = '';
+            // Exibe atividades
+            if (todasAtividades.length === 0) {
+              container.innerHTML = '<div class="sem-atividade">Nenhuma atividade encontrada.</div>';
+              return;
             }
 
-            div.innerHTML = `
-              <h3>💸 Retirada Solicitada - Status: <span class="${statusClass}">${statusText}</span></h3>
-              <p>Valor: R$ ${item.valor}</p>
-              <p>Endereço: ${item.endereco}</p>
-              <p><small>${item.dataHora.toLocaleString()}</small></p>
-            `;
-          }
-
-          container.appendChild(div);
+            todasAtividades.forEach(item => {
+              const div = document.createElement('div');
+              div.className = 'atividade-item ' + 
+                              (item.tipo === 'atividade' ? 'atividade-atividade' : 
+                               item.tipo === 'recarga' ? 'atividade-recarga' : 'atividade-retirada');
+              div.innerHTML = `
+                <h3>${item.tipo === 'atividade' ? '📌' : item.tipo === 'recarga' ? '💰' : '💸'} ${item.titulo}</h3>
+                <p>${item.descricao}</p>
+                <p><small>${item.dataHora.toLocaleString()}</small></p>
+              `;
+              container.appendChild(div);
+            });
+          });
         });
+
+      }).catch(err => {
+        console.error("Erro ao carregar atividades:", err);
+        container.innerHTML = '<div class="sem-atividade">Erro ao carregar atividades.</div>';
       });
     }
+
+    // Executa ao carregar a página
+    window.onload = checkLogin;
   </script>
 </body>
 </html>
