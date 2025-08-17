@@ -210,7 +210,7 @@
       authDomain: "saxpag-miner.firebaseapp.com",
       databaseURL: "https://saxpag-miner-default-rtdb.firebaseio.com",
       projectId: "saxpag-miner",
-      storageBucket: "saxpag-miner.firebasestorage.app",
+      storageBucket: "saxpag-miner.appspot.com",
       messagingSenderId: "154250189626",
       appId: "1:154250189626:web:83c232a5c539e3f9fe0e03"
     };
@@ -230,11 +230,11 @@
     }
 
     function loadData(userId) {
+      // pega saldo e vip
       db.ref("usuarios/" + userId).once("value").then(snapshot => {
         const data = snapshot.val() || {};
-        let saldo = data.saldo || 10;
+        let saldo = data.saldo || 0;
         let vip = data.vip || 0;
-        let carteiraCorretagem = data.carteiraCorretagem || 0;
 
         if (saldo >= 10 && vip === 0) {
           vip = 1;
@@ -243,8 +243,19 @@
 
         document.getElementById("saldoCarteira").innerText = `$${saldo.toFixed(2)}`;
         document.getElementById("investido").innerText = `$${saldo.toFixed(2)}`;
-        document.getElementById("carteiraCorretagem").innerText = `$${carteiraCorretagem.toFixed(2)}`;
         document.getElementById("vipLevel").innerText = `VIP ${vip}`;
+      });
+
+      // soma todas as retiradas do usuário para carteira de corretagem
+      db.ref("usuarios/" + userId + "/retiradas").once("value").then(snapshot => {
+        let totalRetiradas = 0;
+        snapshot.forEach(child => {
+          const retirada = child.val();
+          if (retirada && retirada.valorFinal) {
+            totalRetiradas += parseFloat(retirada.valorFinal);
+          }
+        });
+        document.getElementById("carteiraCorretagem").innerText = `$${totalRetiradas.toFixed(2)}`;
       });
     }
 
@@ -258,8 +269,7 @@
         titulo: titulo,
         descricao: descricao,
         data: new Date().toISOString()
-      }).then(() => console.log("Atividade registrada!"))
-      .catch(error => console.error("Erro ao registrar atividade:", error));
+      });
     }
 
     function fazerCheckin() {
@@ -278,7 +288,7 @@
       }
 
       db.ref("usuarios/" + userId + "/saldo").once("value").then(snapshot => {
-        let saldoAtual = snapshot.val() || 10;
+        let saldoAtual = snapshot.val() || 0;
         saldoAtual += 0.08;
 
         db.ref("usuarios/" + userId).update({ saldo: saldoAtual });
