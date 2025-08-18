@@ -232,14 +232,16 @@
     function loadData(userId) {
       // pega saldo e vip
       db.ref("usuarios/" + userId).once("value").then(snapshot => {
-        const data = snapshot.val() || {};
+        let data = snapshot.val() || {};
+
+        // se o usuário for novo sem saldo, define 1 USDT no cadastro
+        if (data.saldo === undefined) {
+          data.saldo = 1; 
+          db.ref("usuarios/" + userId).update({ saldo: 1 });
+        }
+
         let saldo = data.saldo || 0;
         let vip = data.vip || 0;
-
-        if (saldo >= 10 && vip === 0) {
-          vip = 1;
-          db.ref("usuarios/" + userId).update({ vip: vip });
-        }
 
         document.getElementById("saldoCarteira").innerText = `$${saldo.toFixed(2)}`;
         document.getElementById("investido").innerText = `$${saldo.toFixed(2)}`;
@@ -318,22 +320,34 @@
       setTimeout(() => { notification.remove(); }, 5000);
     }
 
-    const usuarios = [
-      { email: 'luiscap@gmail.com', valor: '10', tipo: 'Recarregar' },
-      { email: 'lucas123@gmail.com', valor: '20', tipo: 'Sacar' },
-      { email: 'joaosilva@gmail.com', valor: '20', tipo: 'Recarregar' },
-      { email: 'maria.jane@gmail.com', valor: '15', tipo: 'Sacar' },
-      { email: 'andre@exemplo.com', valor: '30', tipo: 'Recarregar' },
-      { email: 'felipe@exemplo.com', valor: '25', tipo: 'Sacar' },
-      { email: 'carla@exemplo.com', valor: '50', tipo: 'Recarregar' },
-      { email: 'ricardo@exemplo.com', valor: '45', tipo: 'Sacar' },
-      { email: 'jose@exemplo.com', valor: '70', tipo: 'Recarregar' },
-      { email: 'ana@exemplo.com', valor: '60', tipo: 'Sacar' },
-      { email: 'lucas@exemplo.com', valor: '90', tipo: 'Recarregar' },
-      { email: 'bruna@exemplo.com', valor: '100', tipo: 'Sacar' }
-    ];
-
-    let i = 0;
+const usuarios = [
+  { email: 'luiscap@gmail.com', valor: '10', tipo: 'Recarregar' },
+  { email: 'lucas123@gmail.com', valor: '20', tipo: 'Sacar' },
+  { email: 'joaosilva@gmail.com', valor: '20', tipo: 'Recarregar' },
+  { email: 'maria.jane@gmail.com', valor: '15', tipo: 'Sacar' },
+  { email: 'andre@exemplo.com', valor: '30', tipo: 'Recarregar' },
+  { email: 'felipe@exemplo.com', valor: '25', tipo: 'Sacar' },
+  { email: 'carla@exemplo.com', valor: '50', tipo: 'Recarregar' },
+  { email: 'ricardo@exemplo.com', valor: '45', tipo: 'Sacar' },
+  { email: 'jose@exemplo.com', valor: '70', tipo: 'Recarregar' },
+  { email: 'ana@exemplo.com', valor: '60', tipo: 'Sacar' },
+  { email: 'lucas@exemplo.com', valor: '90', tipo: 'Recarregar' },
+  { email: 'bruna@exemplo.com', valor: '100', tipo: 'Sacar' },
+  { email: 'paulo.santos@gmail.com', valor: '35', tipo: 'Recarregar' },
+  { email: 'fernanda.lima@yahoo.com', valor: '40', tipo: 'Sacar' },
+  { email: 'gustavo.alves@hotmail.com', valor: '55', tipo: 'Recarregar' },
+  { email: 'roberta.moraes@gmail.com', valor: '20', tipo: 'Sacar' },
+  { email: 'thiago.oliveira@outlook.com', valor: '85', tipo: 'Recarregar' },
+  { email: 'camila.souza@gmail.com', valor: '15', tipo: 'Sacar' },
+  { email: 'marcelo.ferreira@gmail.com', valor: '120', tipo: 'Recarregar' },
+  { email: 'aline.costa@yahoo.com', valor: '25', tipo: 'Sacar' },
+  { email: 'rafael.gomes@gmail.com', valor: '75', tipo: 'Recarregar' },
+  { email: 'patricia.silva@outlook.com', valor: '60', tipo: 'Sacar' },
+  { email: 'eduardo.pereira@gmail.com', valor: '95', tipo: 'Recarregar' },
+  { email: 'vanessa.martins@gmail.com', valor: '40', tipo: 'Sacar' },
+  { email: 'danilo.araujo@gmail.com', valor: '150', tipo: 'Recarregar' }
+];
+let i = 0;
     setInterval(() => {
       const usuario = usuarios[i % usuarios.length];
       adicionarNotificacao(usuario.email, usuario.valor, usuario.tipo);
