@@ -18,6 +18,7 @@
       padding: 20px;
       border-radius: 10px;
       border: 1px solid #00ffcc;
+      text-align: center;
     }
 
     .titulo {
@@ -33,6 +34,10 @@
       line-height: 1.6;
     }
 
+    .qrcode {
+      margin: 20px 0;
+    }
+
     .chave {
       background: #001f3a;
       padding: 10px;
@@ -40,10 +45,10 @@
       text-align: center;
       word-break: break-word;
       border: 1px solid #00ffcc;
+      margin-bottom: 15px;
     }
 
     button {
-      margin-top: 15px;
       padding: 10px 15px;
       background-color: #00ffcc;
       border: none;
@@ -52,77 +57,58 @@
       font-weight: bold;
     }
 
-    /* Estilo da bolinha de carregamento */
-    .loader {
-      border: 4px solid #f3f3f3;
-      border-top: 4px solid #00ffcc;
-      border-radius: 50%;
-      width: 24px;
-      height: 24px;
-      animation: spin 1s linear infinite;
-      margin-left: 10px;
+    button:hover {
+      background-color: #00cca3;
     }
-
-    /* Animação de rotação */
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-
   </style>
 </head>
 <body>
   <div class="container">
-    <div class="titulo">💸 Enviar Pagamento</div>
+    <div class="titulo">💸 Enviar Pagamento (USDT - BEP20)</div>
 
     <div class="info" id="mensagem-valor">
       Carregando valor selecionado...
     </div>
 
-    <div class="chave" id="chavePix">
+    <!-- QR Code será gerado aqui -->
+    <div class="qrcode" id="qrcode"></div>
+
+    <!-- Endereço da carteira -->
+    <div class="chave" id="chaveCarteira">
       0xe24dca3069B2a473274CCAf64CD5083075f9f3Fa
     </div>
 
-    <button onclick="copiarChave()">Copiar Chave
-      <span id="loading" class="loader" style="display:none;"></span>
-    </button>
+    <button onclick="copiarChave()">📋 Copiar Endereço</button>
   </div>
 
-  <!-- Firebase SDKs -->
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+  <!-- QRCodeJS para gerar o QR Code -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
   <script>
-    // Configuração do Firebase
-    const firebaseConfig = {
-      apiKey: "AIzaSyDzOgL6cvc0b4AO0vAEay1CeSAv_-WqaWQ",
-      authDomain: "saxpag-miner.firebaseapp.com",
-      databaseURL: "https://saxpag-miner-default-rtdb.firebaseio.com",
-      projectId: "saxpag-miner",
-      storageBucket: "saxpag-miner.firebasestorage.app",
-      messagingSenderId: "154250189626",
-      appId: "1:154250189626:web:83c232a5c539e3f9fe0e03",
-      measurementId: "G-LEV5TL9P7H"
-    };
+    const carteira = "0xe24dca3069B2a473274CCAf64CD5083075f9f3Fa";
 
-    // Inicializa o Firebase
-    firebase.initializeApp(firebaseConfig);
-    const database = firebase.database();
+    // Gerar QR Code
+    new QRCode(document.getElementById("qrcode"), {
+      text: carteira,
+      width: 200,
+      height: 200,
+      colorDark: "#00ffcc",
+      colorLight: "#0b0f3b",
+      correctLevel: QRCode.CorrectLevel.H
+    });
 
+    // Mensagem dinâmica com valor
     const valor = localStorage.getItem("valorRecarga") || "0";
     const rede = localStorage.getItem("redeSelecionada") || "BEP20-USDT";
-    document.getElementById("mensagem-valor").innerText = `Copie a chave abaixo e envie exatamente $${valor} via ${rede} usando sua corretora de preferência.`;
+    document.getElementById("mensagem-valor").innerText = 
+      `Escaneie o QR Code ou copie a carteira abaixo e envie exatamente $${valor} via ${rede} usando sua corretora de preferência.`;
 
     function copiarChave() {
-      const chave = document.getElementById("chavePix").innerText;
-      // Mostrar o loader de carregamento
-      document.getElementById("loading").style.display = "inline-block";
-      navigator.clipboard.writeText(chave).then(() => {
-        alert("Chave copiada!");
-        // Esperar 2 segundos para a animação antes de redirecionar
+      navigator.clipboard.writeText(carteira).then(() => {
+        alert("Endereço da carteira copiado!");
         setTimeout(() => {
           window.location.href = "confirmar-recarga.html";
-        }, 2000); // 2 segundos de espera
+        }, 2000);
       });
     }
   </script>
