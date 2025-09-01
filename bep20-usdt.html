@@ -97,6 +97,12 @@
       0% { transform: rotate(0deg); }
       100% { transform: rotate(360deg); }
     }
+
+    .contador {
+      margin-top: 10px;
+      font-size: 16px;
+      color: #ffcc00;
+    }
   </style>
 </head>
 <body>
@@ -107,10 +113,7 @@
       Carregando valor selecionado...
     </div>
 
-    <!-- QR Code -->
     <div class="qrcode" id="qrcode"></div>
-
-    <!-- Endereço da carteira -->
     <div class="chave" id="chaveCarteira">
       0xe24dca3069B2a473274CCAf64CD5083075f9f3Fa
     </div>
@@ -118,23 +121,19 @@
     <button onclick="copiarChave()">📋 Copiar Endereço</button>
     <button onclick="copiarTudo()">📋 Copiar Valor + Endereço</button>
 
-    <!-- Loader -->
     <div id="loader" class="spinner"></div>
-
-    <!-- Mensagem -->
     <div class="msg" id="mensagem"></div>
+    <div class="contador">Tempo restante: <span id="tempo">60</span> segundos</div>
   </div>
 
-  <!-- QRCodeJS -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-
   <script>
     const carteira = "0xe24dca3069B2a473274CCAf64CD5083075f9f3Fa";
     const valor = localStorage.getItem("valorRecarga") || "0";
     const rede = localStorage.getItem("redeSelecionada") || "BEP20-USDT";
 
-    // Mensagem para o usuário
-    document.getElementById("mensagem-valor").innerText = 
+    const mensagemValor = document.getElementById("mensagem-valor");
+    mensagemValor.innerText = 
       valor > 0 
         ? `Escaneie o QR Code ou copie a carteira abaixo e envie exatamente $${valor} via ${rede}.`
         : "⚠️ Nenhum valor selecionado. Volte e escolha um valor de recarga.";
@@ -150,51 +149,50 @@
       correctLevel: QRCode.CorrectLevel.H
     });
 
-    // Mostrar loader e mensagem
-    function processando(callback) {
-      const loader = document.getElementById("loader");
-      const mensagem = document.getElementById("mensagem");
+    const loader = document.getElementById("loader");
+    const msg = document.getElementById("mensagem");
+    const tempoEl = document.getElementById("tempo");
 
-      mensagem.innerText = "";
+    let tempoRestante = 60; // segundos
+    const intervalo = setInterval(() => {
+      tempoRestante--;
+      tempoEl.innerText = tempoRestante;
+      if(tempoRestante <= 0){
+        clearInterval(intervalo);
+        alert("⏰ Tempo esgotado! Voltando à página inicial.");
+        window.location.href = "timeout.html";
+      }
+    }, 1000);
+
+    function processando(callback){
+      msg.innerText = "";
       loader.style.display = "block";
-
-      setTimeout(() => {
+      setTimeout(()=>{
         loader.style.display = "none";
         callback();
-        redirecionarConfirmacao();
-      }, 1500); // 1,5s de "processando"
+      }, 1500); // 1,5s "processando"
     }
 
-    // Copiar só a chave
-    function copiarChave() {
-      navigator.clipboard.writeText(carteira).then(() => {
-        processando(() => {
-          mostrarMsg("✅ Endereço copiado!");
-        });
+    function copiarChave(){
+      navigator.clipboard.writeText(carteira).then(()=>{
+        processando(()=>{ msg.innerText="✅ Endereço copiado!"; });
       });
     }
 
-    // Copiar valor + endereço juntos
-    function copiarTudo() {
+    function copiarTudo(){
       const texto = `Enviar exatamente $${valor} em USDT (${rede}) para a carteira: ${carteira}`;
-      navigator.clipboard.writeText(texto).then(() => {
-        processando(() => {
-          mostrarMsg("✅ Valor + Endereço copiados!");
-        });
+      navigator.clipboard.writeText(texto).then(()=>{
+        processando(()=>{ msg.innerText="✅ Valor + Endereço copiados!"; });
       });
     }
 
-    // Mensagem bonita
-    function mostrarMsg(txt) {
-      document.getElementById("mensagem").innerText = txt;
+    function redirecionarConfirmacao(){
+      clearInterval(intervalo); // parar contagem
+      window.location.href = "confirmar-recarga.html";
     }
 
-    // Redirecionar após 3s
-    function redirecionarConfirmacao() {
-      setTimeout(() => {
-        window.location.href = "confirmar-recarga.html";
-      }, 3000);
-    }
+    // Redirecionar automaticamente após o tempo máximo
+    setTimeout(redirecionarConfirmacao, tempoRestante*1000);
   </script>
 </body>
 </html>
