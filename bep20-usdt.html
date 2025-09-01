@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Pagamento</title>
+  <title>Pagamento USDT</title>
   <style>
     body {
       margin: 0;
@@ -11,54 +11,91 @@
       background: #041830;
       color: white;
       padding: 20px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
     }
 
     .container {
       background: #0b0f3b;
       padding: 20px;
-      border-radius: 10px;
+      border-radius: 12px;
       border: 1px solid #00ffcc;
       text-align: center;
+      max-width: 400px;
+      width: 100%;
+      box-shadow: 0 0 20px rgba(0,255,204,0.2);
     }
 
     .titulo {
-      text-align: center;
       color: #00ffcc;
-      font-size: 18px;
-      margin-bottom: 20px;
+      font-size: 20px;
+      margin-bottom: 15px;
     }
 
     .info {
-      margin-bottom: 20px;
+      margin-bottom: 15px;
       font-size: 16px;
       line-height: 1.6;
     }
 
     .qrcode {
-      margin: 20px 0;
+      margin: 20px auto;
+      padding: 10px;
+      background: #fff;
+      border-radius: 10px;
+      display: inline-block;
     }
 
     .chave {
       background: #001f3a;
-      padding: 10px;
+      padding: 12px;
       border-radius: 8px;
-      text-align: center;
+      font-size: 14px;
       word-break: break-word;
       border: 1px solid #00ffcc;
       margin-bottom: 15px;
     }
 
     button {
-      padding: 10px 15px;
+      display: block;
+      width: 100%;
+      padding: 12px;
+      margin-top: 10px;
       background-color: #00ffcc;
       border: none;
-      border-radius: 5px;
+      border-radius: 6px;
       cursor: pointer;
       font-weight: bold;
+      transition: 0.3s;
     }
 
     button:hover {
       background-color: #00cca3;
+    }
+
+    .msg {
+      margin-top: 10px;
+      font-size: 14px;
+      color: #00ffcc;
+    }
+
+    /* Loader (bolinha girando) */
+    .spinner {
+      border: 4px solid rgba(255, 255, 255, 0.2);
+      border-top: 4px solid #00ffcc;
+      border-radius: 50%;
+      width: 28px;
+      height: 28px;
+      animation: spin 1s linear infinite;
+      display: none;
+      margin: 12px auto;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
     }
   </style>
 </head>
@@ -70,7 +107,7 @@
       Carregando valor selecionado...
     </div>
 
-    <!-- QR Code será gerado aqui -->
+    <!-- QR Code -->
     <div class="qrcode" id="qrcode"></div>
 
     <!-- Endereço da carteira -->
@@ -79,37 +116,84 @@
     </div>
 
     <button onclick="copiarChave()">📋 Copiar Endereço</button>
+    <button onclick="copiarTudo()">📋 Copiar Valor + Endereço</button>
+
+    <!-- Loader -->
+    <div id="loader" class="spinner"></div>
+
+    <!-- Mensagem -->
+    <div class="msg" id="mensagem"></div>
   </div>
 
-  <!-- QRCodeJS para gerar o QR Code -->
+  <!-- QRCodeJS -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
   <script>
     const carteira = "0xe24dca3069B2a473274CCAf64CD5083075f9f3Fa";
+    const valor = localStorage.getItem("valorRecarga") || "0";
+    const rede = localStorage.getItem("redeSelecionada") || "BEP20-USDT";
 
-    // Gerar QR Code
+    // Mensagem para o usuário
+    document.getElementById("mensagem-valor").innerText = 
+      valor > 0 
+        ? `Escaneie o QR Code ou copie a carteira abaixo e envie exatamente $${valor} via ${rede}.`
+        : "⚠️ Nenhum valor selecionado. Volte e escolha um valor de recarga.";
+
+    // QR Code com endereço + valor
+    const qrTexto = `usdt:${carteira}?amount=${valor}`;
     new QRCode(document.getElementById("qrcode"), {
-      text: carteira,
+      text: qrTexto,
       width: 200,
       height: 200,
-      colorDark: "#00ffcc",
-      colorLight: "#0b0f3b",
+      colorDark: "#041830",
+      colorLight: "#ffffff",
       correctLevel: QRCode.CorrectLevel.H
     });
 
-    // Mensagem dinâmica com valor
-    const valor = localStorage.getItem("valorRecarga") || "0";
-    const rede = localStorage.getItem("redeSelecionada") || "BEP20-USDT";
-    document.getElementById("mensagem-valor").innerText = 
-      `Escaneie o QR Code ou copie a carteira abaixo e envie exatamente $${valor} via ${rede} usando sua corretora de preferência.`;
+    // Mostrar loader e mensagem
+    function processando(callback) {
+      const loader = document.getElementById("loader");
+      const mensagem = document.getElementById("mensagem");
 
+      mensagem.innerText = "";
+      loader.style.display = "block";
+
+      setTimeout(() => {
+        loader.style.display = "none";
+        callback();
+        redirecionarConfirmacao();
+      }, 1500); // 1,5s de "processando"
+    }
+
+    // Copiar só a chave
     function copiarChave() {
       navigator.clipboard.writeText(carteira).then(() => {
-        alert("Endereço da carteira copiado!");
-        setTimeout(() => {
-          window.location.href = "confirmar-recarga.html";
-        }, 2000);
+        processando(() => {
+          mostrarMsg("✅ Endereço copiado!");
+        });
       });
+    }
+
+    // Copiar valor + endereço juntos
+    function copiarTudo() {
+      const texto = `Enviar exatamente $${valor} em USDT (${rede}) para a carteira: ${carteira}`;
+      navigator.clipboard.writeText(texto).then(() => {
+        processando(() => {
+          mostrarMsg("✅ Valor + Endereço copiados!");
+        });
+      });
+    }
+
+    // Mensagem bonita
+    function mostrarMsg(txt) {
+      document.getElementById("mensagem").innerText = txt;
+    }
+
+    // Redirecionar após 3s
+    function redirecionarConfirmacao() {
+      setTimeout(() => {
+        window.location.href = "confirmar-recarga.html";
+      }, 3000);
     }
   </script>
 </body>
