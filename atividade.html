@@ -96,30 +96,31 @@
             }
           });
 
-          // 3️⃣ Retiradas
-          db.ref('usuarios/' + userId + '/retiradas').once('value').then(snapshotRet => {
+          // 3️⃣ Retiradas (corrigido para buscar no mesmo nó do painel)
+          db.ref('painel/retiradas').once('value').then(snapshotRet => {
             snapshotRet.forEach(child => {
               const data = child.val();
-              let statusClass = '';
-              if (data.status.toLowerCase() === 'aprovado') {
-                statusClass = 'status-aprovado';
-              } else if (data.status.toLowerCase() === 'em revisão') {
-                statusClass = 'status-em-revisao';
-              } else if (data.status.toLowerCase() === 'reprovado') {
-                statusClass = 'status-reprovado';
-              }
 
-              // Forçando atualização do status "Aprovado"
-              if (data.status === "Aprovado") {
-                data.status = "Aprovado";
-              }
+              // Filtra só retiradas do usuário logado
+              if (data.usuario === user.email || data.userId === userId) {
+                let statusClass = '';
+                const statusLower = data.status.toLowerCase();
 
-              todasAtividades.push({
-                tipo: 'retirada',
-                titulo: 'Retirada Solicitada',
-                descricao: `Valor: ${data.valor} USDT | Endereço: ${data.endereco} | Status: <span class="${statusClass}">${data.status}</span>`,
-                dataHora: new Date(data.data)
-              });
+                if (statusLower === 'aprovado') {
+                  statusClass = 'status-aprovado';
+                } else if (statusLower === 'pendente' || statusLower === 'em revisão') {
+                  statusClass = 'status-em-revisao';
+                } else if (statusLower === 'reprovado') {
+                  statusClass = 'status-reprovado';
+                }
+
+                todasAtividades.push({
+                  tipo: 'retirada',
+                  titulo: 'Retirada Solicitada',
+                  descricao: `Valor: ${data.valor} USDT | Endereço: ${data.endereco} | Status: <span class="${statusClass}">${data.status}</span>`,
+                  dataHora: new Date(data.dataHora) // 🔥 corrigido para usar dataHora
+                });
+              }
             });
 
             // Ordena da mais recente para a mais antiga
