@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>saxpag-miner</title>
+  <title>SaxPag Miner</title>
   <style>
     body {
       margin: 0;
@@ -18,14 +18,9 @@
       align-items: center;
       justify-content: space-between;
     }
-    .logo {
-      display: flex;
-      align-items: center;
-    }
     .logo span {
       font-size: 20px;
       font-weight: bold;
-      margin-left: 10px;
       color: #fff;
     }
     .vip-level {
@@ -35,7 +30,6 @@
       background: #1f1f3f;
       padding: 6px 12px;
       border-radius: 15px;
-      user-select: none;
       white-space: nowrap;
     }
     .card {
@@ -43,6 +37,7 @@
       margin: 20px;
       padding: 20px;
       border-radius: 15px;
+      max-width: 500px;
     }
     .card h2 {
       color: #00bfff;
@@ -76,27 +71,32 @@
       font-size: 13px;
       color: #00bfff;
       cursor: pointer;
+      transition: background 0.3s;
+    }
+    .menu-item:hover {
+      background: #1e3a56;
     }
     .tarefas {
       background: #142c43;
       margin: 0 20px 80px 20px;
       padding: 15px;
       border-radius: 15px;
+      max-width: 500px;
     }
     .tarefas h3 {
       font-size: 16px;
       margin: 0 0 10px 0;
     }
-    .checkin {
-      background: #ff69b4;
-      color: white;
+    .btn {
       border: none;
       padding: 8px 16px;
       border-radius: 20px;
       font-size: 14px;
-      float: right;
       cursor: pointer;
-      margin-left: 5px;
+    }
+    .btn-primary {
+      background: #ff69b4;
+      color: white;
     }
     .bottom-nav {
       position: fixed;
@@ -124,6 +124,7 @@
       max-height: 80%;
       overflow-y: auto;
       width: 300px;
+      z-index: 9999;
     }
     .notification {
       background-color: #2e3b48;
@@ -135,18 +136,21 @@
       align-items: center;
       font-size: 14px;
       color: white;
-      animation: slide-up 2s ease-out;
+      animation: slide-up 0.5s ease-out;
     }
     .notification i {
-      margin-right: 10px;
-      font-size: 18px;
-    }
-    .notification-content {
-      flex-grow: 1;
+      margin-left: 10px;
+      font-size: 16px;
+      cursor: pointer;
     }
     @keyframes slide-up {
-      0% { transform: translateY(100%); }
-      100% { transform: translateY(0); }
+      0% { transform: translateY(100%); opacity: 0; }
+      100% { transform: translateY(0); opacity: 1; }
+    }
+    @media (max-width: 600px) {
+      .card, .tarefas { margin: 10px; }
+      .saldo { font-size: 22px; }
+      .menu-item { font-size: 12px; }
     }
   </style>
 </head>
@@ -154,7 +158,7 @@
 
   <header>
     <div class="logo">
-      <span>saxpag-miner</span>
+      <span>SaxPag Miner</span>
     </div>
     <div style="display: flex; align-items: center; gap: 15px;">
       <div style="color: white; font-size: 14px;">🌐 Português</div>
@@ -187,7 +191,7 @@
   <div class="tarefas">
     <h3>
       Entrar na tarefa 
-      <button class="checkin" onclick="fazerCheckin()">Check-in</button>
+      <button class="btn btn-primary" onclick="fazerCheckin()">Check-in</button>
     </h3>
     <p>+0.08 USDT<br><small>Uma vez por dia</small></p>
   </div>
@@ -219,6 +223,10 @@
     const auth = firebase.auth();
     const db = firebase.database();
 
+    function formatarMoeda(valor) {
+      return `$${parseFloat(valor).toFixed(2)}`;
+    }
+
     function checkLogin() {
       auth.onAuthStateChanged(user => {
         if (!user) {
@@ -230,25 +238,20 @@
     }
 
     function loadData(userId) {
-      // pega saldo e vip
       db.ref("usuarios/" + userId).once("value").then(snapshot => {
         let data = snapshot.val() || {};
-
-        // se o usuário for novo sem saldo, define 1 USDT no cadastro
         if (data.saldo === undefined) {
           data.saldo = 1; 
           db.ref("usuarios/" + userId).update({ saldo: 1 });
         }
-
         let saldo = data.saldo || 0;
         let vip = data.vip || 0;
 
-        document.getElementById("saldoCarteira").innerText = `$${saldo.toFixed(2)}`;
-        document.getElementById("investido").innerText = `$${saldo.toFixed(2)}`;
+        document.getElementById("saldoCarteira").innerText = formatarMoeda(saldo);
+        document.getElementById("investido").innerText = formatarMoeda(saldo);
         document.getElementById("vipLevel").innerText = `VIP ${vip}`;
       });
 
-      // soma todas as retiradas do usuário para carteira de corretagem
       db.ref("usuarios/" + userId + "/retiradas").once("value").then(snapshot => {
         let totalRetiradas = 0;
         snapshot.forEach(child => {
@@ -257,7 +260,7 @@
             totalRetiradas += parseFloat(retirada.valorFinal);
           }
         });
-        document.getElementById("carteiraCorretagem").innerText = `$${totalRetiradas.toFixed(2)}`;
+        document.getElementById("carteiraCorretagem").innerText = formatarMoeda(totalRetiradas);
       });
     }
 
@@ -274,80 +277,59 @@
       });
     }
 
+    function showNotification(msg) {
+      const container = document.getElementById("notification-container");
+      if (container.children.length >= 3) {
+        container.removeChild(container.children[0]);
+      }
+      const n = document.createElement("div");
+      n.classList.add("notification");
+      n.innerHTML = `<div>${msg}</div><i onclick="this.parentElement.remove()">✖</i>`;
+      container.appendChild(n);
+      setTimeout(() => { n.remove(); }, 5000);
+    }
+
     function fazerCheckin() {
       const user = auth.currentUser;
       if (!user) return;
-
       const userId = user.uid;
-      const checkinKey = "ultimoCheckin_" + userId;
-      const ultimaColeta = localStorage.getItem(checkinKey);
-      const agora = new Date().getTime();
-      const umDia = 24 * 60 * 60 * 1000;
 
-      if (ultimaColeta && agora - ultimaColeta < umDia) {
-        alert("Você já coletou hoje. Tente novamente amanhã.");
-        return;
-      }
+      db.ref("usuarios/" + userId).once("value").then(snapshot => {
+        let data = snapshot.val() || {};
+        const agora = Date.now();
+        const umDia = 24 * 60 * 60 * 1000;
 
-      db.ref("usuarios/" + userId + "/saldo").once("value").then(snapshot => {
-        let saldoAtual = snapshot.val() || 0;
+        if (data.ultimoCheckin && agora - data.ultimoCheckin < umDia) {
+          showNotification("⚠️ Você já coletou hoje. Tente novamente amanhã.");
+          return;
+        }
+
+        let saldoAtual = data.saldo || 0;
         saldoAtual += 0.08;
 
-        db.ref("usuarios/" + userId).update({ saldo: saldoAtual });
-        localStorage.setItem(checkinKey, agora);
+        db.ref("usuarios/" + userId).update({ 
+          saldo: saldoAtual, 
+          ultimoCheckin: agora 
+        });
 
-        alert("Check-in realizado com sucesso! +0.08 USDT");
-        adicionarAtividade(userId, 'Check-in diário', 'Você realizou o check-in e ganhou +0.08 USDT.');
+        showNotification("✅ Check-in realizado! +0.08 USDT");
+        adicionarAtividade(userId, 'Check-in diário', 'Você ganhou +0.08 USDT.');
         loadData(userId);
       });
     }
 
     function adicionarNotificacao(nome, valor, tipo) {
-      const notificationContainer = document.getElementById('notification-container');
-      if (notificationContainer.children.length > 0) {
-        notificationContainer.removeChild(notificationContainer.children[0]);
-      }
-      const notification = document.createElement('div');
-      notification.classList.add('notification');
       const emailMascarado = nome.replace(/(?<=.{2}).*(?=@)/, '*****');
-      notification.innerHTML = `
-        <div class="notification-content">
-          <strong>${emailMascarado}</strong> ${tipo} <strong>${valor} USDT</strong>
-        </div>
-        <i class="fas fa-times" onclick="this.parentElement.remove();"></i>
-      `;
-      notificationContainer.appendChild(notification);
-      setTimeout(() => { notification.remove(); }, 5000);
+      showNotification(`<strong>${emailMascarado}</strong> ${tipo} <strong>${valor} USDT</strong>`);
     }
 
-const usuarios = [
-  { email: 'luiscap@gmail.com', valor: '10', tipo: 'Recarregar' },
-  { email: 'lucas123@gmail.com', valor: '20', tipo: 'Sacar' },
-  { email: 'joaosilva@gmail.com', valor: '20', tipo: 'Recarregar' },
-  { email: 'maria.jane@gmail.com', valor: '15', tipo: 'Sacar' },
-  { email: 'andre@exemplo.com', valor: '30', tipo: 'Recarregar' },
-  { email: 'felipe@exemplo.com', valor: '25', tipo: 'Sacar' },
-  { email: 'carla@exemplo.com', valor: '50', tipo: 'Recarregar' },
-  { email: 'ricardo@exemplo.com', valor: '45', tipo: 'Sacar' },
-  { email: 'jose@exemplo.com', valor: '70', tipo: 'Recarregar' },
-  { email: 'ana@exemplo.com', valor: '60', tipo: 'Sacar' },
-  { email: 'lucas@exemplo.com', valor: '90', tipo: 'Recarregar' },
-  { email: 'bruna@exemplo.com', valor: '100', tipo: 'Sacar' },
-  { email: 'paulo.santos@gmail.com', valor: '35', tipo: 'Recarregar' },
-  { email: 'fernanda.lima@yahoo.com', valor: '40', tipo: 'Sacar' },
-  { email: 'gustavo.alves@hotmail.com', valor: '55', tipo: 'Recarregar' },
-  { email: 'roberta.moraes@gmail.com', valor: '20', tipo: 'Sacar' },
-  { email: 'thiago.oliveira@outlook.com', valor: '85', tipo: 'Recarregar' },
-  { email: 'camila.souza@gmail.com', valor: '15', tipo: 'Sacar' },
-  { email: 'marcelo.ferreira@gmail.com', valor: '120', tipo: 'Recarregar' },
-  { email: 'aline.costa@yahoo.com', valor: '25', tipo: 'Sacar' },
-  { email: 'rafael.gomes@gmail.com', valor: '75', tipo: 'Recarregar' },
-  { email: 'patricia.silva@outlook.com', valor: '60', tipo: 'Sacar' },
-  { email: 'eduardo.pereira@gmail.com', valor: '95', tipo: 'Recarregar' },
-  { email: 'vanessa.martins@gmail.com', valor: '40', tipo: 'Sacar' },
-  { email: 'danilo.araujo@gmail.com', valor: '150', tipo: 'Recarregar' }
-];
-let i = 0;
+    const usuarios = [
+      { email: 'luiscap@gmail.com', valor: '10', tipo: 'Recarregar' },
+      { email: 'lucas123@gmail.com', valor: '20', tipo: 'Sacar' },
+      { email: 'joaosilva@gmail.com', valor: '20', tipo: 'Recarregar' },
+      { email: 'maria.jane@gmail.com', valor: '15', tipo: 'Sacar' }
+    ];
+    let i = 0;
     setInterval(() => {
       const usuario = usuarios[i % usuarios.length];
       adicionarNotificacao(usuario.email, usuario.valor, usuario.tipo);
