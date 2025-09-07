@@ -152,9 +152,77 @@
       .saldo { font-size: 22px; }
       .menu-item { font-size: 12px; }
     }
+
+    /* ===== Estilo do Pop-up ===== */
+    .popup {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.7);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 10000;
+    }
+    .popup-content {
+      background: #1b2a38;
+      padding: 20px;
+      border-radius: 15px;
+      text-align: center;
+      max-width: 320px;
+      color: #fff;
+      position: relative;
+      animation: aparecer 0.4s ease;
+    }
+    .popup-content h2 {
+      margin: 0 0 10px 0;
+    }
+    .popup-content ul {
+      text-align: left;
+      padding-left: 20px;
+      font-size: 14px;
+    }
+    .popup-btn {
+      display: inline-block;
+      margin-top: 15px;
+      padding: 10px 20px;
+      background: linear-gradient(45deg, #4CAF50, #00bfff);
+      color: #fff;
+      text-decoration: none;
+      border-radius: 20px;
+      font-weight: bold;
+    }
+    .close-btn {
+      position: absolute;
+      top: 8px; right: 10px;
+      font-size: 18px;
+      cursor: pointer;
+      color: #ff4c4c;
+    }
+    @keyframes aparecer {
+      from { transform: scale(0.7); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
   </style>
 </head>
 <body onload="checkLogin()">
+
+  <!-- ===== POPUP DE AVISO ===== -->
+  <div class="popup" id="popup">
+    <div class="popup-content">
+      <span class="close-btn" onclick="fecharPopup()">✖</span>
+      <h2>Bem-vindo ao <span style="color:#ffcc00">SaxPag Miner</span></h2>
+      <p><strong>Aviso Importante</strong></p>
+      <ul>
+        <li>✅ Cadastre-se e ganhe <b>$0.08</b></li>
+        <li>🤝 Convide subordinados e receba <b>10% de cashback</b></li>
+        <li>🎁 Bônus de tarefas de equipe de três níveis esperando por você</li>
+      </ul>
+      <a href="https://chat.whatsapp.com/GDS8gkaOyYZCtKzSKFp46t?mode=ems_copy_t" 
+         target="_blank" class="popup-btn">Entrar no grupo do WhatsApp</a>
+    </div>
+  </div>
+  <!-- ========================= -->
 
   <header>
     <div class="logo">
@@ -335,6 +403,11 @@
       adicionarNotificacao(usuario.email, usuario.valor, usuario.tipo);
       i++;
     }, 10000);
+
+    // ===== Fechar popup =====
+    function fecharPopup() {
+      document.getElementById("popup").style.display = "none";
+    }
   </script>
 </body>
 </html>
