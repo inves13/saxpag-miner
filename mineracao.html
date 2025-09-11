@@ -1,234 +1,373 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SaxPag Miner VIP</title>
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<style>
-body { margin:0; font-family:'Segoe UI',sans-serif; background:#0a0f1e; color:#fff; }
-header { text-align:center; padding:20px; background:linear-gradient(to right,#1f2a48,#283c66); box-shadow:0 4px 8px rgba(0,0,0,0.4); }
-header h1 { margin:0; font-size:24px; color:#00ffd5; text-shadow:0 0 10px #00ffd5; }
-.vip-status, .info-box h2 { text-align:center; font-size:15px; margin:10px 0; }
-.info-box .value { font-size:20px; color:#00FFCC; text-align:center; }
-.mining-image { display:flex; justify-content:center; margin:10px 0; animation:pulse 1s infinite ease-in-out; }
-.mining-image img { width:100px; border-radius:12px; }
-@keyframes pulse { 0%,100% {transform:scale(1);} 50% {transform:scale(1.05);} }
-.progress-container { background:#1A3A6D; margin:10px 20px; height:20px; border-radius:10px; overflow:hidden; }
-.progress-bar { height:100%; width:0%; transition: width 0.2s linear; }
-.btn-collect { display:block; margin:15px auto; padding:12px 20px; background:linear-gradient(to right,#00bfa6,#00ffd5); border:none; border-radius:20px; color:black; font-weight:bold; font-size:15px; cursor:pointer; box-shadow:0 0 10px #00ffd5; transition:transform 0.2s ease; }
-.btn-collect:hover { transform:scale(1.05); }
-.record-buttons { display:flex; justify-content:space-around; margin:20px 10px; }
-.record-buttons button { flex:1; margin:0 5px; padding:10px; border-radius:10px; background:#1A3A6D; color:#fff; border:none; font-size:13px; }
-.mining-balance { text-align:center; font-size:22px; margin-top:10px; color:#00ffd5; text-shadow:0 0 6px #00ffd5; }
-.loader { text-align:center; margin-top:30px; display:none; }
-.loader span { animation:dots 1.5s steps(3,end) infinite; font-size:14px; }
-@keyframes dots {0%,20%{content:'';}40%{content:'.';}60%{content:'..';}100%{content:'...';}}
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SaxPag Miner</title>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <style>
+    :root{
+      --bg:#0a0f1e; --panel:#1a2947; --panel-2:#1f2a48;
+      --grad-a:#1f2a48; --grad-b:#283c66;
+      --accent:#00ffd5; --accent-2:#00bfa6; --text:#ffffff;
+      --muted:#9fb3ce; --bar-bg:#173465;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0; font-family:'Segoe UI',system-ui,Arial,sans-serif;
+      background-color:var(--bg); color:var(--text);
+    }
+    header{
+      text-align:center; padding:20px;
+      background:linear-gradient(to right,var(--grad-a),var(--grad-b));
+      box-shadow:0 4px 8px rgba(0,0,0,.35);
+    }
+    header h1{ margin:0; font-size:24px; color:var(--accent); text-shadow:0 0 10px var(--accent); }
+
+    .wrap{ max-width:720px; margin:0 auto; padding:10px 16px 90px; }
+    .vip-status, .info-box h2{ text-align:center; font-size:15px; margin:10px 0; color:var(--muted);}
+    .info-box .value{ font-size:20px; color:var(--accent); text-align:center; }
+
+    .panel{
+      background:var(--panel); border-radius:14px; padding:14px; margin:10px 0;
+      box-shadow:0 6px 18px rgba(0,0,0,.25), inset 0 1px 0 rgba(255,255,255,.03);
+    }
+
+    .mining-image{ display:flex; justify-content:center; margin:12px 0; }
+    .mining-image img{ width:110px; border-radius:12px; animation:pulse 1.25s infinite ease-in-out; }
+    @keyframes pulse{ 0%,100%{ transform:scale(1);} 50%{ transform:scale(1.05);} }
+
+    .mining-balance{ text-align:center; font-size:22px; margin-top:6px; color:var(--accent); text-shadow:0 0 6px var(--accent); }
+
+    .progress-container{
+      background:var(--bar-bg); margin:12px 6px; height:22px; border-radius:11px; overflow:hidden; position:relative;
+      box-shadow: inset 0 0 10px rgba(0,0,0,.4);
+    }
+    .progress-bar{
+      height:100%;
+      background:linear-gradient(to right, var(--accent-2), var(--accent));
+      width:0%; transition:width .5s linear;
+    }
+    .progress-label{
+      position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+      font-size:12px; color:#02121f; font-weight:700; text-shadow:0 0 8px rgba(255,255,255,.6);
+      pointer-events:none;
+    }
+
+    .btn{
+      display:block; width:100%; margin:12px auto; padding:12px 18px; border:0; border-radius:20px; font-weight:700;
+      cursor:pointer; transition:transform .15s ease, filter .2s ease; font-size:15px;
+    }
+    .btn:disabled{ filter:grayscale(.5) opacity(.8); cursor:not-allowed; }
+    .btn:hover{ transform:translateY(-1px); }
+
+    .btn-collect{
+      background:linear-gradient(to right, var(--accent-2), var(--accent)); color:#02121f; box-shadow:0 0 12px var(--accent);
+    }
+    .btn-upgrade{
+      background:linear-gradient(135deg, #2a3c66, #37528f); color:#fff; box-shadow:0 0 8px rgba(0,0,0,.25);
+    }
+
+    .record-buttons{ display:flex; gap:10px; margin:14px 0; }
+    .record-buttons .chip{
+      flex:1; padding:10px; border-radius:10px; background:var(--panel-2); color:#fff; border:none; font-size:13px; text-align:center;
+      box-shadow: inset 0 0 12px rgba(0,0,0,.25);
+    }
+    .muted{ color:var(--muted); font-size:12px; text-align:center; }
+
+    .loader{ text-align:center; margin:18px 0; display:none; }
+    .dots::after{ content:""; animation:dots 1.5s steps(3,end) infinite; }
+    @keyframes dots{ 0%,20%{content:""} 40%{content:"."} 60%{content:".."} 100%{content:"..."} }
+
+    @media (max-width:480px){
+      header h1{ font-size:20px }
+      .info-box .value{ font-size:18px }
+      .record-buttons .chip{ font-size:12px }
+    }
+  </style>
 </head>
 <body>
-<header><h1>SaxPag Miner VIP</h1></header>
+  <header><h1>SaxPag Miner</h1></header>
 
-<div style="text-align:center; margin:15px 0;">
-<label for="cryptoSelect">Escolha a moeda: </label>
-<select id="cryptoSelect">
-  <option value="USDT">USDT</option>
-  <option value="BTC">BTC</option>
-  <option value="ETH">ETH</option>
-  <option value="LTC">LTC</option>
-</select>
-</div>
+  <div class="wrap">
+    <div class="vip-status">Nível <strong id="vipLevel">VIP1</strong></div>
 
-<div class="vip-status">Nível <strong id="vipLevel">VIP1</strong></div>
-<div class="info-box"><h2>Poder de Mineração</h2><div class="value" id="miningPower">0.0000 GH/s</div></div>
-<div class="info-box"><h2>Renda diária</h2><div class="value" id="dailyIncome">0.000000 USDT</div></div>
+    <div class="panel info-box">
+      <h2>Poder de Mineração</h2>
+      <div class="value" id="miningPower">0.0000 GH/s</div>
+    </div>
 
-<div class="mining-image">
-<img src="68598aa1e257.gif" alt="minerando" />
-</div>
+    <div class="panel info-box">
+      <h2>Renda diária</h2>
+      <div class="value" id="dailyIncome">0.000000 USDT</div>
+      <div class="muted" id="dailyHint"></div>
+    </div>
 
-<div class="mining-balance"><span id="miningBalance">0.000000</span> USDT</div>
-<div class="progress-container"><div class="progress-bar" id="progressBar"></div></div>
+    <div class="panel">
+      <div class="mining-image">
+        <img src="68598aa1e257.gif" alt="minerando" />
+      </div>
 
-<button class="btn-collect" onclick="coletarManual()">COLETAR RENDIMENTO</button>
-<button class="btn-collect" onclick="location.href='recarregar.html'">MELHORAR PODER DE COMPUTAÇÃO / MUDAR MOEDA</button>
+      <div class="mining-balance"><span id="miningBalance">0.000000</span> USDT</div>
 
-<div class="record-buttons">
-<button>Para ser coletado: <span id="toCollect">0.000000</span></button>
-<button>Recebido: <span id="received">0.000000</span></button>
-</div>
+      <div class="progress-container">
+        <div class="progress-bar" id="progressBar"></div>
+        <div class="progress-label" id="progressLabel">0%</div>
+      </div>
 
-<div class="loader" id="loader"><span>Carregando usuário...</span></div>
+      <button class="btn btn-collect" id="btnCollect" onclick="coletar()">COLETAR RENDIMENTO</button>
+      <button class="btn btn-upgrade" onclick="location.href='recarregar.html'">MELHORAR PODER DE COMPUTAÇÃO</button>
 
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+      <div class="record-buttons">
+        <div class="chip">Para ser coletado: <span id="toCollect">0.000000</span></div>
+        <div class="chip">Recebido: <span id="received">0.000000</span></div>
+      </div>
 
-<script>
-const firebaseConfig = {
-apiKey: "AIzaSyDzOgL6cvc0b4AO0vAEay1CeSAv_-WqaWQ",
-authDomain: "saxpag-miner.firebaseapp.com",
-databaseURL: "https://saxpag-miner-default-rtdb.firebaseio.com",
-projectId: "saxpag-miner",
-storageBucket: "saxpag-miner.appspot.com",
-messagingSenderId: "154250189626",
-appId: "1:154250189626:web:83c232a5c539e3f9fe0e03"
-};
-firebase.initializeApp(firebaseConfig);
-const auth=firebase.auth();
-const db=firebase.database();
-const baseRate=0.000001;
+      <div class="loader" id="loader"><span class="dots">Carregando usuário</span></div>
+      <div class="muted" id="sessionWarn"></div>
+    </div>
+  </div>
 
-const mineracao={
-progresso:{}, saldoMinerado:{}, recebido:{}, rendaDiaria:{}, poder:0.001, vip:1, ultimaMineracao:Date.now(), userId:null, intervalo:null, moedaMinerando:null, saldo:0
-};
+  <!-- Firebase v8 -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
-const vipConfig = [
-    { min: 0, max: 10, renda: 0.001 },
-    { min: 10, max: 20, renda: 0.01 },
-    { min: 20, max: 30, renda: 1.00 },
-    { min: 30, max: 50, renda: 2.00 },
-    { min: 50, max: 100, renda: 3.00 },
-    { min: 100, max: 200, renda: 4.00 },
-    { min: 200, max: 1000, renda: 5.00 }
-];
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyDzOgL6cvc0b4AO0vAEay1CeSAv_-WqaWQ",
+      authDomain: "saxpag-miner.firebaseapp.com",
+      databaseURL: "https://saxpag-miner-default-rtdb.firebaseio.com",
+      projectId: "saxpag-miner",
+      storageBucket: "saxpag-miner.appspot.com",
+      messagingSenderId: "154250189626",
+      appId: "1:154250189626:web:83c232a5c539e3f9fe0e03"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db   = firebase.database();
 
-let moedaSelecionada="USDT";
+    const baseRate = 0.000001;
+    const SAVE_EVERY_MS = 30_000;
+    const UI_TICK_MS = 1000;
+    const MIN_COLLECT_AMOUNT = 0.000001;
 
-document.getElementById('cryptoSelect').addEventListener('change', (e)=>{
-const sel=e.target.value;
-if(!mineracao.moedaMinerando){ mineracao.moedaMinerando=sel; moedaSelecionada=sel; inicializarMoeda(sel);}
-else if(mineracao.moedaMinerando!==sel){
-Swal.fire({icon:'warning', title:'Moeda já escolhida!', text:'Só pode minerar a moeda escolhida. Para mudar, recarregue.', confirmButtonColor:'#00ffd5'});
-document.getElementById('cryptoSelect').value=mineracao.moedaMinerando;
-}
-});
+    const vipConfig = [
+      { min: 0,     max: 70,     renda: 0.005 },
+      { min: 70,    max: 200,    renda: 0.03  },
+      { min: 200,   max: 1000,   renda: 0.05  },
+      { min: 1000,  max: 3000,   renda: 0.06  },
+      { min: 3000,  max: 8000,   renda: 0.07  },
+      { min: 8000,  max: 30000,  renda: 0.08  },
+      { min: 30000, max: 100000, renda: 0.09  },
+    ];
 
-function inicializarMoeda(moeda){
-if(!mineracao.saldoMinerado[moeda]) mineracao.saldoMinerado[moeda]=0.000001;
-if(!mineracao.recebido[moeda]) mineracao.recebido[moeda]=0;
-if(!mineracao.progresso[moeda]) mineracao.progresso[moeda]=0;
-if(!mineracao.rendaDiaria[moeda]) mineracao.rendaDiaria[moeda]=0;
-atualizarVipEComputacao();
-atualizarUI();
-salvarFirebase();
-}
+    const nf6 = new Intl.NumberFormat('en-US', { minimumFractionDigits: 6, maximumFractionDigits: 6 });
 
-function checkLogin(){
-document.getElementById('loader').style.display='block';
-auth.onAuthStateChanged(user=>{
-if(!user) window.location.href='login.html';
-else{ mineracao.userId=user.uid; carregarDados(); }
-});
-}
+    const state = {
+      userId: null,
+      sessionId: Math.random().toString(36).slice(2),
+      serverOffset: 0,
+      lastTick: null,
+      saveTimer: null,
+      uiTimer: null,
+      mining: {
+        progresso: 0,
+        saldoMinerado: MIN_COLLECT_AMOUNT,
+        recebido: 0,
+        rendaDiaria: 0,
+        poder: 10,
+        vip: 1,
+        ultimaMineracao: Date.now(),
+        saldo: 0,
+        rendaDiaRef: null,
+        limiteDiario: 1  // limite diário padrão
+      }
+    };
 
-function carregarDados(){
-db.ref('usuarios/'+mineracao.userId).once('value').then(snapshot=>{
-document.getElementById('loader').style.display='none';
-const data=snapshot.val();
-if(data) Object.assign(mineracao,data);
-if(mineracao.moedaMinerando){ moedaSelecionada=mineracao.moedaMinerando; document.getElementById('cryptoSelect').value=moedaSelecionada; }
-inicializarMoeda(moedaSelecionada);
-});
-}
+    function clamp6(n){ return Number.parseFloat(Number(n).toFixed(6)); }
+    function nowServer(){ return Date.now() + state.serverOffset; }
+    function ymd(ms){ return new Date(ms).toISOString().slice(0,10); }
 
-// Atualização do VIP e Poder de mineração: agora o poder = saldo
-function atualizarVipEComputacao() {
-    let saldo = mineracao.saldo;
-    let vipIndex = vipConfig.findIndex(v => saldo >= v.min && saldo < v.max);
-    mineracao.vip = (vipIndex + 1) || 1;
-    mineracao.poder = saldo > 0 ? saldo : 0.001;
-    if (mineracao.vip > 1 && !mineracao.intervalo) iniciarMineracao();
-    atualizarUI();
-}
+    function setText(id, text){ const el = document.getElementById(id); if(el) el.textContent = text; }
 
-function iniciarMineracao() {
-    if (mineracao.intervalo) clearInterval(mineracao.intervalo);
-    mineracao.intervalo = setInterval(() => {
-        if (mineracao.vip <= 1) return;
-        let ganho = mineracao.poder * (vipConfig[mineracao.vip - 1]?.renda || 0.01) * baseRate;
-        mineracao.saldoMinerado[moedaSelecionada] += ganho;
-        mineracao.rendaDiaria[moedaSelecionada] += ganho;
-        mineracao.progresso[moedaSelecionada] = Math.min(mineracao.progresso[moedaSelecionada] + mineracao.poder * 0.15, 100);
-        mineracao.ultimaMineracao = Date.now();
+    function startSessionPresence(){
+      const ref = db.ref(`sessoes/${state.userId}/${state.sessionId}`);
+      ref.set(firebase.database.ServerValue.TIMESTAMP);
+      ref.onDisconnect().remove();
+      const listRef = db.ref(`sessoes/${state.userId}`);
+      listRef.on('value', snap => {
+        const count = snap.numChildren();
+        const warn = document.getElementById('sessionWarn');
+        warn.textContent = count > 1 ? "Aviso: múltiplas abas abertas. Para evitar inconsistências, deixe só uma aba minerando." : "";
+      });
+    }
+
+    function checkLogin(){
+      document.getElementById('loader').style.display = 'block';
+      db.ref(".info/serverTimeOffset").on("value", snap => { state.serverOffset = snap.val() || 0; });
+      auth.onAuthStateChanged(user => {
+        if (!user){ window.location.href='login.html'; return; }
+        state.userId = user.uid;
+        startSessionPresence();
+        carregarDados();
+      });
+    }
+
+    function carregarDados(){
+      db.ref('usuarios/' + state.userId).once('value').then(snapshot => {
+        document.getElementById('loader').style.display = 'none';
+        const data = snapshot.val() || {};
+
+        state.mining.progresso       = Number(data.progresso ?? 0);
+        state.mining.saldoMinerado   = Number(data.saldoMinerado ?? MIN_COLLECT_AMOUNT);
+        state.mining.recebido        = Number(data.recebido ?? 0);
+        state.mining.rendaDiaria     = Number(data.rendaDiaria ?? 0);
+        state.mining.poder           = Number(data.poder ?? 10);
+        state.mining.vip             = Number(data.vip ?? 1);
+        state.mining.ultimaMineracao = Number(data.ultimaMineracao ?? nowServer());
+        state.mining.saldo           = Number(data.saldo ?? 0);
+        state.mining.rendaDiaRef     = data.rendaDiaRef ?? ymd(nowServer());
+        state.mining.limiteDiario    = data.limiteDiario ?? 1;
+
+        atualizarVipEComputacao();
+        aplicarMineracaoOffline();
         atualizarUI();
-        salvarFirebase();
+        iniciarLoops();
+      }).catch(err => console.error(err));
+    }
 
-        // **Coleta automática quando atingir 100%**
-        if(mineracao.progresso[moedaSelecionada] >= 100){
-            coletarAutomatico();
-        }
+    function atualizarVipEComputacao(){
+      const idx = vipConfig.findIndex(v => state.mining.saldo >= v.min && state.mining.saldo < v.max);
+      state.mining.vip = idx + 1;
+      state.mining.poder = state.mining.saldo;
+      const renda = vipConfig[idx].renda;
+      document.getElementById('dailyHint').textContent = `Seu VIP${state.mining.vip} rende ${(renda*100).toFixed(2)}% do poder por segundo × base.`;
+    }
 
-    }, 200);
-}
+    function aplicarMineracaoOffline(){
+      const serverNow = nowServer();
+      const deltaSec = Math.max(0, Math.floor((serverNow - state.mining.ultimaMineracao)/1000));
+      const curDay = ymd(serverNow);
+      if (state.mining.rendaDiaRef !== curDay){
+        state.mining.rendaDiaRef = curDay;
+        state.mining.rendaDiaria = 0;
+      }
+      if(deltaSec>0){
+        const vipIdx = state.mining.vip-1;
+        const ganho = clamp6(deltaSec*state.mining.poder*vipConfig[vipIdx].renda*baseRate);
+        state.mining.saldoMinerado = clamp6(state.mining.saldoMinerado+ganho);
+        state.mining.rendaDiaria = clamp6(state.mining.rendaDiaria+ganho);
+        state.mining.progresso = Math.min(100, state.mining.progresso + deltaSec*0.1);
+      }
+      state.mining.ultimaMineracao = serverNow;
+      salvarFirebase(true);
+      state.lastTick = serverNow;
+    }
 
-// Coleta manual (botão)
-function coletarManual(){ coletar(); }
+    function tickMineracao(){
+      const serverNow = nowServer();
+      const delta = Math.max(0,(serverNow-(state.lastTick??serverNow))/1000);
+      const curDay = ymd(serverNow);
+      if(state.mining.rendaDiaRef!==curDay){ state.mining.rendaDiaRef = curDay; state.mining.rendaDiaria = 0; }
+      const vipIdx = state.mining.vip-1;
+      const ganho = clamp6(delta*state.mining.poder*vipConfig[vipIdx].renda*baseRate);
 
-// Coleta automática
-function coletarAutomatico(){
-    const s = moedaSelecionada;
-    mineracao.recebido[s] += mineracao.saldoMinerado[s];
-    mineracao.saldoMinerado[s] = 0.000001;
-    mineracao.progresso[s] = 0;
-    salvarFirebase(); atualizarUI();
-    console.log("✅ Coleta automática realizada e enviada para a carteira!");
-}
+      // pausa se atingir limite diário
+      if(state.mining.saldoMinerado < state.mining.limiteDiario){
+        state.mining.saldoMinerado = clamp6(state.mining.saldoMinerado + ganho);
+        state.mining.rendaDiaria = clamp6(state.mining.rendaDiaria + ganho);
+        state.mining.progresso = Math.min(100, state.mining.progresso + delta*0.1);
+      }
 
-function coletar(){
-Swal.fire({icon:'success', title:'Coleta realizada!', text:'Rendimento enviado para sua carteira.', confirmButtonColor:'#00ffd5'});
-coletarAutomatico();
-}
+      state.mining.ultimaMineracao = serverNow;
+      state.lastTick = serverNow;
+      atualizarUI();
+    }
 
-function atualizarUI(){
-const s=moedaSelecionada;
-document.getElementById("vipLevel").innerText="VIP"+mineracao.vip;
-document.getElementById("miningPower").innerText=mineracao.poder.toFixed(4)+" GH/s";
-document.getElementById("dailyIncome").innerText=(mineracao.poder*(vipConfig[mineracao.vip-1]?.renda||0.001)*baseRate*86400).toFixed(6)+" "+s;
-const progress=document.getElementById("progressBar");
-progress.style.width=mineracao.progresso[s]+"%";
-switch(mineracao.vip){
-case 1: progress.style.background="linear-gradient(to right,#555555,#888888)"; break;
-case 2: progress.style.background="linear-gradient(to right,#00ff00,#00cc00)"; break;
-case 3: progress.style.background="linear-gradient(to right,#00ffff,#00cccc)"; break;
-case 4: progress.style.background="linear-gradient(to right,#ffcc00,#ffaa00)"; break;
-case 5: progress.style.background="linear-gradient(to right,#ff6600,#ff3300)"; break;
-case 6: progress.style.background="linear-gradient(to right,#ff00ff,#cc00cc)"; break;
-case 7: progress.style.background="linear-gradient(to right,#ff0000,#cc0000)"; break;
-default: progress.style.background="linear-gradient(to right,#00ffd5,#00bfa6)";
-}
-document.getElementById("miningBalance").innerText=mineracao.saldoMinerado[s].toFixed(6)+" "+s;
-document.getElementById("toCollect").innerText=mineracao.saldoMinerado[s].toFixed(6)+" "+s;
-document.getElementById("received").innerText=mineracao.recebido[s].toFixed(6)+" "+s;
-}
+    function iniciarLoops(){
+      if(state.uiTimer) clearInterval(state.uiTimer);
+      if(state.saveTimer) clearInterval(state.saveTimer);
 
-function salvarFirebase(){
-db.ref('usuarios/'+mineracao.userId).update({
-progresso:mineracao.progresso,
-saldoMinerado:mineracao.saldoMinerado,
-recebido:mineracao.recebido,
-rendaDiaria:mineracao.rendaDiaria,
-poder:mineracao.poder,
-vip:mineracao.vip,
-ultimaMineracao:mineracao.ultimaMineracao,
-moedaMinerando:mineracao.moedaMinerando,
-saldo:mineracao.saldo
-});
-}
+      state.uiTimer = setInterval(tickMineracao, UI_TICK_MS);
+      state.saveTimer = setInterval(()=>salvarFirebase(false), SAVE_EVERY_MS);
+      window.addEventListener('beforeunload',()=>salvarFirebase(false),{capture:true});
+    }
 
-function recarregar(valor) {
-    mineracao.saldo += valor;
-    Swal.fire({
-        icon: 'success',
-        title: 'Recarga realizada!',
-        text: `Você recarregou ${valor} USDT`,
-        confirmButtonColor: '#00ffd5'
-    });
-    atualizarVipEComputacao();
-    salvarFirebase();
-}
+    function atualizarUI(){
+      const vipIdx = state.mining.vip-1;
+      const dIncome = ganhoPorSegundo(state.mining.poder,vipIdx)*86400;
+      setText("vipLevel","VIP"+state.mining.vip);
+      setText("miningPower",(state.mining.poder||0).toFixed(4)+" GH/s");
+      setText("dailyIncome",nf6.format(dIncome)+" USDT");
+      setText("miningBalance",nf6.format(state.mining.saldoMinerado));
+      setText("toCollect",nf6.format(state.mining.saldoMinerado));
+      setText("received",nf6.format(state.mining.recebido));
+      const p=Math.round(state.mining.progresso);
+      document.getElementById("progressBar").style.width=p+"%";
+      document.getElementById("progressLabel").textContent=p+"%";
+    }
 
-checkLogin();
-</script>
+    function ganhoPorSegundo(poder,vipIdx){ return poder*vipConfig[vipIdx].renda*baseRate; }
+
+    let saving=false;
+    function salvarFirebase(isAfterOffline){
+      if(!state.userId||saving) return;
+      saving=true;
+      const payload={
+        progresso:state.mining.progresso,
+        saldoMinerado:clamp6(state.mining.saldoMinerado),
+        recebido:clamp6(state.mining.recebido),
+        rendaDiaria:clamp6(state.mining.rendaDiaria),
+        poder:state.mining.poder,
+        vip:state.mining.vip,
+        saldo:state.mining.saldo,
+        rendaDiaRef:state.mining.rendaDiaRef,
+        ultimaMineracao:firebase.database.ServerValue.TIMESTAMP,
+        limiteDiario:state.mining.limiteDiario
+      };
+      db.ref('usuarios/'+state.userId).update(payload).finally(()=>saving=false);
+    }
+
+    let collecting=false;
+    async function coletar(){
+      if(collecting) return;
+      const btn=document.getElementById('btnCollect');
+      if(!btn) return;
+      tickMineracao();
+      if(state.mining.saldoMinerado<=MIN_COLLECT_AMOUNT){
+        Swal.fire({icon:'info',title:'Sem saldo',text:'Nenhum saldo disponível para coletar.',confirmButtonColor:'#00ffd5'});
+        return;
+      }
+      collecting=true; btn.disabled=true;
+      const oldText=btn.textContent; btn.textContent="Coletando...";
+      try{
+        await db.ref('usuarios/'+state.userId).transaction(current=>{
+          current=current||{};
+          const saldoMinerado=Number(current.saldoMinerado??state.mining.saldoMinerado);
+          const recebido=Number(current.recebido??0);
+          const now=Date.now();
+          if(saldoMinerado<=MIN_COLLECT_AMOUNT) return current;
+          const novoRecebido=clamp6(recebido+saldoMinerado);
+          current.recebido=novoRecebido;
+          current.saldoMinerado=MIN_COLLECT_AMOUNT;
+          current.progresso=0;
+          current.ultimaMineracao=now;
+          if(!current.coletas) current.coletas={};
+          const id=db.ref().push().key;
+          current.coletas[id]={valor:clamp6(saldoMinerado),ts:now};
+          return current;
+        });
+        state.mining.recebido = clamp6(state.mining.recebido + state.mining.saldoMinerado);
+        state.mining.saldoMinerado=MIN_COLLECT_AMOUNT;
+        state.mining.progresso=0;
+        atualizarUI();
+        Swal.fire({icon:'success',title:'Coleta realizada!',text:'Rendimento enviado para sua carteira com sucesso.',confirmButtonColor:'#00ffd5'});
+      } catch(err){ console.error(err); Swal.fire({icon:'error',title:'Erro',text:'Não foi possível coletar agora.'}); }
+      finally{ collecting=false; btn.disabled=false; btn.textContent=oldText; }
+    }
+
+    document.addEventListener('DOMContentLoaded',checkLogin);
+  </script>
 </body>
 </html>
