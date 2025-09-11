@@ -135,8 +135,10 @@
 
   <script>
     // =========================
-    // Firebase
+    // Função para formatação numérica
     // =========================
+    const nf6 = new Intl.NumberFormat('en-US', { minimumFractionDigits: 6, maximumFractionDigits: 6 });
+
     const firebaseConfig = {
       apiKey: "AIzaSyDzOgL6cvc0b4AO0vAEay1CeSAv_-WqaWQ",
       authDomain: "saxpag-miner.firebaseapp.com",
@@ -148,31 +150,28 @@
     };
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
-    const db   = firebase.database();
+    const db = firebase.database();
 
-    // =========================
-    // Config / Estado
-    // =========================
-    const baseRate = 0.000001; // ganho base por segundo * (poder * rendaVIP)
-    const SAVE_EVERY_MS = 30_000; // salva no Firebase a cada 30s
-    const UI_TICK_MS    = 1_000;  // atualiza UI a cada 1s
+    const baseRate = 0.000001;
+    const SAVE_EVERY_MS = 30_000;
+    const UI_TICK_MS = 1_000;
     const MIN_COLLECT_AMOUNT = 0.000001;
 
     const vipConfig = [
-      { min: 0,     max: 70,     renda: 0.005 },
-      { min: 70,    max: 200,    renda: 0.03  },
-      { min: 200,   max: 1000,   renda: 0.05  },
-      { min: 1000,  max: 3000,   renda: 0.06  },
-      { min: 3000,  max: 8000,   renda: 0.07  },
-      { min: 8000,  max: 30000,  renda: 0.08  },
-      { min: 30000, max: 100000, renda: 0.09  },
+      { min: 0, max: 70, renda: 0.005 },
+      { min: 70, max: 200, renda: 0.03 },
+      { min: 200, max: 1000, renda: 0.05 },
+      { min: 1000, max: 3000, renda: 0.06 },
+      { min: 3000, max: 8000, renda: 0.07 },
+      { min: 8000, max: 30000, renda: 0.08 },
+      { min: 30000, max: 100000, renda: 0.09 },
     ];
 
     const state = {
       userId: null,
       sessionId: Math.random().toString(36).slice(2),
-      serverOffset: 0, // ms
-      lastTick: null,  // serverNow ms
+      serverOffset: 0,
+      lastTick: null,
       saveTimer: null,
       uiTimer: null,
       mining: {
@@ -184,32 +183,31 @@
         vip: 1,
         ultimaMineracao: Date.now(),
         saldo: 0,
-        rendaDiaRef: null // YYYY-MM-DD (server)
+        rendaDiaRef: null
       }
     };
 
     // =========================
     // Utils
     // =========================
-    const nf6 = new Intl.NumberFormat('en-US', { minimumFractionDigits: 6, maximumFractionDigits: 6 });
-    function clamp6(n){ return Number.parseFloat(Number(n).toFixed(6)); }
-    function nowServer(){ return Date.now() + state.serverOffset; }
-    function vipIndexBySaldo(saldo){
+    function clamp6(n) { return Number.parseFloat(Number(n).toFixed(6)); }
+    function nowServer() { return Date.now() + state.serverOffset; }
+    function vipIndexBySaldo(saldo) {
       const i = vipConfig.findIndex(v => saldo >= v.min && saldo < v.max);
       return (i === -1 ? vipConfig.length - 1 : i);
     }
-    function ganhoPorSegundo(poder, vipIdx){
+    function ganhoPorSegundo(poder, vipIdx) {
       const renda = vipConfig[vipIdx]?.renda ?? 0;
       return poder * renda * baseRate;
     }
-    function ymd(ms){ return new Date(ms).toISOString().slice(0,10); }
+    function ymd(ms) { return new Date(ms).toISOString().slice(0, 10); }
 
-    function setText(id, text){ const el = document.getElementById(id); if(el) el.textContent = text; }
+    function setText(id, text) { const el = document.getElementById(id); if (el) el.textContent = text; }
 
     // =========================
     // Sessão (multi-abas - aviso)
     // =========================
-    function startSessionPresence(){
+    function startSessionPresence() {
       const ref = db.ref(`sessoes/${state.userId}/${state.sessionId}`);
       ref.set(firebase.database.ServerValue.TIMESTAMP);
       ref.onDisconnect().remove();
@@ -228,16 +226,15 @@
     // =========================
     // Fluxo de login e bootstrap
     // =========================
-    function checkLogin(){
+    function checkLogin() {
       document.getElementById('loader').style.display = 'block';
 
-      // pegar offset do servidor
       db.ref(".info/serverTimeOffset").on("value", snap => {
         state.serverOffset = snap.val() || 0;
       });
 
       auth.onAuthStateChanged(user => {
-        if (!user){
+        if (!user) {
           window.location.href = 'login.html';
           return;
         }
@@ -247,77 +244,69 @@
       });
     }
 
-    function carregarDados(){
+    function carregarDados() {
       db.ref('usuarios/' + state.userId).once('value').then(snapshot => {
         document.getElementById('loader').style.display = 'none';
         const data = snapshot.val() || {};
-        // Mescla dados persistidos
-        state.mining.progresso       = Number(data.progresso ?? 0);
-        state.mining.saldoMinerado   = Number(data.saldoMinerado ?? MIN_COLLECT_AMOUNT);
-        state.mining.recebido        = Number(data.recebido ?? 0);
-        state.mining.rendaDiaria     = Number(data.rendaDiaria ?? 0);
-        state.mining.poder           = Number(data.poder ?? 10);
-        state.mining.vip             = Number(data.vip ?? 1);
+        state.mining.progresso = Number(data.progresso ?? 0);
+        state.mining.saldoMinerado = Number(data.saldoMinerado ?? MIN_COLLECT_AMOUNT);
+        state.mining.recebido = Number(data.recebido ?? 0);
+        state.mining.rendaDiaria = Number(data.rendaDiaria ?? 0);
+        state.mining.poder = Number(data.poder ?? 10);
+        state.mining.vip = Number(data.vip ?? 1);
         state.mining.ultimaMineracao = Number(data.ultimaMineracao ?? nowServer());
-        state.mining.saldo           = Number(data.saldo ?? 0);
-        state.mining.rendaDiaRef     = data.rendaDiaRef ?? ymd(nowServer());
+        state.mining.saldo = Number(data.saldo ?? 0);
+        state.mining.rendaDiaRef = data.rendaDiaRef ?? ymd(nowServer());
 
         atualizarVipEComputacao();
-        aplicarMineracaoOffline(); // usa serverNow
+        aplicarMineracaoOffline();
         atualizarUI();
         iniciarLoops();
       }).catch(err => {
         console.error(err);
-        Swal.fire({ icon:'error', title:'Erro', text:'Falha ao carregar dados do usuário.' });
+        Swal.fire({ icon: 'error', title: 'Erro', text: 'Falha ao carregar dados do usuário.' });
       });
     }
 
     // =========================
     // Lógica de mineração
     // =========================
-    function atualizarVipEComputacao(){
+    function atualizarVipEComputacao() {
       const idx = vipIndexBySaldo(state.mining.saldo);
       state.mining.vip = idx + 1;
-      state.mining.poder = state.mining.saldo; // seu requisito original
-      // dica contextual
+      state.mining.poder = state.mining.saldo;
       const renda = vipConfig[idx].renda;
       document.getElementById('dailyHint').textContent = `Seu VIP${state.mining.vip} rende ${(renda*100).toFixed(2)}% do poder por segundo × base.`;
     }
 
-    function aplicarMineracaoOffline(){
+    function aplicarMineracaoOffline() {
       const serverNow = nowServer();
       const last = state.mining.ultimaMineracao || serverNow;
       const deltaSec = Math.max(0, Math.floor((serverNow - last) / 1000));
-
-      // reset de renda diária por dia (server)
       const curDay = ymd(serverNow);
-      if (state.mining.rendaDiaRef !== curDay){
+      if (state.mining.rendaDiaRef !== curDay) {
         state.mining.rendaDiaRef = curDay;
         state.mining.rendaDiaria = 0;
       }
-
-      if (deltaSec > 0){
+      if (deltaSec > 0) {
         const vipIdx = state.mining.vip - 1;
         const ganhoSec = ganhoPorSegundo(state.mining.poder, vipIdx);
         const ganho = clamp6(deltaSec * ganhoSec);
         state.mining.saldoMinerado = clamp6(state.mining.saldoMinerado + ganho);
-        state.mining.rendaDiaria   = clamp6(state.mining.rendaDiaria + ganho);
-        state.mining.progresso     = Math.min(100, state.mining.progresso + deltaSec * 0.1);
+        state.mining.rendaDiaria = clamp6(state.mining.rendaDiaria + ganho);
+        state.mining.progresso = Math.min(100, state.mining.progresso + deltaSec * 0.1);
       }
       state.mining.ultimaMineracao = serverNow;
-      // salva uma vez o estado pós-offline
       salvarFirebase(true);
       state.lastTick = serverNow;
     }
 
-    function tickMineracao(){
+    function tickMineracao() {
       const serverNow = nowServer();
       const last = state.lastTick ?? serverNow;
-      const delta = Math.max(0, (serverNow - last) / 1000); // fracionário
-
-      // reset de renda diária por mudança de dia
+      const delta = Math.max(0, (serverNow - last) / 1000);
       const curDay = ymd(serverNow);
-      if (state.mining.rendaDiaRef !== curDay){
+      if (state.mining.rendaDiaRef !== curDay) {
         state.mining.rendaDiaRef = curDay;
         state.mining.rendaDiaria = 0;
       }
@@ -327,34 +316,29 @@
       const ganho = clamp6(delta * ganhoSec);
 
       state.mining.saldoMinerado = clamp6(state.mining.saldoMinerado + ganho);
-      state.mining.rendaDiaria   = clamp6(state.mining.rendaDiaria + ganho);
-      state.mining.progresso     = Math.min(100, state.mining.progresso + delta * 0.1);
+      state.mining.rendaDiaria = clamp6(state.mining.rendaDiaria + ganho);
+      state.mining.progresso = Math.min(100, state.mining.progresso + delta * 0.1);
       state.mining.ultimaMineracao = serverNow;
       state.lastTick = serverNow;
 
       atualizarUI();
     }
 
-    function iniciarLoops(){
+    function iniciarLoops() {
       if (state.uiTimer) clearInterval(state.uiTimer);
       if (state.saveTimer) clearInterval(state.saveTimer);
 
       state.uiTimer = setInterval(tickMineracao, UI_TICK_MS);
       state.saveTimer = setInterval(() => salvarFirebase(false), SAVE_EVERY_MS);
 
-      // salva ao sair
       window.addEventListener('beforeunload', () => {
-        try { salvarFirebase(false); } catch(e){}
-      }, { capture:true });
+        try { salvarFirebase(false); } catch (e) { }
+      }, { capture: true });
     }
 
-    // =========================
-    // UI
-    // =========================
-    function atualizarUI(){
+    function atualizarUI() {
       const vipIdx = state.mining.vip - 1;
-      const dIncome = ganhoPorSegundo(state.mining.poder, vipIdx) * 86400; // por dia
-
+      const dIncome = ganhoPorSegundo(state.mining.poder, vipIdx) * 86400;
       setText("vipLevel", "VIP" + state.mining.vip);
       setText("miningPower", (state.mining.poder || 0).toFixed(4) + " GH/s");
       setText("dailyIncome", nf6.format(dIncome) + " USDT");
@@ -369,11 +353,8 @@
       if (lbl) lbl.textContent = p + "%";
     }
 
-    // =========================
-    // Persistência
-    // =========================
     let saving = false;
-    function salvarFirebase(isAfterOffline){
+    function salvarFirebase(isAfterOffline) {
       if (!state.userId || saving) return;
       saving = true;
 
@@ -393,11 +374,8 @@
         .finally(() => { saving = false; });
     }
 
-    // =========================
-    // Coleta
-    // =========================
     let collecting = false;
-    async function coletar(){
+    async function coletar() {
       if (collecting) return;
       const btn = document.getElementById('btnCollect');
       if (!btn) return;
@@ -405,8 +383,8 @@
       // garante último tick antes da coleta
       tickMineracao();
 
-      if (state.mining.saldoMinerado <= MIN_COLLECT_AMOUNT){
-        Swal.fire({ icon:'info', title:'Sem saldo', text:'Nenhum saldo disponível para coletar.', confirmButtonColor:'#00ffd5' });
+      if (state.mining.saldoMinerado <= MIN_COLLECT_AMOUNT) {
+        Swal.fire({ icon: 'info', title: 'Sem saldo', text: 'Nenhum saldo disponível para coletar.', confirmButtonColor: '#00ffd5' });
         return;
       }
 
@@ -415,14 +393,14 @@
       const oldText = btn.textContent;
       btn.textContent = "Coletando...";
 
-      try{
+      try {
         await db.ref('usuarios/' + state.userId).transaction(current => {
           current = current || {};
           const saldoMinerado = Number(current.saldoMinerado ?? state.mining.saldoMinerado);
           const recebido = Number(current.recebido ?? 0);
           const now = Date.now();
 
-          if (saldoMinerado <= MIN_COLLECT_AMOUNT){
+          if (saldoMinerado <= MIN_COLLECT_AMOUNT) {
             // nada a coletar
             return current;
           }
@@ -433,6 +411,7 @@
           current.saldoMinerado = MIN_COLLECT_AMOUNT;
           current.progresso = 0;
           current.ultimaMineracao = now;
+
           // registra histórico
           if (!current.coletas) current.coletas = {};
           const id = db.ref().push().key;
@@ -448,15 +427,15 @@
         atualizarUI();
 
         await Swal.fire({
-          icon:'success',
-          title:'Coleta realizada!',
-          text:'Rendimento enviado para sua carteira com sucesso.',
-          confirmButtonColor:'#00ffd5'
+          icon: 'success',
+          title: 'Coleta realizada!',
+          text: 'Rendimento enviado para sua carteira com sucesso.',
+          confirmButtonColor: '#00ffd5'
         });
-      } catch(err){
+      } catch (err) {
         console.error(err);
-        Swal.fire({ icon:'error', title:'Erro', text:'Não foi possível coletar agora.' });
-      } finally{
+        Swal.fire({ icon: 'error', title: 'Erro', text: 'Não foi possível coletar agora.' });
+      } finally {
         collecting = false;
         btn.disabled = false;
         btn.textContent = oldText;
