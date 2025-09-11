@@ -1,279 +1,163 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Carteira - Retirar</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Carteira - Retirar</title>
 
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #0a0e2a;
-      color: #fff;
-      padding: 20px;
-      max-width: 480px;
-      margin: auto;
-    }
-
-    h2 {
-      text-align: center;
-      color: #00ffd0;
-    }
-
-    label, p {
-      margin-top: 10px;
-      font-size: 14px;
-      display: block;
-    }
-
-    input, button {
-      width: 100%;
-      padding: 10px;
-      margin-top: 8px;
-      border-radius: 5px;
-      border: none;
-      font-size: 14px;
-      box-sizing: border-box;
-    }
-
-    input {
-      background-color: #fff;
-      color: #000;
-    }
-
-    button {
-      background-color: #00ffd0;
-      color: #000;
-      font-weight: bold;
-      cursor: pointer;
-      margin-top: 15px;
-    }
-
-    .resumo {
-      margin-top: 20px;
-      font-size: 14px;
-    }
-
-    .resumo p {
-      margin: 4px 0;
-    }
-
-    .lembrete {
-      background: #111c3b;
-      padding: 15px;
-      margin-top: 25px;
-      border-radius: 8px;
-      font-size: 13px;
-      color: #ccc;
-      line-height: 1.5;
-    }
-
-    #notificacao {
-      position: fixed;
-      bottom: 30px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: linear-gradient(135deg, #00ffd5, #00c9ff);
-      color: #000;
-      padding: 18px 28px;
-      border-radius: 12px;
-      font-weight: bold;
-      font-size: 15px;
-      box-shadow: 0 0 20px rgba(0, 255, 255, 0.5);
-      display: none;
-      z-index: 9999;
-      animation: fadein 0.6s ease-in-out, fadeout 0.6s ease-in-out 3.4s;
-    }
-
-    @keyframes fadein {
-      from { bottom: 0; opacity: 0; }
-      to { bottom: 30px; opacity: 1; }
-    }
-
-    @keyframes fadeout {
-      from { bottom: 30px; opacity: 1; }
-      to { bottom: 0; opacity: 0; }
-    }
-  </style>
+<style>
+body {
+  font-family: Arial, sans-serif;
+  background: #0a0e2a;
+  color: #fff;
+  padding: 20px;
+  max-width: 480px;
+  margin: auto;
+}
+h2 { text-align:center; color:#00ffd0; }
+label, p { margin-top: 10px; font-size: 14px; display:block; }
+input, button { width: 100%; padding: 10px; margin-top: 8px; border-radius: 5px; border: none; font-size:14px; box-sizing:border-box; }
+input { background-color: #fff; color:#000; }
+button { background-color: #00ffd0; color:#000; font-weight:bold; cursor:pointer; margin-top:15px; }
+.resumo { margin-top: 20px; font-size:14px; }
+.resumo p { margin:4px 0; }
+.lembrete { background:#111c3b; padding:15px; margin-top:25px; border-radius:8px; font-size:13px; color:#ccc; line-height:1.5; }
+#notificacao {
+  position: fixed; bottom:30px; left:50%; transform:translateX(-50%);
+  background: linear-gradient(135deg, #00ffd5, #00c9ff); color:#000;
+  padding:18px 28px; border-radius:12px; font-weight:bold; font-size:15px;
+  box-shadow:0 0 20px rgba(0,255,255,0.5); display:none; z-index:9999;
+  animation: fadein 0.6s ease-in-out, fadeout 0.6s ease-in-out 3.4s;
+}
+@keyframes fadein { from{bottom:0;opacity:0;} to{bottom:30px;opacity:1;} }
+@keyframes fadeout { from{bottom:30px;opacity:1;} to{bottom:0;opacity:0;} }
+</style>
 </head>
 <body>
-  <h2>Retirar</h2>
+<h2>Retirar</h2>
 
-  <p><strong>Ativos disponíveis atualmente</strong></p>
-  <p id="saldo">$0.000000 USDT</p>
+<p><strong>Ativos disponíveis atualmente</strong></p>
+<p id="saldo">$0.000000 USDT</p>
 
-  <label for="endereco">Endereço de retirada</label>
-  <input type="text" id="endereco" placeholder="Cole o endereço de retirada" />
+<label for="endereco">Endereço de retirada</label>
+<input type="text" id="endereco" placeholder="Cole o endereço de retirada" />
 
-  <label for="valorUsdt">Valor de retirada (USDT)</label>
-  <input type="number" id="valorUsdt" placeholder="Insira o valor da transferência" min="10" max="10000" step="0.000001" />
+<label for="valorUsdt">Valor de retirada (USDT)</label>
+<input type="number" id="valorUsdt" placeholder="Insira o valor" min="10" max="10000" step="0.000001" />
 
-  <label for="senha">Senha de segurança</label>
-  <input type="password" id="senha" placeholder="Senha de segurança" />
+<label for="senha">Senha de segurança</label>
+<input type="password" id="senha" placeholder="Senha de segurança" />
 
-  <div class="resumo" id="resumoTaxas">
-    <p>Taxa: <span id="taxa">0 USDT</span></p>
-    <p>Impostos: <span id="impostos">0 USDT</span></p>
-    <p>Chegada real: <span id="chegada">0 USDT</span></p>
-  </div>
+<div class="resumo" id="resumoTaxas">
+  <p>Taxa: <span id="taxa">0 USDT</span></p>
+  <p>Impostos: <span id="impostos">0 USDT</span></p>
+  <p>Chegada real: <span id="chegada">0 USDT</span></p>
+</div>
 
-  <button onclick="confirmarSaque()">Confirmar</button>
+<button onclick="confirmarSaque()">Confirmar</button>
 
-  <div class="lembrete">
-    <p><strong>💰 Regras de retirada</strong><br>
-    Mínimo: 10 USDT | Máximo: 10.000 USDT | 1 saque por dia<br>
-    Taxa: 2% | Chegada: até 5 minutos</p>
-  </div>
+<div class="lembrete">
+<p><strong>💰 Regras de retirada</strong><br>
+Mínimo: 10 USDT | Máximo: 10.000 USDT | 1 saque por dia<br>
+Taxa: 2% | Chegada: até 5 minutos</p>
+</div>
 
-  <div id="notificacao"></div>
+<div id="notificacao"></div>
 
-  <script>
-    const firebaseConfig = {
-      apiKey: "AIzaSyDzOgL6cvc0b4AO0vAEay1CeSAv_-WqaWQ",
-      authDomain: "saxpag-miner.firebaseapp.com",
-      databaseURL: "https://saxpag-miner-default-rtdb.firebaseio.com",
-      projectId: "saxpag-miner",
-      storageBucket: "saxpag-miner.appspot.com",
-      messagingSenderId: "154250189626",
-      appId: "1:154250189626:web:83c232a5c539e3f9fe0e03"
-    };
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyDzOgL6cvc0b4AO0vAEay1CeSAv_-WqaWQ",
+  authDomain: "saxpag-miner.firebaseapp.com",
+  databaseURL: "https://saxpag-miner-default-rtdb.firebaseio.com",
+  projectId: "saxpag-miner",
+  storageBucket: "saxpag-miner.appspot.com",
+  messagingSenderId: "154250189626",
+  appId: "1:154250189626:web:83c232a5c539e3f9fe0e03"
+};
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.database();
+let userId = null;
 
-    firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth();
-    const db = firebase.database();
-    let userId = null;
+window.onload = function() { iniciarCarteira(); };
 
-    window.onload = function() {
-      iniciarCarteira();
-    };
+function iniciarCarteira() {
+  auth.onAuthStateChanged(user => {
+    if(!user){ alert("Faça login primeiro."); window.location.href="login.html"; }
+    else { userId = user.uid; mostrarSaldo(); }
+  });
+  document.getElementById("valorUsdt").addEventListener("input", calcularTaxas);
+}
 
-    function iniciarCarteira() {
-      auth.onAuthStateChanged(user => {
-        if (!user) {
-          alert("Faça login primeiro.");
-          window.location.href = "login.html";
-        } else {
-          userId = user.uid;
-          mostrarSaldo();
-        }
-      });
-      document.getElementById("valorUsdt").addEventListener("input", calcularTaxas);
-    }
+async function mostrarSaldo(){
+  const snap = await db.ref("usuarios/"+userId).once("value");
+  const data = snap.val() || {};
+  const saldo = parseFloat(data.rendaDiaria || 0);
+  document.getElementById("saldo").innerText = "$"+saldo.toFixed(6)+" USDT";
+  calcularTaxas();
+}
 
-    async function mostrarSaldo() {
-      const saldoElem = document.getElementById("saldo");
-      if (saldoElem) {  // Verifica se o elemento existe
-        const snap = await db.ref("usuarios/" + userId).once("value");
-        const data = snap.val() || {};
-        const saldo = parseFloat(data.rendaDiaria || 0);
-        saldoElem.innerText = "$" + saldo.toFixed(6) + " USDT";
-        calcularTaxas();
-      }
-    }
+function calcularTaxas(){
+  const valor = parseFloat(document.getElementById("valorUsdt").value || '0');
+  const taxa = valor*0.02;
+  const chegada = valor - taxa;
+  document.getElementById("taxa").innerText = taxa.toFixed(6)+" USDT";
+  document.getElementById("impostos").innerText = "0 USDT";
+  document.getElementById("chegada").innerText = chegada.toFixed(6)+" USDT";
+}
 
-    function calcularTaxas() {
-      const valor = parseFloat(document.getElementById("valorUsdt").value || '0');
-      const taxa = valor * 0.02;
-      const chegada = valor - taxa;
+async function confirmarSaque(){
+  const senha = document.getElementById("senha").value.trim();
+  const valor = parseFloat(document.getElementById("valorUsdt").value || '0');
+  const endereco = document.getElementById("endereco").value.trim();
+  if(!senha || !endereco || valor<10 || valor>10000){
+    mostrarNotificacao("⚠️ Preencha todos os campos corretamente. Valor mínimo 10 USDT.");
+    return;
+  }
 
-      const taxaElem = document.getElementById("taxa");
-      const impostosElem = document.getElementById("impostos");
-      const chegadaElem = document.getElementById("chegada");
+  const snap = await db.ref("usuarios/"+userId+"/rendaDiaria").once("value");
+  let saldo = parseFloat(snap.val()||0);
+  if(valor>saldo){ mostrarNotificacao("❌ Saldo insuficiente para esta retirada."); return; }
 
-      if (taxaElem && impostosElem && chegadaElem) {  // Verifica se os elementos existem
-        taxaElem.innerText = taxa.toFixed(6) + ' USDT';
-        impostosElem.innerText = '0 USDT';
-        chegadaElem.innerText = chegada.toFixed(6) + ' USDT';
-      }
-    }
+  const lastWithdrawalSnap = await db.ref("usuarios/"+userId+"/ultimoSaque").once("value");
+  const lastWithdrawal = lastWithdrawalSnap.val();
+  if(lastWithdrawal && (Date.now()-lastWithdrawal)<86400000){
+    mostrarNotificacao("⚠️ Você só pode sacar uma vez a cada 24 horas."); return;
+  }
 
-    async function confirmarSaque() {
-      const senha = document.getElementById("senha").value.trim();
-      const valor = parseFloat(document.getElementById("valorUsdt").value || '0');
-      const endereco = document.getElementById("endereco").value.trim();
+  const valorFinal = valor - (valor*0.02);
+  saldo -= valor;
+  await db.ref("usuarios/"+userId).update({ rendaDiaria: saldo, ultimoSaque: Date.now() });
 
-      if (!senha || !endereco || valor < 10 || valor > 10000) {
-        mostrarNotificacao("⚠️ Preencha todos os campos corretamente. Valor mínimo 10 USDT.");
-        return;
-      }
+  // Registrar retirada
+  db.ref('usuarios/'+userId+'/retiradas').push({
+    valor: valor,
+    valorFinal: valorFinal,
+    endereco: endereco,
+    data: Date.now(),
+    status: 'Aguardando Análise'
+  });
+  db.ref('painel/retiradas').push({
+    userId: userId,
+    valor: valor,
+    endereco: endereco,
+    dataHora: new Date().toLocaleString(),
+    status: 'Aguardando Análise'
+  });
 
-      const snap = await db.ref("usuarios/" + userId + "/rendaDiaria").once("value");
-      let saldo = parseFloat(snap.val() || 0);
+  mostrarNotificacao(`✅ Retirada de $${valor.toFixed(6)} USDT enviada para ${endereco}. Você receberá $${valorFinal.toFixed(6)} USDT.`);
+  setTimeout(()=>window.location.href='tela-principal.html',3500);
+}
 
-      if (valor > saldo) {
-        mostrarNotificacao("❌ Saldo insuficiente para esta retirada.");
-        return;
-      }
-
-      const lastWithdrawalSnap = await db.ref("usuarios/" + userId + "/ultimoSaque").once("value");
-      const lastWithdrawal = lastWithdrawalSnap.val();
-
-      if (lastWithdrawal && (Date.now() - lastWithdrawal) < 86400000) {
-        mostrarNotificacao("⚠️ Você só pode sacar uma vez a cada 24 horas.");
-        return;
-      }
-
-      const currentHour = new Date().getHours();
-      if (currentHour < 9 || currentHour > 17) {
-        mostrarNotificacao("⚠️ Saques podem ser feitos apenas entre 09:00 e 17:00.");
-        return;
-      }
-
-      // Subtrai a taxa de 2%
-      const valorFinal = valor - (valor * 0.02);
-      saldo -= valor;
-      await db.ref("usuarios/" + userId).update({ rendaDiaria: saldo, ultimoSaque: Date.now() });
-
-      // Registrar a retirada no painel do administrador e nas atividades
-      registrarRetiradaPainel(userId, valor, endereco);
-      adicionarAtividade(userId, 'Retirada Solicitada', `Você solicitou um saque de $${valor.toFixed(6)} USDT para o endereço ${endereco}. Status: Aguardando Análise`);
-      
-      db.ref('usuarios/' + userId + '/retiradas').push({
-        valor: valor,
-        valorFinal: valorFinal,
-        endereco: endereco,
-        data: Date.now(),
-        status: 'Aguardando Análise'
-      });
-
-      mostrarNotificacao(`✅ Retirada de $${valor.toFixed(6)} USDT enviada para ${endereco}. Você receberá $${valorFinal.toFixed(6)} USDT após a análise.`);
-      setTimeout(() => window.location.href = 'tela-principal.html', 3500);
-    }
-
-    function adicionarAtividade(uid, titulo, descricao) {
-      const atividade = {
-        titulo: titulo,
-        descricao: descricao,
-        dataHora: Date.now()
-      };
-      db.ref('usuarios/' + uid + '/atividades').push(atividade);
-    }
-
-    function mostrarNotificacao(mensagem) {
-      const div = document.getElementById("notificacao");
-      if (div) {  // Verifica se o elemento de notificação existe
-        div.innerText = mensagem;
-        div.style.display = "block";
-        setTimeout(() => {
-          div.style.display = "none";
-        }, 4000);
-      }
-    }
-
-    function registrarRetiradaPainel(userId, valor, endereco) {
-      const dataHora = new Date().toLocaleString();
-      db.ref('painel/retiradas').push({
-        userId: userId,
-        valor: valor,
-        endereco: endereco,
-        dataHora: dataHora,
-        status: 'Aguardando Análise'
-      });
-    }
-  </script>
+function mostrarNotificacao(msg){
+  const div = document.getElementById("notificacao");
+  div.innerText = msg; div.style.display="block";
+  setTimeout(()=>{ div.style.display="none"; },4000);
+}
+</script>
 </body>
 </html>
